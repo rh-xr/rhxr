@@ -1,6 +1,7 @@
 /** Non-XR quality/diagnostic controls. No tracking or storage. */
 import {V3_ASSETS,V3_PRESETS,v3RecommendedPreset,normalizedPreset} from './v3-assets.mjs';
 import {loadAccentSofa} from './sofa-loader.mjs';
+import {installSoftPbrReflections} from './pbr-lighting.mjs';
 
 export function mountV3VisualControls(THREE,stage,renderer,scene,architecture){
   const parent=document.createElement('div');
@@ -34,6 +35,8 @@ export function mountV3VisualControls(THREE,stage,renderer,scene,architecture){
   let current='';
   let sofa=null, sofaPending=null, sampleDt=0, frames=0;
   let glbStatus='non chargé';
+  let lightingRequested=false;
+  let lightingReady=false;
   const width=()=>stage.clientWidth, height=()=>stage.clientHeight;
 
   const refresh=()=>{
@@ -44,6 +47,17 @@ export function mountV3VisualControls(THREE,stage,renderer,scene,architecture){
       if(width()>0&&height()>0)renderer.setSize(width(),height());
     }
     architecture.setDetailEnabled(profile.architecture);
+    if(current==='immersive'&&!lightingRequested){
+      lightingRequested=true;
+      void installSoftPbrReflections(THREE,renderer,scene).then(result=>{
+        lightingReady=result.status==='ready';
+        if(current!=='immersive')scene.environment=null;
+      });
+    } else if(lightingReady && current==='immersive') {
+      void installSoftPbrReflections(THREE,renderer,scene);
+    } else if(current!=='immersive') {
+      scene.environment=null;
+    }
     if(sofa?.root)sofa.root.visible=profile.sofa;
     if(profile.sofa&&!sofa&&!sofaPending){
       sofaPending=loadAccentSofa(THREE,scene,{
