@@ -78,6 +78,21 @@ test('local revision history increments and rejects empty notes',()=>{
  next.history.pop();
  assert.ok(validateDraft(next).some(s=>s.includes('incohérents')));
 });
+test('source provenance is pinned to the original editorial version',()=>{
+ const d=makeDraft('D01');
+ d.provenance.sourceVersion='9.9';
+ assert.ok(validateDraft(d).some(e=>e.includes('Version source')));
+ assert.throws(()=>parseDraft(JSON.stringify(d)),/Version source/);
+ const other=makeDraft('D01');other.baseVersion='1.0';
+ assert.ok(validateDraft(other).some(e=>e.includes('Version source')));
+});
+test('revision history must be consecutive, not just end at the requested number',()=>{
+ const d=makeDraft('D01');
+ d.revision=4;
+ d.history.push({revision:4,note:'Saut de deux numéros'});
+ assert.ok(validateDraft(d).some(e=>e.includes('Séquence de révisions')));
+});
+
 test('semantic and markdown exports remain clearly draft-only and source-linked',()=>{
  const d=makeDraft('D06'),md=draftMarkdown(d),ld=draftJsonLd(d);
  assert.ok(md.includes('brouillon de travail'));
