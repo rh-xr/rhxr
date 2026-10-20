@@ -17,6 +17,15 @@ La scène reste un **démonstrateur low-poly**, sans interaction entre manettes 
 | Mobile 2D | boutons en superposition | déplacement et rotation |
 | Tous | chaise visiteur | dossier côté entrée, siège orienté vers le bureau |
 
+## Résultat du test utilisateur — 20 octobre 2026
+
+- **Validé sur matériel :** la Preview s'ouvre sur Meta Quest 3S, l'immersion VR démarre et le déplacement physique dans la salle fonctionne (premier essai).
+- **Validé après correctif V0.1.1 :** l'utilisateur confirme que l'utilisation des manettes Quest fonctionne « très bien », à la suite du test demandé des déplacements au stick gauche et des rotations au stick droit.
+- **À confirmer séparément :** orientation visuelle de la chaise vide après sa rotation de 180°, retour au mode 2D et confort lors d'une utilisation prolongée.
+- **À améliorer ultérieurement :** qualité visuelle de la salle (modèles, textures, éclairage, avatars). Les améliorations graphiques ne font pas partie de la correction de locomotion.
+
+Cette validation repose sur un essai utilisateur réel ; elle ne constitue pas une certification de compatibilité universelle WebXR.
+
 ## Protocole de recette
 
 1. Ouvrir la **Preview de la PR #1** ; ne pas tester l'URL de production encore liée au README seul.
