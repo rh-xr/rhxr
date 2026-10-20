@@ -41,3 +41,41 @@
 @media(max-width:1200px){.learning-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.timeline{grid-template-columns:1fr}}
 @media(max-width:740px){.learning-grid{grid-template-columns:1fr}.daci-principles{grid-template-columns:1fr}.daci-annotation{grid-template-columns:1fr}.control-bar{align-items:stretch}.control-bar .input{width:100%}}
 @media print{.side,.top,.footer,.control-bar,.btnrow,.related,.daci-toc,.daci-reader button,.learning-grid{display:none!important}.shell{display:block}.main{padding:0;max-width:none}.panel,.learning-detail,.daci-reader{border:0;padding:0;box-shadow:none}.daci-annotation{break-inside:avoid}.daci-section{break-inside:avoid}.notice{border-color:#ccc;color:#333}}
+
+/* Iteration 2 — readable, keyboard-operable course and knowledge explorer */
+.teaching-panel{margin:20px 0 22px;max-width:1100px}
+.teaching-panel>p{max-width:850px;line-height:1.85}
+.teaching-panel h2{font-size:24px;letter-spacing:-.55px}
+.teaching-panel h3{margin:26px 0 9px;font-size:17px}
+.chapter-stack{display:grid;gap:12px;margin:23px 0}
+.chapter{border:1px solid #d7e5eb;border-radius:12px;background:#fbfcfd;padding:17px 19px}
+.chapter[open]{background:white;box-shadow:0 4px 20px #1639560c}
+.chapter summary{font-size:15px;font-weight:750;cursor:pointer;line-height:1.65}
+.chapter summary .eyebrow{display:inline-block;margin-right:12px}
+.chapter>p{font-size:13px;line-height:1.9;color:#375469}
+.chapter .quote{font-size:12px;margin-bottom:3px}
+.learning-checklist{padding:0;list-style:none}
+.learning-checklist li{padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.learning-checklist input{width:16px;height:16px;accent-color:#168c85;vertical-align:middle;margin-right:8px}
+.quiz-list{display:grid;gap:14px;margin:23px 0}
+.quiz-item{margin:0;min-width:0;border:1px solid #d7e4ec;background:#fafcfd;border-radius:13px;padding:19px}
+.quiz-item legend{font-weight:750;font-size:13px;line-height:1.6;padding:0 8px}
+.quiz-option{display:flex;gap:10px;align-items:flex-start;padding:11px;border-radius:8px;font-size:12px;line-height:1.6;cursor:pointer}
+.quiz-option:hover{background:#eaf5f5}
+.quiz-option input{flex:none;margin-top:3px;accent-color:#168c85}
+.quiz-feedback{border-left:3px solid #168e80;border-radius:6px;background:#ecf9f3;font-size:12px;line-height:1.8;padding:12px 15px;margin-top:12px;color:#315c48}
+.quiz-feedback[hidden]{display:none}
+.workbook{display:block;resize:vertical;margin-top:10px;line-height:1.9;min-height:220px}
+.glossary-list{display:grid;gap:11px}
+.glossary-list>div{border:1px solid #e2eaf0;border-radius:10px;padding:14px}
+.glossary-list dt{font-weight:750;color:#205674;font-size:13px}
+.glossary-list dd{margin:8px 0 0;color:#516779;font-size:12px;line-height:1.7}
+.graph-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.graph-group{border:1px solid #e0eaf0;background:#f8fbfc;border-radius:13px;padding:17px}
+.graph-group h3{margin:0 0 14px;font-size:15px}
+.graph-links{display:grid;gap:9px}
+.graph-link{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px;border:1px solid #dce5eb;border-radius:10px;background:white;font-size:12px;font-weight:700;line-height:1.5}
+.graph-link:hover,.graph-link:focus-visible{background:#e7f6f4}
+.graph-link small{font-size:10px;font-weight:800;color:#7d909b}
+@media(max-width:750px){.graph-groups{grid-template-columns:1fr}.quiz-item{padding:12px}.chapter{padding:14px}.teaching-panel{padding:16px}}
+@media print{.quiz-list,.control-bar,#restart-quiz,#download-template,#reset-template{display:none!important}.chapter:not([open])>p,.chapter:not([open])>.quote{display:block!important}}
