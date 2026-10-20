@@ -102,7 +102,7 @@ for(const [id,step] of [['move-up',-1],['move-down',1]])$(id).addEventListener('
 });
 $('add-media').addEventListener('click',()=>{try{draft=addMediaSlot(draft);modified();renderMedia();}catch(e){status(e.message,'error');}});
 $('save-revision').addEventListener('click',()=>{
- try{draft=recordRevision(draft,$('revision-note').value);$('revision-note').value='';dirty=false;renderHistory();$('revision-pill').textContent='Révision '+draft.revision;status('Note de révision ajoutée. Exportez votre travail en JSON pour le conserver.','ok');}
+ try{draft=recordRevision(draft,$('revision-note').value);$('revision-note').value='';modified();renderHistory();status('Révision ajoutée au brouillon temporaire. Exportez votre travail en JSON pour le conserver.','ok');}
  catch(e){status(e.message,'error');}
 });
 function verify(){
