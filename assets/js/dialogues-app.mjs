@@ -1,6 +1,7 @@
 import {BRANCHING_SCENARIOS,getBranchingScenario,startBranching,chooseBranch,pathSummary} from './branching-scenarios.mjs';
 import {getModule} from './learning-data.mjs';
 import {getDocument} from './daci-data.mjs';
+import {returnHref} from './daci-section-activities.mjs';
 import {guideFor} from './facilitator-guides.mjs';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
@@ -16,6 +17,16 @@ function download(name,text,type){
 }
 const app=document.querySelector('#app');
 app.innerHTML=shell('<div class="eyebrow">Soft Skills Lab · simulations ramifiées</div><h1 class="title">Dialogues professionnels guidés</h1><p class="lead">Cinq conversations RH en trois phases. Vos décisions font évoluer la réaction de l’interlocuteur fictif. Le débriefing explique les effets des réponses sans vous attribuer de profil ou de note.</p><div class="notice">Simulation textuelle active dès maintenant. L’avatar 3D, la conversation IA et la transposition RV sont des améliorations futures. Vos choix restent dans la mémoire de cette page et disparaissent lorsque vous la quittez.</div><div class="control-bar"><label for="dialogue-select">Choisir une situation</label><select class="input" id="dialogue-select">'+BRANCHING_SCENARIOS.map(s=>'<option value="'+esc(s.id)+'">'+esc(s.id+' · '+s.title)+'</option>').join('')+'</select></div><div class="two dialogue-layout"><section class="panel"><div class="row space">'+pill('Situation professionnelle fictive')+'<span id="dialogue-phase" class="tiny">Phase 1 / 3</span></div><h2 id="dialogue-title"></h2><p id="dialogue-objective"></p><div class="progress" aria-hidden="true"><div id="dialogue-progress" style="width:33%"></div></div><div id="dialogue-stage" aria-live="polite"></div><div id="dialogue-feedback" class="feedback hidden" role="status" aria-live="polite"></div><div class="btnrow"><button type="button" class="primary hidden" id="dialogue-next">Poursuivre →</button><button type="button" class="secondary" id="dialogue-restart">Recommencer</button></div></section><aside class="panel"><h2>Objectifs et ressources</h2><p id="dialogue-learning"></p><h3>Trace formative de la session</h3><ol id="dialogue-history" class="learning-history"><li>Vos décisions et retours pédagogiques apparaîtront ici.</li></ol><div id="dialogue-links" class="related"></div><div id="facilitator-zone"></div></aside></div>');
+const returnTarget=returnHref(new URLSearchParams(location.search).get('returnTo'));
+if(returnTarget){
+ const link=document.createElement('div');
+ link.className='notice daci-return';
+ const a=document.createElement('a');
+ a.href=returnTarget;
+ a.textContent='↩ Revenir à la section DACI après cette simulation';
+ link.append(a);
+ document.querySelector('#dialogue-select').closest('.control-bar').before(link);
+}
 const select=document.querySelector('#dialogue-select');select.value=scenario.id;
 const title=document.querySelector('#dialogue-title'),objective=document.querySelector('#dialogue-objective'),stage=document.querySelector('#dialogue-stage');
 const feedback=document.querySelector('#dialogue-feedback'),next=document.querySelector('#dialogue-next'),historyList=document.querySelector('#dialogue-history');
