@@ -138,3 +138,17 @@
 @media(max-width:1100px){.studio-grid{grid-template-columns:1fr}.studio-preview{position:static}.studio-paper{max-height:none}}
 @media(max-width:620px){.studio-two{grid-template-columns:1fr}.studio-topbar{align-items:stretch}.studio-topbar>label:first-child{width:100%}.studio-grid>.panel{padding:17px}}
 @media print{.studio-editor,.studio-preview>.btnrow,.studio-export,.studio-topbar,#studio-status,.side,.top{display:none!important}.studio-grid{display:block}.studio-preview{position:static;border:none;padding:0}.studio-paper{max-height:none;overflow:visible;border:0}}
+
+/* DACI contextual learning loops: read -> practice -> reflect -> return. */
+.daci-practice{border:1px solid #b9d9dd;border-left:4px solid #14867e;background:#f1f9f8;border-radius:12px;padding:18px 20px;margin:20px 0 23px}
+.daci-practice>.row{align-items:center;gap:12px}
+.daci-practice strong{font-size:13px;color:#155e68}
+.daci-practice p{font-size:13px;line-height:1.75;color:#325d66;max-width:840px}
+.daci-practice .tiny{color:#536f76}
+.daci-practice a.secondary{display:inline-flex;align-items:center;margin-top:5px;min-height:38px}
+.daci-practice a:focus-visible,.daci-return a:focus-visible{outline:3px solid #13867e;outline-offset:3px}
+.daci-return{border-left:3px solid #168c85;background:#eef8f7;margin:12px 0 20px}
+.daci-return a{font-weight:750;color:#17646b;text-decoration:underline;text-underline-offset:3px}
+#quiz,#template{scroll-margin-top:22px}
+@media(max-width:740px){.daci-practice{padding:14px 16px}.daci-practice .row{flex-wrap:wrap}}
+@media print{.daci-practice{break-inside:avoid}.daci-practice a.secondary,.daci-return{display:none!important}}
