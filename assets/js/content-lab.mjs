@@ -1,6 +1,7 @@
 import {MODULES,getModule} from './learning-data.mjs';
 import {DOSSIERS,QUESTIONS,TEMPLATES,GLOSSARY,REFERENCES,teachingPack,quizFor,templateFor,checkAnswer} from './pedagogy-plus.mjs';
 import {KNOWLEDGE_GRAPH,learningPath,neighbors,graphAsJsonLd} from './knowledge-graph.mjs';
+import {ITINERARIES,getItinerary} from './itineraries.mjs';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const qs=new URLSearchParams(location.search);
@@ -8,8 +9,8 @@ const page=document.body.dataset.page;
 const chosen=MODULES.some(m=>m.id===qs.get('module'))?qs.get('module'):'M1';
 const pill=(s)=>'<span class="pill neutral">'+esc(s)+'</span>';
 function shell(content){
- const nav=[['index.html','⌂','Accueil'],['parcours.html','▦','Parcours'],['cas-pratiques.html','◉','Cas pratiques'],['atelier.html','✎','Atelier & outils'],['daci.html','▤','Documents DACI'],['reseau.html','⇄','Réseau DACI'],['simulation.html','◎','Simulation VR']];
- return '<div class="shell"><aside class="side"><div><a class="brand" href="index.html">RH<span>·</span>XR <small>LAB</small></a><div class="brand-sub">Formation et documents enrichissables<br>VR, RA et IA à leur juste place</div></div><div><div class="navlabel">RESSOURCES</div><nav class="nav" aria-label="Navigation principale">'+nav.map(([url,ico,label])=>'<a href="'+url+'" class="'+((page==='atelier'&&url==='atelier.html')||(page==='reseau'&&url==='reseau.html')?'active':'')+'"><span aria-hidden="true">'+ico+'</span>'+esc(label)+'</a>').join('')+'</nav></div><div class="side-foot">Ressources de démonstration · Tout reste dans cette session de navigateur. Aucune saisie envoyée à un serveur RH.</div></aside><main class="main"><header class="top"><span>RH·XR / <strong>'+(page==='atelier'?'Atelier pédagogique':'Réseau des connaissances')+'</strong></span>'+pill('Contenu V1.1')+'</header>'+content+'<footer class="footer">RH·XR · Formation sans classement personnel. IA générative, suivi individuel, modèles 3D et RA non intégrés dans cet espace.</footer></main></div>';
+ const nav=[['index.html','⌂','Accueil'],['parcours.html','▦','Parcours'],['itineraires.html','🧭','Itinéraires guidés'],['cas-pratiques.html','◉','Cas pratiques'],['atelier.html','✎','Atelier & outils'],['daci.html','▤','Documents DACI'],['reseau.html','⇄','Réseau DACI'],['simulation.html','◎','Simulation VR']];
+ return '<div class="shell"><aside class="side"><div><a class="brand" href="index.html">RH<span>·</span>XR <small>LAB</small></a><div class="brand-sub">Formation et documents enrichissables<br>VR, RA et IA à leur juste place</div></div><div><div class="navlabel">RESSOURCES</div><nav class="nav" aria-label="Navigation principale">'+nav.map(([url,ico,label])=>'<a href="'+url+'" class="'+((page==='atelier'&&url==='atelier.html')||(page==='reseau'&&url==='reseau.html')||(page==='itineraires'&&url==='itineraires.html')?'active':'')+'"><span aria-hidden="true">'+ico+'</span>'+esc(label)+'</a>').join('')+'</nav></div><div class="side-foot">Ressources de démonstration · Tout reste dans cette session de navigateur. Aucune saisie envoyée à un serveur RH.</div></aside><main class="main"><header class="top"><span>RH·XR / <strong>'+(page==='atelier'?'Atelier pédagogique':page==='itineraires'?'Itinéraires de formation':'Réseau des connaissances')+'</strong></span>'+pill('Contenu V1.1')+'</header>'+content+'<footer class="footer">RH·XR · Formation sans classement personnel. IA générative, suivi individuel, modèles 3D et RA non intégrés dans cet espace.</footer></main></div>';
 }
 const select=(id,value)=>'<label for="'+id+'"><strong>Choisir un domaine de formation</strong></label><select id="'+id+'" class="input">'+MODULES.map(m=>'<option value="'+esc(m.id)+'" '+(m.id===value?'selected':'')+'>'+esc(m.id+' · '+m.title)+'</option>').join('')+'</select>';
 const refLinks=()=>'<section class="panel" style="margin-top:18px"><h2>Repères et lectures de référence</h2><p class="tiny">Ces sources officielles constituent un cadre documentaire général. Les fiches et les cas RH·XR sont des créations pédagogiques fictives et ne constituent pas des traductions officielles ni des conseils juridiques.</p><div class="related">'+REFERENCES.map(r=>'<a href="'+esc(r.url)+'" target="_blank" rel="noopener noreferrer">'+esc(r.name)+' ↗</a>').join('')+'</div></section>';
@@ -66,7 +67,19 @@ function graphFor(id){
   return '<section class="graph-group"><h3>'+esc(typeLabel[type])+' <span class="tiny">('+group.length+')</span></h3><div class="graph-links">'+group.map(n=>'<a href="'+esc(n.href)+'" class="graph-link"><span>'+esc(n.label)+'</span><small>'+esc(n.id)+'</small></a>').join('')+'</div></section>';
  }).join('')+'</div><div class="notice"><strong>Exemple de cheminement :</strong> le parcours vous mène à son dossier détaillé et à ses séquences ; les cas permettent d’appliquer les notions ; les documents DACI fournissent un support structuré ; les fiches facilitent le transfert.</div></section>';
 }
-document.querySelector('#app').innerHTML=shell(page==='atelier'?atelierBase():networkBase());
+function itinerariesBase(){
+ const selected=getItinerary(qs.get('itineraire'))?.id || 'I1';
+ return '<div class="eyebrow">Choix explicite, sans profilage</div><h1 class="title">Votre itinéraire de formation RH</h1><p class="lead">Choisissez l’objectif qui vous intéresse : le site affiche un enchaînement de parcours, de cas et de documents. Cette recommandation est éditoriale, visible et modifiable, sans analyse de votre profil.</p><div class="notice">Il s’agit de suggestions pédagogiques et non d’un parcours obligatoire ou d’une orientation RH automatisée. Vous pouvez changer de parcours sans laisser de trace.</div><div class="control-bar"><label for="itinerary-select"><strong>Mon besoin de formation</strong></label><select id="itinerary-select" class="input">'+ITINERARIES.map(p=>'<option value="'+esc(p.id)+'" '+(p.id===selected?'selected':'')+'>'+esc(p.audience+' — '+p.title)+'</option>').join('')+'</select><button type="button" class="secondary" id="print-itinerary">Imprimer le plan</button></div><div id="itinerary-panel"></div><div class="related"><a href="atelier.html">✎ Explorer tous les cours et les outils</a><a href="reseau.html">⇄ Explorer les relations DACI</a></div>';
+}
+function showItinerary(id){
+ const p=getItinerary(id);
+ if(!p)return '';
+ return '<section class="panel teaching-panel"><div class="row space">'+pill(p.id+' · '+p.audience)+pill(p.time)+'</div><h2>'+esc(p.title)+'</h2><p>'+esc(p.summary)+'</p><h3>Votre objectif de sortie</h3><p>'+esc(p.goal)+'</p><div class="chapter-stack">'+p.steps.map((step,i)=>{
+  const m=getModule(step.moduleId);
+  return '<article class="chapter"><div class="row space">'+pill('Étape '+(i+1))+'<span class="tiny">'+esc(step.moduleId)+'</span></div><h3>'+esc(m.title)+'</h3><p>'+esc(step.action)+'</p><p><strong>Production attendue :</strong> '+esc(step.evidence)+'</p><div class="related"><a href="parcours.html?module='+esc(step.moduleId)+'">▦ Parcours</a><a href="atelier.html?module='+esc(step.moduleId)+'">✎ Cours et quiz</a><a href="cas-pratiques.html?case='+esc(step.caseId)+'">◉ Cas '+esc(step.caseId)+'</a><a href="daci.html?doc='+esc(step.documentId)+'">▤ Document '+esc(step.documentId)+'</a></div></article>';
+ }).join('')+'</div><div class="notice"><strong>Extension multimodale à venir :</strong> '+esc(p.futureXR)+'</div><p class="tiny">Aucun résultat individuel enregistré. Le plan et ses liens sont librement consultables et imprimables.</p></section>';
+}
+document.querySelector('#app').innerHTML=shell(page==='atelier'?atelierBase():page==='itineraires'?itinerariesBase():networkBase());
 if(page==='atelier'){
  const select=document.querySelector('#domain');
  const render=()=>{const m=getModule(select.value);if(m)attachAtelier(m)};
@@ -88,5 +101,16 @@ if(page==='reseau'){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download='RHXR-reseau-DACI.jsonld';a.click();setTimeout(()=>URL.revokeObjectURL(url),1200);
  });
+ render();
+}
+
+if(page==='itineraires'){
+ const select=document.querySelector('#itinerary-select');
+ const render=()=>{document.querySelector('#itinerary-panel').innerHTML=showItinerary(select.value)};
+ select.addEventListener('change',()=>{
+  history.replaceState(null,'','itineraires.html?itineraire='+encodeURIComponent(select.value));
+  render();
+ });
+ document.querySelector('#print-itinerary').addEventListener('click',()=>window.print());
  render();
 }
