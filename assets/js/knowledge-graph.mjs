@@ -6,6 +6,7 @@ import {CASES} from './case-data.mjs';
 import {BRANCHING_SCENARIOS} from './branching-scenarios.mjs';
 import {DOCUMENTS} from './daci-data.mjs';
 import {DOSSIERS,TEMPLATES} from './pedagogy-plus.mjs';
+import {SECTION_ACTIVITIES} from './daci-section-activities.mjs';
 
 const node=(id,type,label,href,moduleId)=>({id,type,label,href,moduleId});
 export function buildKnowledgeGraph() {
@@ -40,7 +41,11 @@ export function buildKnowledgeGraph() {
   nodes.push(node(template.id,'template',template.title,'atelier.html?module='+template.moduleId,template.moduleId));
   edges.push({from:template.moduleId,to:template.id,relation:'hasTemplate',label:'Accompagné d’une fiche'});
  }
- return {nodes,edges,version:'content-v1.1'};
+ for(const activity of SECTION_ACTIVITIES){
+  const target=activity.kind==='template'?'T'+activity.id.slice(1):activity.id;
+  edges.push({from:activity.documentId,to:target,relation:'hasSectionActivity',label:'Exercice lié à la section '+activity.anchor,section:activity.anchor});
+ }
+ return {nodes,edges,version:'content-v1.3'};
 }
 export const KNOWLEDGE_GRAPH=buildKnowledgeGraph();
 export function neighbors(id,graph=KNOWLEDGE_GRAPH){
