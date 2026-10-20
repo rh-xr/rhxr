@@ -9,6 +9,8 @@ import {BRANCHING_SCENARIOS,validateBranching} from '../assets/js/branching-scen
 import {FACILITATOR_GUIDES,validateGuides} from '../assets/js/facilitator-guides.mjs';
 import {KNOWLEDGE_GRAPH,validateGraph} from '../assets/js/knowledge-graph.mjs';
 import {SECTION_ACTIVITIES,validateSectionActivities} from '../assets/js/daci-section-activities.mjs';
+import {makeDraft} from '../assets/js/daci-editor-core.mjs';
+import {REVIEW_REQUIREMENTS,reviewPreflight} from '../assets/js/daci-review-core.mjs';
 
 export function contentAudit(){
  const errors=[
@@ -20,7 +22,8 @@ export function contentAudit(){
   ...validateGraph(),
   ...validateBranching(),
   ...validateGuides(BRANCHING_SCENARIOS),
-  ...validateSectionActivities()
+  ...validateSectionActivities(),
+  ...(DOCUMENTS.some(d=>reviewPreflight(makeDraft(d.id)).readyForReview)?['Une demande de revue est prête sans provenance explicitement remplie.']:[])
  ];
  const counts={
   modules:MODULES.length,
@@ -38,7 +41,9 @@ export function contentAudit(){
   references:REFERENCES.length,
   branchingScenarios:BRANCHING_SCENARIOS.length,
   instructorGuides:FACILITATOR_GUIDES.length,
-  linkedDaciActivities:SECTION_ACTIVITIES.length
+  linkedDaciActivities:SECTION_ACTIVITIES.length,
+  reviewCriteria:REVIEW_REQUIREMENTS.length,
+  reviewRequestsAutomaticallyApproved:0
  };
  const warnings=[];
  for(const doc of DOCUMENTS){
