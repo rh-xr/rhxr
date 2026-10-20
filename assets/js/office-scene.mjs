@@ -1,8 +1,10 @@
 /** RH·XR V2: modern HR mediation office, modelled procedurally.
  * Visual-only scene module: Quest input, safety and learning engine live elsewhere.
- * No remote models or person-related assets are loaded.
+ * A licensed CC0 PBR chair can load asynchronously; validated geometry remains as a fallback.
  */
 import { OFFICE_LAYOUT as L } from './office-layout.mjs';
+import { upgradePbrMaterials } from './pbr-textures.mjs';
+import { loadProfessionalSeating } from './professional-models.mjs';
 
 export function createOfficeScene(THREE, scene, renderer) {
   scene.background = new THREE.Color('#b9d2de');
@@ -32,6 +34,7 @@ export function createOfficeScene(THREE, scene, renderer) {
     black: material('#202e36'), white: material('#ffffff'),
     screen: new THREE.MeshStandardMaterial({color:'#c9e5e7',emissive:'#4e7c86',emissiveIntensity:.3,metalness:.05,roughness:.34})
   };
+  upgradePbrMaterials(THREE, m);
   const boxGeometry = new Map();
   const geomBox = (w,h,d) => {
     const k=[w,h,d].join('/');
@@ -156,8 +159,10 @@ export function createOfficeScene(THREE, scene, renderer) {
     }
     return group;
   }
-  makeChair(L.managerChair);
-  makeChair(L.visitorChair);
+  const seats = [
+    {layout:L.managerChair,fallback:makeChair(L.managerChair)},
+    {layout:L.visitorChair,fallback:makeChair(L.visitorChair)}
+  ];
 
   // More articulate but deliberately stylized seated training avatar:
   // hands, face, jacket/shirt and legs. Not a photorealistic likeness.
@@ -228,5 +233,11 @@ export function createOfficeScene(THREE, scene, renderer) {
 
   // Low-poly objects intentionally remain modest in polygon count;
   // 3D source content and PBR model upgrades will follow in a separate phase.
-  return { layout:L, visualVersion:'v2-procedural', geometryMode:'procedural', controlsUntouched:true };
+  return {
+    layout:L,
+    visualVersion:'v2-plus-pbr',
+    geometryMode:'progressive-glb-with-fallback',
+    controlsUntouched:true,
+    loadAssets(options={}) { return loadProfessionalSeating(THREE,scene,seats,options); }
+  };
 }
