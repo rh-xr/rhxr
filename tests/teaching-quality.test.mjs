@@ -64,7 +64,7 @@ test('references are official HTTPS URLs, not placeholder citations',()=>{
 test('semantic graph has unique IDs and no dangling references',()=>{
  assert.deepEqual(validateGraph(),[]);
  assert.equal(KNOWLEDGE_GRAPH.nodes.length,71);
- assert.equal(KNOWLEDGE_GRAPH.edges.length,74);
+ assert.equal(KNOWLEDGE_GRAPH.edges.length,92);
  assert.equal(new Set(KNOWLEDGE_GRAPH.nodes.map(n=>n.id)).size,71);
 });
 test('all documents have a traversable path to their module and case',()=>{
