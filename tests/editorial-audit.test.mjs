@@ -10,7 +10,7 @@ test('every editorial link resolves and the full content model passes its gate',
  assert.equal(data.counts.quizQuestions,24);
  assert.equal(data.counts.daciSections,18);
  assert.equal(data.counts.itineraries,5);
- assert.equal(data.counts.graphNodes,66);
+ assert.equal(data.counts.graphNodes,71);
 });
 test('editorial audit does not conceal unverified human review',()=>{
  const data=contentAudit();
