@@ -2,6 +2,7 @@ import {MODULES,getModule} from './learning-data.mjs';
 import {DOSSIERS,QUESTIONS,TEMPLATES,GLOSSARY,REFERENCES,teachingPack,quizFor,templateFor,checkAnswer} from './pedagogy-plus.mjs';
 import {KNOWLEDGE_GRAPH,learningPath,neighbors,graphAsJsonLd} from './knowledge-graph.mjs';
 import {ITINERARIES,getItinerary} from './itineraries.mjs';
+import {BRANCHING_SCENARIOS} from './branching-scenarios.mjs';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const qs=new URLSearchParams(location.search);
@@ -76,7 +77,7 @@ function showItinerary(id){
  if(!p)return '';
  return '<section class="panel teaching-panel"><div class="row space">'+pill(p.id+' · '+p.audience)+pill(p.time)+'</div><h2>'+esc(p.title)+'</h2><p>'+esc(p.summary)+'</p><h3>Votre objectif de sortie</h3><p>'+esc(p.goal)+'</p><div class="chapter-stack">'+p.steps.map((step,i)=>{
   const m=getModule(step.moduleId);
-  return '<article class="chapter"><div class="row space">'+pill('Étape '+(i+1))+'<span class="tiny">'+esc(step.moduleId)+'</span></div><h3>'+esc(m.title)+'</h3><p>'+esc(step.action)+'</p><p><strong>Production attendue :</strong> '+esc(step.evidence)+'</p><div class="related"><a href="parcours.html?module='+esc(step.moduleId)+'">▦ Parcours</a><a href="atelier.html?module='+esc(step.moduleId)+'">✎ Cours et quiz</a><a href="cas-pratiques.html?case='+esc(step.caseId)+'">◉ Cas '+esc(step.caseId)+'</a><a href="daci.html?doc='+esc(step.documentId)+'">▤ Document '+esc(step.documentId)+'</a></div></article>';
+  return '<article class="chapter"><div class="row space">'+pill('Étape '+(i+1))+'<span class="tiny">'+esc(step.moduleId)+'</span></div><h3>'+esc(m.title)+'</h3><p>'+esc(step.action)+'</p><p><strong>Production attendue :</strong> '+esc(step.evidence)+'</p><div class="related"><a href="parcours.html?module='+esc(step.moduleId)+'">▦ Parcours</a><a href="atelier.html?module='+esc(step.moduleId)+'">✎ Cours et quiz</a><a href="cas-pratiques.html?case='+esc(step.caseId)+'">◉ Cas '+esc(step.caseId)+'</a>'+BRANCHING_SCENARIOS.filter(s=>s.moduleId===step.moduleId).map(s=>'<a href="dialogues.html?scenario='+esc(s.id)+'">◎ Dialogue '+esc(s.id)+'</a>').join('')+'<a href="daci.html?doc='+esc(step.documentId)+'">▤ Document '+esc(step.documentId)+'</a></div></article>';
  }).join('')+'</div><div class="notice"><strong>Extension multimodale à venir :</strong> '+esc(p.futureXR)+'</div><p class="tiny">Aucun résultat individuel enregistré. Le plan et ses liens sont librement consultables et imprimables.</p></section>';
 }
 document.querySelector('#app').innerHTML=shell(page==='atelier'?atelierBase():page==='itineraires'?itinerariesBase():networkBase());
