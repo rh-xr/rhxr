@@ -65,6 +65,8 @@ export function validateDraft(d) {
  if(d.schemaVersion!==DACI_DRAFT_SCHEMA)errors.push('Version de schéma incompatible');
  if(!sourceDocument(d.documentId))errors.push('Source documentaire inconnue');
  if(!plain(d.provenance)||d.provenance.sourceDocumentId!==d.documentId||!str(d.provenance.sourceVersion,20))errors.push('Provenance de la source manquante');
+ const canonical=sourceDocument(d.documentId);
+ if(canonical&&(d.baseVersion!==canonical.version||d.provenance?.sourceVersion!==canonical.version))errors.push('Version source non conforme au document canonique');
  if(!MODULES.some(m=>m.id===d.moduleId))errors.push('Module inconnu');
  if(!CASES.some(c=>c.id===d.caseId&&c.moduleId===d.moduleId))errors.push('Cas lié au mauvais module');
  if(!Number.isInteger(d.revision)||d.revision<1||d.revision>500)errors.push('Révision non valide');
@@ -96,6 +98,7 @@ export function validateDraft(d) {
  if(!Array.isArray(d.history)||d.history.length<1||d.history.length>50)errors.push('Historique absent ou trop long');
  else {
   for(const item of d.history)if(!plain(item)||!Number.isInteger(item.revision)||typeof item.note!=='string'||item.note.length>240)errors.push('Entrée de suivi invalide');
+  if(d.history[0]?.revision!==1||d.history.some((h,i)=>i>0&&h?.revision!==d.history[i-1]?.revision+1))errors.push('Séquence de révisions invalide');
   if(d.history.at(-1)?.revision!==d.revision)errors.push('Révision et historique incohérents');
  }
  if(!Array.isArray(d.provenance?.sourceReferences)||d.provenance.sourceReferences.length>20||d.provenance.sourceReferences.some(r=>typeof r!=='string'||r.length>1000))errors.push('Sources documentaires non conformes');
