@@ -116,7 +116,7 @@ export const DOSSIERS=[
       {
         "id": "M4-P2",
         "title": "Proposer une action proportionnée",
-        "text": "Distinguer une mesure immédiate pour sécuriser la situation et une mesure durable pour en réduire la fréquence. Lorsque l’environnement réel est concerné, se référer à la procédure locale et aux personnes habilitées.",
+        "text": "Distinguer une mesure immédiate pour sécuriser la situation et une mesure durable pour en réduire la fréquence. Lorsque l’environnement réel est concerné, se référer à la procédure locale et aux personnes habilitées. Distinguer une réaction d’urgence, qui limite une exposition dans l’instant, d’une transformation organisationnelle qui réduit durablement le risque. Documenter les deux réponses avec leurs responsables, une échéance et une façon de vérifier leur application. Les situations de formation doivent rester fictives et ne remplacent jamais l’analyse de risque propre au site.",
         "example": "Le contenu ne prescrit pas un geste d’urgence spécifique sans contexte ni validation par un professionnel compétent."
       },
       {
