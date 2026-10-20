@@ -2,6 +2,7 @@
  * The same educational scenario remains available without XR.
  */
 import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotion.mjs';
+import { createOfficeScene } from './office-scene.mjs';
 
 let initialized = false;
 export async function mountRoom(stage) {
@@ -29,67 +30,8 @@ export async function mountRoom(stage) {
   playerRig.add(camera);
   scene.add(playerRig);
 
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x758fa1, 2.4));
-  const light = new THREE.DirectionalLight(0xfff6eb, 2.6);
-  light.position.set(-3, 5, 4);
-  scene.add(light);
-  const material = color => new THREE.MeshStandardMaterial({ color, roughness: 0.75 });
-  const mat = {
-    wall: material('#e6edf0'),
-    floor: material('#b1c4ce'),
-    wood: material('#aa8665'),
-    metal: material('#5b7684'),
-    seat: material('#315471'),
-    skin: material('#c9977a'),
-    shirt: material('#4e8a99'),
-    plant: material('#3d7b69')
-  };
-  function cube(w, h, d, x, y, z, m) {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
-    mesh.position.set(x, y, z);
-    scene.add(mesh);
-    return mesh;
-  }
-  function sphere(r, x, y, z, m) {
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 12), m);
-    mesh.position.set(x, y, z);
-    scene.add(mesh);
-    return mesh;
-  }
-  function cylinder(r1, r2, h, x, y, z, m) {
-    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, h, 12), m);
-    mesh.position.set(x, y, z);
-    scene.add(mesh);
-    return mesh;
-  }
-  cube(11, .2, 13, 0, -.12, -1, mat.floor);
-  cube(11, 5.6, .16, 0, 2.8, -7.6, mat.wall);
-  cube(.15, 5.6, 13, -5.5, 2.8, -1, mat.wall);
-  cube(.15, 5.6, 13, 5.5, 2.8, -1, mat.wall);
-  cube(11, .15, 13, 0, 5.6, -1, mat.wall);
-  cube(3.7, .15, 1.7, 0, 1.03, -2.35, mat.wood);
-  for (const x of [-1.5, 1.5]) for (const z of [-2.95, -1.75]) cube(.12, 1, .12, x, .5, z, mat.metal);
-
-  // The empty visitor chair faces the desk (-Z), so its back is +Z.
-  // The occupied chair faces the visitor (+Z), so its back is -Z.
-  function chair(x, z, backSide) {
-    cube(.9, .15, .85, x, .55, z, mat.seat);
-    cube(.9, 1, .13, x, 1.05, z + .36 * backSide, mat.seat);
-  }
-  chair(0, -4.5, -1);
-  chair(0, .1, +1); // 180° fix: empty chair now oriented toward the desk
-
-  cylinder(.3, .25, .8, 0, 1.18, -4.5, mat.shirt);
-  sphere(.28, 0, 1.83, -4.5, mat.skin);
-  cylinder(.09, .09, .55, -.35, 1.3, -4.5, mat.skin);
-  cylinder(.09, .09, .55, .35, 1.3, -4.5, mat.skin);
-  for (const x of [-4, 4]) {
-    cylinder(.35, .30, .45, x, .24, -6, mat.wood);
-    cylinder(.06, .07, .9, x, .9, -6, mat.plant);
-    sphere(.5, x, 1.5, -6, mat.plant);
-  }
-  cube(2.3, 1.4, .06, -2.5, 3, -7.48, mat.metal);
-  cube(1.8, 1.1, .08, 2.6, 3, -7.48, mat.wood);
+  // Visuals are isolated from locomotion to preserve the validated Quest controls.
+  createOfficeScene(THREE, scene, renderer);
 
   const keys = new Set();
   const allowed = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD']);
