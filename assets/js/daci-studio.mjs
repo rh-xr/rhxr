@@ -31,7 +31,7 @@ const shell='<div class="shell"><aside class="side"><div><a class="brand" href="
 '<footer class="footer">Atelier DACI expérimental · aucune transmission de brouillons · aucune publication ni activation de média.</footer></main></div>';
 document.querySelector('#app').innerHTML=shell;
 const status=(message,kind='info')=>{const el=$('studio-status');el.textContent=message;el.dataset.kind=kind;};
-const modified=()=>{dirty=true;$('revision-pill').textContent='Révision '+draft.revision+' · modifiée';};
+const modified=()=>{dirty=true;$('revision-pill').textContent='Révision '+draft.revision+' · modifiée';const r=$('review-preflight');if(r){r.textContent='Le brouillon a changé : relancer le contrôle avant de préparer la revue.';r.dataset.kind='info';}};
 const sec=()=>draft.sections.find(s=>s.anchor===chosen)||draft.sections[0];
 function renderCases(){
  $('draft-case').innerHTML=CASES.filter(c=>c.moduleId===draft.moduleId).map(c=>'<option value="'+esc(c.id)+'">'+esc(c.id+' · '+c.title)+'</option>').join('');
