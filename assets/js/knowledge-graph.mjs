@@ -3,6 +3,7 @@
  */
 import {MODULES} from './learning-data.mjs';
 import {CASES} from './case-data.mjs';
+import {BRANCHING_SCENARIOS} from './branching-scenarios.mjs';
 import {DOCUMENTS} from './daci-data.mjs';
 import {DOSSIERS,TEMPLATES} from './pedagogy-plus.mjs';
 
@@ -19,6 +20,11 @@ export function buildKnowledgeGraph() {
  for(const c of CASES){
   nodes.push(node(c.id,'case',c.title,'cas-pratiques.html?case='+c.id,c.moduleId));
   edges.push({from:c.moduleId,to:c.id,relation:'example',label:'Illustré par un cas'});
+ }
+ for(const sim of BRANCHING_SCENARIOS){
+  nodes.push(node(sim.id,'dialogue',sim.title,'dialogues.html?scenario='+sim.id,sim.moduleId));
+  edges.push({from:sim.moduleId,to:sim.id,relation:'hasDialogue',label:'Approfondi en dialogue'});
+  edges.push({from:sim.id,to:sim.daci,relation:'hasResource',label:'Débriefé avec un document DACI'});
  }
  for(const d of DOCUMENTS){
   nodes.push(node(d.id,'document',d.title,'daci.html?doc='+d.id,d.moduleId));
