@@ -124,7 +124,8 @@ for(const fmt of ['json','md','ld'])$('export-'+fmt).addEventListener('click',()
   if(fmt==='json')download(n+'.json',exportDraft(draft),'application/json;charset=utf-8');
   if(fmt==='md')download(n+'.md',draftMarkdown(draft),'text/markdown;charset=utf-8');
   if(fmt==='ld')download(n+'.jsonld',JSON.stringify(draftJsonLd(draft),null,2),'application/ld+json;charset=utf-8');
-  dirty=false;$('revision-pill').textContent='Révision '+draft.revision;status('Export '+fmt+' effectué localement, sans publication.','ok');
+  if(fmt==='json'){dirty=false;$('revision-pill').textContent='Révision '+draft.revision;}
+  status('Export '+fmt+' effectué localement. Seul le JSON complet permet de restaurer ce brouillon.','ok');
  }catch(e){status('Export impossible : '+e.message,'error');}
 });
 $('source-doc').addEventListener('change',e=>{
