@@ -44,11 +44,19 @@ export function createPremiumArchitecture(THREE, scene, renderer, office) {
   }
   box(10.65,.20,.08,0,5.3,-7.45,palette.stone);
   box(10.65,.12,.08,0,.29,-7.43,palette.stone);
-  for(let x=-5.15;x<=5.15;x+=.29){
-    // A walnut vertical-slat feature strip on the rear accent wall. Draws are
-    // deliberately disabled in Quest performance mode when requested.
-    box(.046,2.15,.075,x,2.05,-7.34,palette.walnut);
+  // All rear timber fins share one GPU draw via InstancedMesh, a crucial
+  // optimisation for standalone Quest 3S rendering.
+  const finCount=36;
+  const fins=new THREE.InstancedMesh(new THREE.BoxGeometry(.046,2.15,.075),palette.walnut,finCount);
+  fins.name='rhxr-v3-walnut-fins-instanced';
+  const matrix=new THREE.Matrix4();
+  for(let i=0;i<finCount;i++){
+    matrix.makeTranslation(-5.075+i*.29,2.05,-7.34);
+    fins.setMatrixAt(i,matrix);
   }
+  fins.instanceMatrix.needsUpdate=true;
+  fins.castShadow=false;fins.receiveShadow=true;
+  root.add(fins);
   // Repetition at the room edge gives a premium architectural rhythm.
   for(const z of [-6.7,-6.4,-6.1,3.75,4.06,4.37]){
     box(.09,2.20,.06,-5.27,2.50,z,palette.oak);
