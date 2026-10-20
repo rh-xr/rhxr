@@ -2,6 +2,7 @@ import {DOCUMENTS} from './daci-data.mjs';
 import {MODULES} from './learning-data.mjs';
 import {CASES} from './case-data.mjs';
 import {makeDraft,sourceDocument,validateDraft,addSection,addMediaSlot,recordRevision,parseDraft,exportDraft,draftMarkdown,draftJsonLd,MEDIA_TYPES} from './daci-editor-core.mjs';
+import {reviewPreflight,makeReviewRequest,reviewRequestMarkdown} from './daci-review-core.mjs';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const $=id=>document.getElementById(id);
@@ -26,7 +27,7 @@ const shell='<div class="shell"><aside class="side"><div><a class="brand" href="
 '<div class="studio-fields"><label for="section-select">Section à modifier</label><select id="section-select" class="input"></select><div id="section-fields" class="studio-fields"></div><div class="btnrow"><button type="button" id="move-up" class="secondary">↑ Monter</button><button type="button" id="move-down" class="secondary">↓ Descendre</button><button type="button" id="remove-section" class="secondary">Supprimer</button></div></div>'+
 '<div class="studio-divider"></div><div class="row space"><h2>3. Augmentations futures</h2><button type="button" id="add-media" class="secondary">+ Média prévu</button></div><p class="tiny">Les emplacements représentent des intentions éditoriales, pas des médias publiés.</p><div id="media-list" class="studio-media"></div>'+
 '<div class="studio-divider"></div><h2>4. Historique des notes de révision</h2><p class="tiny">Les notes ne sont pas des snapshots restaurables. Exportez chaque version du brouillon.</p><label for="revision-note">Modification réalisée</label><textarea id="revision-note" class="input" rows="2" maxlength="240"></textarea><div class="btnrow"><button type="button" id="save-revision" class="secondary">Ajouter une révision</button></div><ol id="revision-history" class="learning-history"></ol></section>'+
-'<aside class="panel studio-preview"><h2>Contrôler et exporter</h2><p>La validation technique ne remplace pas une relecture RH, documentaire ou réglementaire.</p><div class="btnrow"><button type="button" class="secondary" id="validate-draft">Vérifier</button><button type="button" class="secondary" id="preview-draft">Actualiser l’aperçu</button></div><div id="validation-result" class="notice" role="status" aria-live="polite">Aucune vérification demandée.</div><h3>Formats disponibles</h3><div class="studio-export"><button type="button" class="secondary" id="export-json">Brouillon JSON</button><button type="button" class="secondary" id="export-md">Document Markdown</button><button type="button" class="secondary" id="export-ld">Métadonnées JSON-LD</button></div><div class="studio-divider"></div><h3>Aperçu du brouillon</h3><article id="draft-preview" class="studio-paper"></article></aside></div>'+
+'<aside class="panel studio-preview"><h2>Contrôler et exporter</h2><p>La validation technique ne remplace pas une relecture RH, documentaire ou réglementaire.</p><div class="btnrow"><button type="button" class="secondary" id="validate-draft">Vérifier</button><button type="button" class="secondary" id="preview-draft">Actualiser l’aperçu</button></div><div id="validation-result" class="notice" role="status" aria-live="polite">Aucune vérification demandée.</div><h3>Formats disponibles</h3><div class="studio-export"><button type="button" class="secondary" id="export-json">Brouillon JSON</button><button type="button" class="secondary" id="export-md">Document Markdown</button><button type="button" class="secondary" id="export-ld">Métadonnées JSON-LD</button></div><div class="studio-divider"></div><h3>5. Préparer une revue éditoriale</h3><p class="tiny">Cet outil produit une demande de relecture, jamais une autorisation de publication. L'identité et l'habilitation du relecteur ne sont pas vérifiées.</p><label for="review-purpose">Finalité et périmètre de la revue</label><textarea class="input" id="review-purpose" rows="3" maxlength="500" placeholder="Objectifs pédagogiques et questions à contrôler..."></textarea><label for="review-role">Rôle du relecteur pressenti (facultatif)</label><input class="input" id="review-role" maxlength="120" placeholder="Formateur RH, documentaliste..."><div class="btnrow"><button type="button" class="secondary" id="preflight-review">Contrôler avant revue</button><button type="button" class="secondary" id="export-review-json">Dossier de revue JSON</button><button type="button" class="secondary" id="export-review-md">Checklist Markdown</button></div><div id="review-preflight" class="notice" role="status" aria-live="polite">Aucun contrôle préalable demandé.</div><p class="tiny">Les URL des références sont vérifiées uniquement dans leur forme : leur contenu, leur licence et leur autorité doivent être contrôlés par un humain.</p><div class="studio-divider"></div><h3>Aperçu du brouillon</h3><article id="draft-preview" class="studio-paper"></article></aside></div>'+
 '<footer class="footer">Atelier DACI expérimental · aucune transmission de brouillons · aucune publication ni activation de média.</footer></main></div>';
 document.querySelector('#app').innerHTML=shell;
 const status=(message,kind='info')=>{const el=$('studio-status');el.textContent=message;el.dataset.kind=kind;};
@@ -117,6 +118,39 @@ $('preview-draft').addEventListener('click',()=>{preview();status('Aperçu actua
 function download(name,content,type){
  const u=URL.createObjectURL(new Blob([content],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1200);
 }
+function renderReviewPreflight(){
+ const result=reviewPreflight(draft),el=$('review-preflight');
+ el.replaceChildren();
+ const heading=document.createElement('strong');
+ heading.textContent=result.readyForReview?'Prêt à soumettre à une relecture humaine — non approuvé.':'Préparation de la revue incomplète.';
+ el.append(heading);
+ const list=(label,items)=>{
+  if(!items.length)return;
+  const h=document.createElement('h4');h.textContent=label;el.append(h);
+  const ul=document.createElement('ul');
+  for(const value of items){const li=document.createElement('li');li.textContent=value;ul.append(li);}
+  el.append(ul);
+ };
+ list('Points bloquants',result.errors);
+ list('Avertissements',result.warnings);
+ const caption=document.createElement('p');
+ caption.textContent=result.checks.filter(c=>c.ok).length+'/'+result.checks.length+' contrôles positifs ; '+result.links.length+' liens pédagogiques documentaires.';
+ el.append(caption);
+ el.dataset.kind=result.readyForReview?'ok':'error';
+ return result;
+}
+$('preflight-review').addEventListener('click',renderReviewPreflight);
+for(const format of ['json','md'])$('export-review-'+format).addEventListener('click',()=>{
+ const result=renderReviewPreflight();
+ if(!result.readyForReview){status('La demande de revue ne peut pas être exportée avant correction des blocages.','error');return;}
+ try{
+  const packet=makeReviewRequest(draft,{purpose:$('review-purpose').value,reviewerRole:$('review-role').value});
+  const base='RHXR-'+draft.documentId+'-demande-revue-r'+draft.revision;
+  if(format==='json')download(base+'.review.json',JSON.stringify(packet,null,2),'application/json;charset=utf-8');
+  else download(base+'.review.md',reviewRequestMarkdown(packet),'text/markdown;charset=utf-8');
+  status('Dossier de revue exporté localement. Aucune approbation ni publication effectuée.','ok');
+ }catch(e){status('Export de revue impossible : '+e.message,'error');}
+});
 for(const fmt of ['json','md','ld'])$('export-'+fmt).addEventListener('click',()=>{
  if(!verify())return;
  try{
