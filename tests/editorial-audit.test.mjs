@@ -15,5 +15,5 @@ test('every editorial link resolves and the full content model passes its gate',
 test('editorial audit does not conceal unverified human review',()=>{
  const data=contentAudit();
  assert.ok(data.warnings.length>=6);
- for(const d of data.warnings)assert.ok(d.includes('validation métier RH')));
+ for(const d of data.warnings)assert.ok(d.includes('validation métier RH'));
 });
