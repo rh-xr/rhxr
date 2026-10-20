@@ -6,7 +6,8 @@
   "description": "RH·XR — Lot 0 pedagogical prototype",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "audit-content": "node scripts/content-audit.mjs"
   },
   "engines": {
     "node": ">=20"
