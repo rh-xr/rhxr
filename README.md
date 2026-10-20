@@ -27,3 +27,11 @@ La simulation 2D fonctionne sans dépendance externe. La scène 3D facultative n
 Ceci est **un prototype Lot 0**, pas un logiciel RH de production : les comptes, Payload CMS, PostgreSQL, l'IA conversationnelle, les analytics et les modules RA sont des extensions futures. Les scènes, situations et personnages sont fictifs. Le score ne doit jamais servir à l'embauche, à la promotion, à la sanction ou à la surveillance d'employés.
 
 Développement par branches/PR ; ne pas ajouter de données RH réelles. Voir `docs/`.
+
+## Déploiement de démonstration (Vercel)
+
+Le projet Vercel est connecté au dépôt `rh-xr/rhxr`. La branche de production `main` ne contient pour l'instant que le document d'initialisation ; une erreur 404 sur sa racine est donc attendue.
+
+**Pour examiner la version exécutable sans fusionner :** utiliser le déploiement **Preview** de la branche `feature/lot0-prototype`, qui comporte `index.html`, `simulation.html`, `studio.html` et les ressources dans `assets/`.
+
+Le site est statique : Application Preset = Other, Root Directory = `./`, sans variables d'environnement et sans commande de construction spécifique. Vérifier la Preview sur ordinateur, smartphone puis Quest 3S avant de fusionner la Pull Request.
