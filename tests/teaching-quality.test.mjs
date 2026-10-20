@@ -87,7 +87,9 @@ test('knowledge paths include modules, lessons, cases, courses and templates',()
 test('graph export uses semantic types and URN identifiers',()=>{
  const doc=graphAsJsonLd();
  assert.equal(doc['@context']['@vocab'],'https://schema.org/');
- assert.equal(doc['@graph'].length,KNOWLEDGE_GRAPH.nodes.length+KNOWLEDGE_GRAPH.edges.length);
+ assert.equal(doc['@graph'].length,KNOWLEDGE_GRAPH.nodes.length);
+ assert.equal(new Set(doc['@graph'].map(n=>n['@id'])).size,KNOWLEDGE_GRAPH.nodes.length);
+ assert.equal(doc['@graph'].reduce((sum,n)=>sum+(n.relatedTo?.length||0),0),KNOWLEDGE_GRAPH.edges.length);
  assert.ok(doc['@graph'].some(n=>n['@type']==='LearningResource'));
  assert.ok(doc['@graph'].every(n=>n['@id'].startsWith('urn:rhxr:')));
 });
