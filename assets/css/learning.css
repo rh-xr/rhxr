@@ -1,0 +1,43 @@
+.learning-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin:17px 0 29px}
+.learning-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-height:220px}
+.learning-card h3{font-size:17px;line-height:1.35;margin:5px 0 0}
+.learning-card p{font-size:13px;color:var(--muted);line-height:1.75;margin:0;flex:1}
+.learning-card .row{width:100%}
+.learning-card .textlink{margin-top:auto}
+.learning-card .btnrow{margin-top:auto}
+.learning-card .btnrow .secondary{font-size:12px}
+.control-bar{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px 18px;display:flex;gap:14px;align-items:center;margin:26px 0 15px;flex-wrap:wrap}
+.control-bar label{font-weight:700;font-size:12px;white-space:nowrap}
+.control-bar .input{flex:1;min-width:180px}
+.control-bar .tiny{white-space:nowrap}
+.learning-detail{margin:20px 0 27px;scroll-margin-top:18px}
+.learning-detail h2,.daci-reader h2{font-size:25px;letter-spacing:-.5px;margin:14px 0}
+.learning-detail h3,.daci-reader h3{font-size:16px;margin:24px 0 9px}
+.learning-detail ul{padding-left:23px;color:#35546a;font-size:13px;line-height:1.9}
+.timeline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.lesson{border:1px solid #dbe5ed;background:#f8fafc;border-radius:12px;padding:17px}
+.lesson b{font-size:13px}
+.lesson p{font-size:12px;line-height:1.65}
+.lesson .pill{padding:4px 7px}
+.related{display:flex;flex-wrap:wrap;gap:10px;margin:19px 0}
+.related a{background:#eef5f7;border:1px solid #cfdee5;border-radius:10px;padding:11px 14px;font-size:12px;font-weight:700;color:#285a6d}
+.related a:hover{background:#dceff0}
+.daci-principles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:27px 0 16px}
+.daci-principles>div{background:#fff;padding:18px;border:1px solid var(--line);border-radius:13px}
+.daci-principles b{color:#147b78;font-size:15px}
+.daci-principles p{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:0}
+.daci-reader{margin:22px 0 24px;padding:clamp(20px,4vw,35px)}
+.daci-toc{display:flex;flex-wrap:wrap;align-items:center;gap:11px;border:1px solid var(--line);border-radius:9px;padding:12px;margin:24px 0}
+.daci-toc strong{font-size:12px}
+.daci-toc a{font-size:12px;color:#157e85;text-decoration:underline;text-underline-offset:3px}
+.daci-section{border-bottom:1px solid var(--line);padding:23px 0;scroll-margin-top:20px}
+.daci-section>p{font-size:14px;line-height:1.85;color:#36546b;max-width:820px}
+.daci-annotation{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:15px 0}
+.daci-annotation>div{padding:15px;border-radius:10px;border:1px solid #cbe4e5;background:#f0f9f8}
+.daci-annotation>div:nth-child(2){background:#f2f6fd;border-color:#d8e3f4}
+.daci-annotation strong{font-size:12px;color:#236774}
+.daci-annotation p{font-size:12px;color:#476070;line-height:1.7;margin:9px 0 0}
+.daci-annotation[hidden]{display:none}
+@media(max-width:1200px){.learning-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.timeline{grid-template-columns:1fr}}
+@media(max-width:740px){.learning-grid{grid-template-columns:1fr}.daci-principles{grid-template-columns:1fr}.daci-annotation{grid-template-columns:1fr}.control-bar{align-items:stretch}.control-bar .input{width:100%}}
+@media print{.side,.top,.footer,.control-bar,.btnrow,.related,.daci-toc,.daci-reader button,.learning-grid{display:none!important}.shell{display:block}.main{padding:0;max-width:none}.panel,.learning-detail,.daci-reader{border:0;padding:0;box-shadow:none}.daci-annotation{break-inside:avoid}.daci-section{break-inside:avoid}.notice{border-color:#ccc;color:#333}}
