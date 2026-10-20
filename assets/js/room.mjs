@@ -4,6 +4,8 @@
 import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotion.mjs';
 import { createOfficeScene } from './office-scene.mjs';
 import { visualQuality } from './visual-assets.mjs';
+import { createPremiumArchitecture } from './premium-architecture.mjs';
+import { mountV3VisualControls } from './v3-visual-controls.mjs';
 
 let initialized = false;
 export async function mountRoom(stage) {
@@ -34,6 +36,8 @@ export async function mountRoom(stage) {
 
   // Visuals are isolated from locomotion to preserve the validated Quest controls.
   const office=createOfficeScene(THREE, scene, renderer);
+  const architecture=createPremiumArchitecture(THREE,scene,renderer,office);
+  const v3Controls=mountV3VisualControls(THREE,stage,renderer,scene,architecture);
   // Loading detailed GLB is intentionally non-blocking. XR, controls and all
   // educational interactions continue on validated procedural geometry.
   void office.loadAssets({
@@ -114,6 +118,7 @@ export async function mountRoom(stage) {
       playerRig.position.z = clamp(playerRig.position.z + move.z, -6.7, 5.1);
     }
     renderer.render(scene, camera);
+    v3Controls.onFrame(dt);
   });
 
   const controls = document.createElement('div');
