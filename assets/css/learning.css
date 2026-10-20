@@ -86,3 +86,22 @@
 .daci-future{margin:24px 0;background:#f6f8fb;padding:17px;border-radius:13px;border:1px solid #dde7ef}
 .daci-future .pill{font-size:10px;white-space:normal;line-height:1.6;max-width:100%;text-align:left}
 .daci-future h3{margin:0 0 9px}
+
+/* Branching dialogue lab and instructor-only supporting content */
+.dialogue-layout{align-items:start}
+.dialogue-layout .panel{min-width:0}
+.dialogue-layout #dialogue-stage h3{font-size:16px;line-height:1.5}
+.dialogue-layout .choice{font-size:13px;min-height:58px}
+.learning-history{margin:12px 0 24px;padding-left:23px;font-size:12px;line-height:1.7;color:#3e5b6d}
+.learning-history li{border-bottom:1px solid var(--line);padding:8px 0}
+.learning-history li b{color:#1c5569}
+.learning-history li p{margin:3px 0 10px}
+.facilitator-guide{background:#f7fafc;border:1px solid #dbe8ed;padding:16px;border-radius:12px;margin-top:18px;font-size:12px;line-height:1.8}
+.facilitator-guide summary{font-size:14px;font-weight:750;color:#20566b;cursor:pointer}
+.facilitator-guide ul{padding-left:21px}
+.facilitator-guide li{margin:5px 0}
+.facilitator-guide h4{margin:20px 0 8px;font-size:12px;color:#175775}
+.facilitator-guide .secondary{margin-top:8px}
+.dialogue-layout [aria-live=polite]{scroll-margin:1rem}
+@media(max-width:860px){.dialogue-layout{display:block}.dialogue-layout>section{margin-bottom:18px}}
+@media print{.dialogue-layout{display:block}.dialogue-layout .choice,.dialogue-layout .btnrow,.facilitator-guide button{display:none!important}.dialogue-layout>aside{break-before:page}.facilitator-guide{break-inside:avoid}}
