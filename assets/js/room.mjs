@@ -1,7 +1,7 @@
 /** RH·XR conceptual low-poly office — experimental 3D + Quest WebXR controls.
  * The same educational scenario remains available without XR.
  */
-import { readSticks, displacement, snapTurn } from './locomotion.mjs';
+import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotion.mjs';
 
 let initialized = false;
 export async function mountRoom(stage) {
@@ -117,12 +117,10 @@ export async function mountRoom(stage) {
   // This prevents orbiting the room center when the user has walked physically.
   function snapAroundHead(angle, xrCamera) {
     headWorld.setFromMatrixPosition(xrCamera.matrixWorld);
-    const relX = headWorld.x - playerRig.position.x;
-    const relZ = headWorld.z - playerRig.position.z;
-    const c = Math.cos(angle), s = Math.sin(angle);
+    const correction = pivotCorrection(headWorld, playerRig.position, angle);
     playerRig.rotation.y += angle;
-    playerRig.position.x += relX - (c * relX + s * relZ);
-    playerRig.position.z += relZ - (-s * relX + c * relZ);
+    playerRig.position.x += correction.x;
+    playerRig.position.z += correction.z;
     playerRig.updateMatrixWorld(true);
   }
 
