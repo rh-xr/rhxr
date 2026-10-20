@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { deadzone, thumbstick, readSticks, displacement, snapTurn, VR_CONTROLS } from '../assets/js/locomotion.mjs';
+import { deadzone, thumbstick, readSticks, displacement, snapTurn, pivotCorrection, VR_CONTROLS } from '../assets/js/locomotion.mjs';
 
 test('deadzone removes controller noise without changing direction', () => {
   assert.equal(deadzone(0.12), 0);
@@ -44,4 +44,14 @@ test('snap turn is 45 degrees and does not repeat until stick is released', () =
 test('snap thresholds and speed are finite safe values', () => {
   assert.ok(VR_CONTROLS.snapRelease < VR_CONTROLS.snapThreshold);
   assert.ok(VR_CONTROLS.moveSpeed > 0 && VR_CONTROLS.moveSpeed < 2);
+});
+
+test('snap-turn correction rotates around tracked headset, not rig origin', () => {
+  const head = { x: 2.2, z: -3.5 }, rig = { x: 0.4, z: -2.0 };
+  const angle = Math.PI / 4, correction = pivotCorrection(head, rig, angle);
+  const relX = head.x - rig.x, relZ = head.z - rig.z;
+  const rotatedX = Math.cos(angle) * relX + Math.sin(angle) * relZ;
+  const rotatedZ = -Math.sin(angle) * relX + Math.cos(angle) * relZ;
+  assert.ok(Math.abs(rig.x + correction.x + rotatedX - head.x) < 1e-9);
+  assert.ok(Math.abs(rig.z + correction.z + rotatedZ - head.z) < 1e-9);
 });
