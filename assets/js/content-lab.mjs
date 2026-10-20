@@ -3,6 +3,7 @@ import {DOSSIERS,QUESTIONS,TEMPLATES,GLOSSARY,REFERENCES,teachingPack,quizFor,te
 import {KNOWLEDGE_GRAPH,learningPath,neighbors,graphAsJsonLd} from './knowledge-graph.mjs';
 import {ITINERARIES,getItinerary} from './itineraries.mjs';
 import {BRANCHING_SCENARIOS} from './branching-scenarios.mjs';
+import {returnHref} from './daci-section-activities.mjs';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const qs=new URLSearchParams(location.search);
@@ -82,6 +83,18 @@ function showItinerary(id){
 }
 document.querySelector('#app').innerHTML=shell(page==='atelier'?atelierBase():page==='itineraires'?itinerariesBase():networkBase());
 if(page==='atelier'){
+ const target=returnHref(qs.get('returnTo'));
+ if(target){
+  const back=document.createElement('div');
+  back.className='notice daci-return';
+  const a=document.createElement('a');a.href=target;
+  a.textContent='↩ Revenir à la section DACI après l’exercice';
+  back.append(a);
+  document.querySelector('#workshop-content').before(back);
+ }
+}
+
+if(page==='atelier'){
  const select=document.querySelector('#domain');
  const render=()=>{const m=getModule(select.value);if(m)attachAtelier(m)};
  select.addEventListener('change',()=>{
@@ -89,6 +102,10 @@ if(page==='atelier'){
   render();
  });
  render();
+ if(['#quiz','#template'].includes(location.hash)){
+  const anchor=document.querySelector(location.hash);
+  if(anchor)requestAnimationFrame(()=>anchor.scrollIntoView({block:'start'}));
+ }
 }
 if(page==='reseau'){
  const select=document.querySelector('#graph-domain');
