@@ -89,6 +89,20 @@ if(page==='daci'){
  const d=getDocument(params.get('doc'));
  if(d){
   document.querySelector('#doc-detail').innerHTML=docDetail(d);
+  // The canonical section is added dynamically; browsers do not always
+  // honor the initial URL fragment before the content has rendered.
+  let requestedAnchor='';
+  try{requestedAnchor=decodeURIComponent(location.hash.slice(1));}catch{}
+  if(d.sections.some(sec=>requestedAnchor===d.id+'-'+sec.anchor)){
+   requestAnimationFrame(()=>{
+    const target=document.getElementById(requestedAnchor);
+    if(target){
+     target.scrollIntoView({block:'start'});
+     target.setAttribute('tabindex','-1');
+     target.focus({preventScroll:true});
+    }
+   });
+  }
   const toggle=document.querySelector('#toggle-annotations');
   toggle.addEventListener('click',()=>{
    const hide=toggle.getAttribute('aria-expanded')==='true';
