@@ -212,7 +212,7 @@ export const DOSSIERS=[
       {
         "id": "M7-P1",
         "title": "Définir la situation et l’objectif",
-        "text": "Décrire un contexte professionnel fictif, le rôle de l’apprenant et une compétence qui pourra être observée. Séparer l’objectif de la narration. Éviter d’utiliser des situations personnelles réelles non autorisées.",
+        "text": "Décrire un contexte professionnel fictif, le rôle de l’apprenant et une compétence qui pourra être observée. Séparer l’objectif de la narration. Éviter d’utiliser des situations personnelles réelles non autorisées. Définir aussi la durée de l’activité et les conditions de réussite que l’animateur pourra expliciter avant le premier choix.",
         "example": "Une bonne consigne annonce « clarifier le désaccord » plutôt que « deviner la personnalité du collègue »."
       },
       {
@@ -224,7 +224,7 @@ export const DOSSIERS=[
       {
         "id": "M7-P3",
         "title": "Tester et publier avec prudence",
-        "text": "Vérifier les enchaînements, la présence d’un retour sur chaque option et le repli accessible. Faire relire le cas par un formateur RH. Ne pas convertir automatiquement les résultats en jugement sur les individus.",
+        "text": "Vérifier les enchaînements, la présence d’un retour sur chaque option et le repli accessible. Faire relire le cas par un formateur RH. Ne pas convertir automatiquement les résultats en jugement sur les individus. Organiser un essai complet avec les réponses moins favorables et consigner les ambiguïtés relevées avant publication.",
         "example": "Avant d’ajouter un avatar 3D ou une IA, le scénario textuel doit déjà être jouable et utile."
       }
     ],
