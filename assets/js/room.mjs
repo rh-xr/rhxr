@@ -3,13 +3,15 @@
  */
 import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotion.mjs';
 import { createOfficeScene } from './office-scene.mjs';
+import { visualQuality } from './visual-assets.mjs';
 
 let initialized = false;
 export async function mountRoom(stage) {
   if (initialized) return;
   const THREE = await import('https://esm.sh/three@0.169.0');
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'low-power' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+  const quality=visualQuality(navigator.userAgent);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality.pixelRatio));
   renderer.setSize(stage.clientWidth, stage.clientHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.xr.enabled = true;
@@ -31,7 +33,17 @@ export async function mountRoom(stage) {
   scene.add(playerRig);
 
   // Visuals are isolated from locomotion to preserve the validated Quest controls.
-  createOfficeScene(THREE, scene, renderer);
+  const office=createOfficeScene(THREE, scene, renderer);
+  // Loading detailed GLB is intentionally non-blocking. XR, controls and all
+  // educational interactions continue on validated procedural geometry.
+  void office.loadAssets({
+    onStatus(status) {
+      const label=document.querySelector('#stage-status');
+      if(!label)return;
+      if(status==='ready')label.textContent='3D • mobilier GLB PBR';
+      if(status==='fallback')label.textContent='3D • rendu de secours';
+    }
+  });
 
   const keys = new Set();
   const allowed = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD']);
