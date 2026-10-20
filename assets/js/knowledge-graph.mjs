@@ -50,13 +50,35 @@ export function neighbors(id,graph=KNOWLEDGE_GRAPH){
 }
 export function learningPath(moduleId,graph=KNOWLEDGE_GRAPH){
  return graph.nodes.filter(n=>n.moduleId===moduleId)
-  .sort((a,b)=>({module:0,dossier:1,lesson:2,case:3,document:4,template:5}[a.type]??9)-({module:0,dossier:1,lesson:2,case:3,document:4,template:5}[b.type]??9));
+  .sort((a,b)=>({module:0,dossier:1,lesson:2,case:3,dialogue:4,document:5,template:6}[a.type]??9)-({module:0,dossier:1,lesson:2,case:3,dialogue:4,document:5,template:6}[b.type]??9));
 }
+/** One JSON-LD node per resource, with compact typed editorial relations.
+ * Only stable URNs are exported: no imagined production-domain links.
+ */
 export function graphAsJsonLd(graph=KNOWLEDGE_GRAPH){
  const context={'@vocab':'https://schema.org/',relatedTo:{'@id':'https://schema.org/relatedLink','@type':'@id'}};
- const rows=graph.nodes.map(n=>({'@id':'urn:rhxr:'+n.id,'@type':n.type==='document'?'LearningResource':'CreativeWork',name:n.label,identifier:n.id,educationalUse:'professional learning'}));
- const links=graph.edges.map(e=>({'@id':'urn:rhxr:'+e.from,relatedTo:{'@id':'urn:rhxr:'+e.to}}));
- return {'@context':context,'@graph':[...rows,...links]};
+ const rows=graph.nodes.map(n=>{
+   const outbound=graph.edges.filter(e=>e.from===n.id);
+   const record={
+    '@id':'urn:rhxr:'+n.id,
+    '@type':n.type==='document'||n.type==='dossier'||n.type==='lesson'?'LearningResource':'CreativeWork',
+    name:n.label,
+    identifier:n.id,
+    inLanguage:'fr',
+    educationalUse:'professional learning'
+   };
+   if(outbound.length){
+    record.relatedTo=outbound.map(e=>({'@id':'urn:rhxr:'+e.to}));
+    record.additionalProperty=outbound.map(e=>({
+      '@type':'PropertyValue',
+      name:e.relation,
+      description:e.label,
+      value:'urn:rhxr:'+e.to
+    }));
+   }
+   return record;
+ });
+ return {'@context':context,'@graph':rows};
 }
 export function validateGraph(graph=KNOWLEDGE_GRAPH){
  const errors=[],ids=new Set();
