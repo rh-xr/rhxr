@@ -63,9 +63,9 @@ test('references are official HTTPS URLs, not placeholder citations',()=>{
 });
 test('semantic graph has unique IDs and no dangling references',()=>{
  assert.deepEqual(validateGraph(),[]);
- assert.equal(KNOWLEDGE_GRAPH.nodes.length,66);
- assert.equal(KNOWLEDGE_GRAPH.edges.length,64);
- assert.equal(new Set(KNOWLEDGE_GRAPH.nodes.map(n=>n.id)).size,66);
+ assert.equal(KNOWLEDGE_GRAPH.nodes.length,71);
+ assert.equal(KNOWLEDGE_GRAPH.edges.length,74);
+ assert.equal(new Set(KNOWLEDGE_GRAPH.nodes.map(n=>n.id)).size,71);
 });
 test('all documents have a traversable path to their module and case',()=>{
  for(const d of DOCUMENTS){
@@ -92,14 +92,14 @@ test('graph export uses semantic types and URN identifiers',()=>{
  assert.ok(doc['@graph'].every(n=>n['@id'].startsWith('urn:rhxr:')));
 });
 test('new navigable pages and scripts exist under the static root',async()=>{
- for(const file of ['parcours.html','cas-pratiques.html','daci.html','atelier.html','reseau.html','simulation.html','studio.html']){
+ for(const file of ['parcours.html','cas-pratiques.html','daci.html','atelier.html','reseau.html','dialogues.html','simulation.html','studio.html']){
   assert.ok(existsSync(file),'Missing '+file);
   const html=await readFile(file,'utf8');
   assert.match(html,/<html lang="fr">/);
   assert.match(html,/<main|<div id="app">/);
   assert.match(html,/name="viewport"/);
  }
- for(const file of ['assets/js/learning-app.mjs','assets/js/content-lab.mjs','assets/js/knowledge-graph.mjs','assets/css/learning.css'])assert.ok(existsSync(file),'Missing '+file);
+ for(const file of ['assets/js/learning-app.mjs','assets/js/content-lab.mjs','assets/js/knowledge-graph.mjs','assets/js/dialogues-app.mjs','assets/css/learning.css'])assert.ok(existsSync(file),'Missing '+file);
 });
 test('content additions do not modify the validated Quest engine',async()=>{
  const room=await readFile('assets/js/room.mjs','utf8');
