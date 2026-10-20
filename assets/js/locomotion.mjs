@@ -63,3 +63,13 @@ export function snapTurn(x, latched, settings = VR_CONTROLS) {
   }
   return { angle: 0, latched };
 }
+
+/** Horizontal correction so yaw rotation around the rig keeps the HMD
+ * stationary in world space (including a physical room-scale offset).
+ */
+export function pivotCorrection(head, rig, angle) {
+  const relX = head.x - rig.x, relZ = head.z - rig.z;
+  const c = Math.cos(angle), s = Math.sin(angle);
+  return { x: relX - (c * relX + s * relZ),
+           z: relZ - (-s * relX + c * relZ) };
+}
