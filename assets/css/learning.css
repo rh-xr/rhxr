@@ -152,3 +152,13 @@
 #quiz,#template{scroll-margin-top:22px}
 @media(max-width:740px){.daci-practice{padding:14px 16px}.daci-practice .row{flex-wrap:wrap}}
 @media print{.daci-practice{break-inside:avoid}.daci-practice a.secondary,.daci-return{display:none!important}}
+
+/* Offline DACI transmission panel */
+.daci-handoff-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:24px 0}
+.daci-handoff-grid .panel{min-width:0}
+.daci-handoff-grid .panel p{font-size:13px;line-height:1.8}
+.daci-handoff-label{display:grid;gap:9px;margin:18px 0;font-size:13px;font-weight:700}
+.daci-handoff-label .input{max-width:100%}
+.daci-handoff-grid .notice{white-space:pre-wrap;overflow-wrap:anywhere}
+.daci-handoff-grid .btnrow{flex-wrap:wrap}
+@media(max-width:900px){.daci-handoff-grid{grid-template-columns:1fr}}
