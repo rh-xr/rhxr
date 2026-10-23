@@ -20,7 +20,8 @@ test('pinned RH office GLBs are valid glTF 2 binary containers',()=>{
     assert.ok(gltf.meshes?.length,spec.filename+' contains no meshes');
     const extensions=gltf.extensionsRequired||[];
     console.log(spec.filename+' '+(file.length/1e6).toFixed(2)+'MB meshes='+gltf.meshes.length+' textures='+(gltf.textures?.length||0)+' requiredExtensions='+extensions.join(','));
-    assert.ok(!extensions.includes('KHR_draco_mesh_compression'),'Draco requires separate decoder: '+spec.filename);
+    assert.ok(extensions.every(ext=>['KHR_draco_mesh_compression','EXT_texture_webp','KHR_texture_transform'].includes(ext)),
+      'Unexpected extension needs new loader support: '+spec.filename+' -> '+extensions.join(','));
     assert.ok(!extensions.includes('EXT_meshopt_compression'),'meshopt requires separate decoder: '+spec.filename);
     assert.ok(!extensions.includes('KHR_texture_basisu'),'KTX2 requires separate transcoder: '+spec.filename);
   }
@@ -56,6 +57,9 @@ test('the existing VR office keeps locomotion unchanged and loads local GLBs',()
   const html=readFileSync(new URL('../simulation.html',import.meta.url),'utf8');
   assert.ok(src.includes('loadOfficeFurniture(THREE,scene'));
   assert.ok(src.includes('fallback[id].forEach'));
+  const loaderSrc=readFileSync(new URL('../assets/js/office-furniture.mjs',import.meta.url),'utf8');
+  assert.ok(loaderSrc.includes('DRACOLoader.js?external=three'));
+  assert.ok(loaderSrc.includes("setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/libs/draco/gltf/')"));
   assert.ok(src.includes('readSticks(session'));
   assert.ok(src.includes('snapAroundHead(turn.angle'));
   assert.ok(html.includes('type="importmap"'));
