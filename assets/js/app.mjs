@@ -29,7 +29,7 @@ if(page==='simulation'){
 document.querySelector('#reset').addEventListener('click',()=>{current=startSession();render()});
 document.querySelector('#next').addEventListener('click',render);render();
 document.querySelector('#view-switch').addEventListener('click',async e=>{const b=e.currentTarget;b.disabled=true;b.textContent='Chargement…';try{const {mountRoom}=await import('./room.mjs');await mountRoom(document.querySelector('#stage'));b.remove();if(!document.querySelector('#stage-status').textContent.includes('GLB')) document.querySelector('#stage-status').textContent='3D active';}catch(err){console.warn(err);b.disabled=false;b.textContent='Réessayer la 3D';document.querySelector('#stage-status').textContent='3D indisponible';document.querySelector('#stage-hint').textContent='Le scénario textuel reste entièrement disponible.';}});
-if(new URLSearchParams(window.location.search).get('office')==='glb'){
+if(['glb','v14'].includes(new URLSearchParams(window.location.search).get('office'))){
   // Optional direct entrance from DACI V13. Failure retains the guided textual exercise.
   document.querySelector('#view-switch')?.click();
 }
