@@ -87,3 +87,22 @@ test('V13 cockpit has VR scenario navigation and readable excerpt, with 2D quick
   assert.match(js, /FERMER LE DOCUMENT/);
   assert.match(html, /href="#scenario"/);
 });
+
+
+test('desktop walkthrough is independently accessible without immersive WebXR', () => {
+  const js = read('../experiences/daci-v13/v13-app.js');
+  const html = read('../experiences/daci-v13/index.html');
+  const css = read('../experiences/daci-v13/v13.css');
+  assert.match(html, /id="desktop-tour"/);
+  assert.match(html, /Entrer en VR \(casque\)/);
+  assert.match(js, /function desktopCamera\(/);
+  assert.match(js, /function desktopPick\(/);
+  assert.match(js, /function updateDesktop\(/);
+  assert.match(js, /activateHit\(desktopPick\(e.clientX,e.clientY\)\)/);
+  assert.match(js, /desktopKeys\.add\(e.code\)/);
+  assert.match(js, /'ArrowUp'/);
+  assert.match(js, /app\.canvas\.focus/);
+  assert.match(js, /'immersive-vr'/);
+  assert.match(js, /desktop\.disabled=!app\.gl\|\|app\.glError/);
+  assert.match(css, /#stage:fullscreen/);
+});
