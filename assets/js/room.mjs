@@ -3,12 +3,19 @@
  */
 import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotion.mjs';
 import { loadOfficeFurniture } from './office-furniture.mjs';
+import {createPremiumOffice} from './premium-office-v14.mjs';
+import {createMetricsSampler,createMetricsDisplay} from './metrics-v14.mjs';
 
 let initialized = false;
 export async function mountRoom(stage) {
   if (initialized) return;
   const THREE = await import('https://esm.sh/three@0.169.0');
+  const params=new URLSearchParams(window.location.search);
+  const premium=params.get('office')==='v14';
+  const diagnostics=premium&&params.get('metrics')==='1';
+  const perf=diagnostics?createMetricsSampler():null;
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'low-power' });
+  if(premium){renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;}
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
   renderer.setSize(stage.clientWidth, stage.clientHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -63,11 +70,17 @@ export async function mountRoom(stage) {
     scene.add(mesh);
     return mesh;
   }
-  cube(11, .2, 13, 0, -.12, -1, mat.floor);
-  cube(11, 5.6, .16, 0, 2.8, -7.6, mat.wall);
-  cube(.15, 5.6, 13, -5.5, 2.8, -1, mat.wall);
-  cube(.15, 5.6, 13, 5.5, 2.8, -1, mat.wall);
-  cube(11, .15, 13, 0, 5.6, -1, mat.wall);
+  if(premium){
+    // Design prototype: same Quest player rig, locomotion, GLBs and S02 state.
+    createPremiumOffice(THREE,scene);
+  }else{
+    cube(11, .2, 13, 0, -.12, -1, mat.floor);
+    cube(11, 5.6, .16, 0, 2.8, -7.6, mat.wall);
+    cube(.15, 5.6, 13, -5.5, 2.8, -1, mat.wall);
+    cube(.15, 5.6, 13, 5.5, 2.8, -1, mat.wall);
+    cube(11, .15, 13, 0, 5.6, -1, mat.wall);
+  }
+  const metricPanel=perf?createMetricsDisplay(THREE,scene,perf):null;
   const fallback={desk:[],manager:[],visitor:[]};
   fallback.desk.push(cube(3.7, .15, 1.7, 0, 1.03, -2.35, mat.wood));
   for (const x of [-1.5, 1.5]) for (const z of [-2.95, -1.75]) {
@@ -88,8 +101,9 @@ export async function mountRoom(stage) {
   const furnitureStatus=document.querySelector('#stage-status');
   void loadOfficeFurniture(THREE,scene,{onItem(id,ready){
     if(ready){fallback[id].forEach(m=>{m.visible=false;});furnitureLoaded.add(id);}
+    perf?.markAsset(id,ready);
     if(furnitureStatus){
-      furnitureStatus.textContent='Bureau 3D · mobilier GLB '+furnitureLoaded.size+'/3'+
+      furnitureStatus.textContent=(premium?'V14 • ':'Bureau 3D · ')+'mobilier GLB '+furnitureLoaded.size+'/3'+
         (ready?'':' · repli actif');
     }
   }}).catch(error=>console.warn('[RH-XR] Furniture loader unavailable; placeholders retained',error));
@@ -98,14 +112,37 @@ export async function mountRoom(stage) {
   sphere(.28, 0, 1.83, -4.5, mat.skin);
   cylinder(.09, .09, .55, -.35, 1.3, -4.5, mat.skin);
   cylinder(.09, .09, .55, .35, 1.3, -4.5, mat.skin);
-  for (const x of [-4, 4]) {
-    cylinder(.35, .30, .45, x, .24, -6, mat.wood);
-    cylinder(.06, .07, .9, x, .9, -6, mat.plant);
-    sphere(.5, x, 1.5, -6, mat.plant);
+  if(!premium){
+    for (const x of [-4, 4]) {
+      cylinder(.35, .30, .45, x, .24, -6, mat.wood);
+      cylinder(.06, .07, .9, x, .9, -6, mat.plant);
+      sphere(.5, x, 1.5, -6, mat.plant);
+    }
+    cube(2.3, 1.4, .06, -2.5, 3, -7.48, mat.metal);
+    cube(1.8, 1.1, .08, 2.6, 3, -7.48, mat.wood);
   }
-  cube(2.3, 1.4, .06, -2.5, 3, -7.48, mat.metal);
-  cube(1.8, 1.1, .08, 2.6, 3, -7.48, mat.wood);
 
+  const debugInfo=diagnostics?document.createElement('div'):null;
+  let lastDebugTextAt=-Infinity;
+  if(debugInfo){
+    debugInfo.id='rhxr-v14-metrics';
+    debugInfo.setAttribute('role','status');
+    debugInfo.style.cssText='position:absolute;left:12px;bottom:60px;max-width:85%;padding:9px;border-radius:8px;background:#102d38ef;color:#e7f8f7;font-size:12px;font-weight:600;z-index:5';
+    debugInfo.textContent='V14 · mesure des intervalles de frames (pas GPU)';
+    stage.appendChild(debugInfo);
+    const exportButton=document.createElement('button');
+    exportButton.textContent='Exporter diagnostic local';
+    exportButton.type='button';
+    exportButton.style.cssText='position:absolute;top:100px;left:12px;z-index:6;background:#e6eadf;color:#183945;border-radius:8px;border:1px solid #bccdd0;padding:8px';
+    exportButton.addEventListener('click',()=>{
+      const report={schema:'rhxr-v14-local-frame-diagnostics-v1',note:'Frame callback intervals are NOT GPU/CPU measurements',...perf.snapshot()};
+      const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});
+      const href=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=href;a.download='rhxr-v14-quest-diagnostic.json';a.click();
+      setTimeout(()=>URL.revokeObjectURL(href),1000);
+    });
+    stage.appendChild(exportButton);
+  }
   const keys = new Set();
   const allowed = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD']);
   const down = e => {
@@ -139,7 +176,7 @@ export async function mountRoom(stage) {
     playerRig.updateMatrixWorld(true);
   }
 
-  renderer.setAnimationLoop(() => {
+  renderer.setAnimationLoop((time) => {
     const dt = Math.min(clock.getDelta(), 0.05);
     if (renderer.xr.isPresenting) {
       const session = renderer.xr.getSession();
@@ -175,6 +212,17 @@ export async function mountRoom(stage) {
       playerRig.position.z = clamp(playerRig.position.z + move.z, -6.7, 5.1);
     }
     renderer.render(scene, camera);
+    if(perf){
+      perf.tick(time,renderer.info.render,renderer.info.memory,renderer.xr.isPresenting?'xr':'desktop');
+      metricPanel?.update(time);
+      // This reports animation callback pacing, not measured GPU time.
+      const info=perf.snapshot();
+      if(debugInfo&&time-lastDebugTextAt>=1000){
+        lastDebugTextAt=time;
+        debugInfo.textContent='V14 '+info.mode+' · '+(info.fpsEstimate??'…')+
+          ' FPS estimées · '+(info.drawCalls??'…')+' draw calls · '+(info.triangles??'…')+' triangles';
+      }
+    }
   });
 
   const controls = document.createElement('div');
@@ -204,7 +252,8 @@ export async function mountRoom(stage) {
   const avatar = stage.querySelector('.avatar');
   if (avatar) avatar.classList.add('hidden');
 
-  document.querySelector('#stage-hint').textContent =
+  document.querySelector('#stage-hint').textContent =premium?
+    'V14 prototype : bureau architectural · W/A/S/D en 3D · Quest : stick gauche + rotation 45° · ?metrics=1 pour le diagnostic':
     '3D : flèches/WASD · Quest : stick gauche = avancer, stick droit = tourner par 45°';
   if (navigator.xr?.isSessionSupported) {
     try {
