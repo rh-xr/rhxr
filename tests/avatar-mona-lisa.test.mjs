@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ARMCHAIR_AVATAR_PLACEMENT,AVATAR_SOURCE,fitAvatarToArmchair,loadArmchairAvatar} from '../assets/js/office-avatar-v14-1.mjs';
+import {avatarYawDegrees,turnAvatarHalfCircle} from '../assets/js/avatar-turn-v14-1.mjs';
 
 const sourceCommit='8587c40216a1bcbc881445b9123fe0168058f6ab';
 test('Mona Lisa avatar is original pinned glTF 2 GLB and inspect its structure',()=>{
@@ -74,4 +75,33 @@ test('failed Mona Lisa GLB load keeps geometric actor available',async()=>{
   assert.ok(room.includes('basicAvatar.forEach(mesh=>{mesh.visible=false;})'));
   assert.ok(room.includes("params.get('avatarYaw')==='0'?0:ARMCHAIR_AVATAR_PLACEMENT.yawRadians"),
     'The 0° orientation should remain available as an explicit comparison only');
+});
+
+
+test('actual avatar pivot is turned by 180° without changing its scale or position',()=>{
+  const a={rotation:{y:Math.PI},scale:{x:.68,y:.68,z:.68},position:{x:0,y:0,z:-4.45},
+    worldUpdates:0,updateMatrixWorld(force){if(force)this.worldUpdates++;}};
+  assert.equal(avatarYawDegrees(a),180);
+  const next=turnAvatarHalfCircle(a);
+  assert.equal(next,0);
+  assert.equal(a.rotation.y,0);
+  assert.equal(a.scale.x,.68);
+  assert.equal(a.position.z,-4.45);
+  assert.equal(turnAvatarHalfCircle(a),180);
+  assert.equal(a.rotation.y,Math.PI);
+  assert.equal(a.worldUpdates,2);
+});
+
+test('V14.1 explicitly bypasses old Quest cache and provides a VR + desktop yaw control',()=>{
+  const room=readFileSync(new URL('../assets/js/room.mjs',import.meta.url),'utf8');
+  const html=readFileSync(new URL('../experiences/rhxr-v14-1/index.html',import.meta.url),'utf8');
+  const control=readFileSync(new URL('../assets/js/avatar-turn-v14-1.mjs',import.meta.url),'utf8');
+  assert.ok(room.includes("office-avatar-v14-1.mjs?v=20261023-quest-facing"));
+  assert.ok(html.includes("room.mjs?v=20261023-quest-facing-1"));
+  assert.ok(html.includes('id="avatar-turn"'));
+  assert.ok(room.includes("avatarTurn.onclick=()=>controls.turn()"));
+  assert.ok(control.includes("controller.addEventListener('select',listener)"));
+  assert.ok(control.includes("raycaster.intersectObject(plaque,false)"));
+  assert.ok(control.includes('turnAvatarHalfCircle(avatar)'));
+  assert.ok(control.includes('avatarYawDegrees(avatar)'));
 });
