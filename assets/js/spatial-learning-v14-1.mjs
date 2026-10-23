@@ -77,14 +77,14 @@ export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer}
       add('return',1.00,-1.11,1.56,.44,'← RETOUR','Revenir au dialogue','document');
     }else{
       const headline=s.ending?'PARCOURS TERMINÉ':s.actor+' · '+s.phase;
-      const lead=s.ending?'Vous pouvez recommencer ou ouvrir un autre parcours.':s.dialogue;
+      const lead=s.ending?s.objective:s.pending?(s.feedback+' '+s.note):s.dialogue;
       add('story',-1.00,.30,1.96,1.29,headline,lead);
       if(s.ending){
-        add('end',1.07,.43,1.99,.65,'BILAN',s.steps+' décisions terminées');
+        add('end',1.07,.43,1.99,.65,'BILAN',s.steps+' décisions · '+s.completed+' référence(s) DACI');
         add('restart',1.07,-.35,1.99,.61,'RECOMMENCER','Reprendre le parcours','restart');
       }else if(s.pending){
         add('reaction',1.07,.40,1.99,.73,'CONSÉQUENCE · '+s.quality,
-          s.reaction||s.feedback);
+          s.reaction||'Observez l’effet de ce choix sur la situation.');
         add('next',1.06,-.27,1.99,.43,'CONTINUER →','Passer à la suite','next');
         if(s.citation)add('document-open',1.06,-.79,1.99,.40,'OUVRIR LE DACI','Voir l’extrait et la source','document');
       }else{
