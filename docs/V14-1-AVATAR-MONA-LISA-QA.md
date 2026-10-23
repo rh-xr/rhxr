@@ -17,9 +17,9 @@ Le fauteuil du responsable RH est `amrchair.glb`, centré à `x=0, z=-4.45`.
 
 Le modèle Mona Lisa :
 - est placé au même centre horizontal `[0, -4.45]` ;
-- est réduit uniformément, sans déformation, dans une enveloppe maximale **0,91 × 1,33 × 0,92 m** ;
+- est réduit uniformément, sans déformation, dans une enveloppe maximale **1,001 × 1,463 × 1,012 m** (soit +10 % par dimension, sans déformation) ;
 - a sa base apparente alignée à la hauteur `y=0.51 m` (hauteur de coussin estimée, à confirmer sur Quest) ;
-- possède une orientation nominale de **0°**, modifiable temporairement à 180° pour le contrôle visuel via `?avatarYaw=180`.
+- possède une orientation nominale de **180°**, modifiable temporairement à 0° pour comparer via `?avatarYaw=0`.
 
 **Important :** l'ajustement de la base du GLB sur l'assise n'est pas une opération d'animation ni de rigging. Le modèle peut représenter une personne dont les jambes, le siège intégré ou les vêtements ne correspondent pas exactement au fauteuil fourni. Seul un véritable modèle adapté à la pose assise ou un rigging correctif peut garantir l'absence d'interpénétrations.
 
@@ -36,7 +36,7 @@ Cette modification est limitée à `/experiences/rhxr-v14-1/index.html` et au pa
 1. Ouvrir `/experiences/rhxr-v14-1/index.html` dans le navigateur du Quest et entrer en VR.
 2. Attendre l'état « Avatar Mona Lisa GLB ... chargé » dans le guide. Le personnage géométrique ne doit plus apparaître.
 3. Approcher le fauteuil du responsable et vérifier que Mona Lisa semble bien assise, non flottante, que le dossier et les vêtements ne se traversent pas visiblement et que le personnage est tourné vers le visiteur.
-4. Si l'avatar semble à l'envers, tester le lien `/experiences/rhxr-v14-1/index.html?avatarYaw=180` ; comparer 0°/180°. Ne changer le défaut qu'après vérification visuelle.
+4. Vérifier l'orientation **180° par défaut** sur `/experiences/rhxr-v14-1/index.html` ; pour comparer l'ancienne position, ouvrir `/experiences/rhxr-v14-1/index.html?avatarYaw=0`. Le réglage `?avatarYaw=180` reste équivalent à la valeur par défaut.
 5. Contrôler la fluidité et la tenue des matériaux à proximité de l'avatar, avant/après VR.
 6. Simuler la défaillance réseau/Draco et confirmer le repli vers le mannequin géométrique.
 7. Vérifier également une mission DACI et une consultation de référence pour garantir l'absence de régression.
