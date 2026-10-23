@@ -5,7 +5,8 @@ import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotio
 import { loadOfficeFurniture } from './office-furniture.mjs';
 import {createPremiumOffice} from './premium-office-v14.mjs';
 import {upgradeOfficeFinish} from './premium-finish-v14-1.mjs';
-import {loadArmchairAvatar,ARMCHAIR_AVATAR_PLACEMENT} from './office-avatar-v14-1.mjs';
+import {loadArmchairAvatar,ARMCHAIR_AVATAR_PLACEMENT} from './office-avatar-v14-1.mjs?v=20261023-quest-facing';
+import {createAvatarTurnControl,avatarYawDegrees} from './avatar-turn-v14-1.mjs';
 import {createMetricsSampler,createMetricsDisplay} from './metrics-v14.mjs';
 
 let initialized = false;
@@ -121,16 +122,29 @@ export async function mountRoom(stage) {
   ];
   if(advanced){
     const avatarStatus=document.querySelector('#avatar-status');
+    const avatarTurn=document.querySelector('#avatar-turn');
+    const updateAvatarStatus=(angle)=>{if(avatarStatus)avatarStatus.textContent=
+      'Mona Lisa GLB chargé · orientation effective : '+angle+'° · taille ×1,10';};
     // Defer avatar decompression until the three original pieces of furniture load.
     const avatarYaw=params.get('avatarYaw')==='0'?0:ARMCHAIR_AVATAR_PLACEMENT.yawRadians;
     void furnitureReady.then(()=>loadArmchairAvatar(THREE,scene,{
       placement:{...ARMCHAIR_AVATAR_PLACEMENT,yawRadians:avatarYaw},
-      onLoaded(){
+      onLoaded(model){
         basicAvatar.forEach(mesh=>{mesh.visible=false;});
-        if(avatarStatus)avatarStatus.textContent='Avatar Mona Lisa GLB sur le fauteuil RH · chargé · orientation '+(avatarYaw===Math.PI?'180° (défaut)':'0° (comparaison)')+' · taille +10 %';
+        model.updateMatrixWorld(true);
+        const controls=createAvatarTurnControl(THREE,{scene,renderer,playerRig},model,{
+          onRotate:updateAvatarStatus
+        });
+        updateAvatarStatus(avatarYawDegrees(model));
+        if(avatarTurn){
+          avatarTurn.disabled=false;
+          avatarTurn.onclick=()=>controls.turn();
+          avatarTurn.textContent='↻ Tourner Mona Lisa de 180°';
+        }
       },
       onFailed(){
         if(avatarStatus)avatarStatus.textContent='Avatar indisponible · personnage simplifié conservé';
+        if(avatarTurn)avatarTurn.disabled=true;
       }
     })).catch(error=>{
       console.warn('[RH-XR V14.1] Avatar initialization',error);
