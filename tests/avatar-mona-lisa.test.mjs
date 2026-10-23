@@ -28,6 +28,11 @@ test('avatar retained at exact original Git blob and seated-height envelope is r
   assert.equal(AVATAR_SOURCE.commit,sourceCommit);
   assert.equal(AVATAR_SOURCE.bytes,3020580);
   assert.deepEqual(ARMCHAIR_AVATAR_PLACEMENT.position,[0,0,-4.45]);
+  assert.equal(ARMCHAIR_AVATAR_PLACEMENT.yawRadians,Math.PI,'Default avatar must face opposite direction');
+  assert.deepEqual(ARMCHAIR_AVATAR_PLACEMENT.maxEnvelope,[1.001,1.463,1.012]);
+  for(const [updated,previous] of [[1.001,.91],[1.463,1.33],[1.012,.92]]){
+    assert.ok(Math.abs(updated/previous-1.1)<1e-12,'Envelope grows exactly 10% per axis');
+  }
   assert.ok(ARMCHAIR_AVATAR_PLACEMENT.seatHeight>=.42&&ARMCHAIR_AVATAR_PLACEMENT.seatHeight<=.7);
   assert.ok(ARMCHAIR_AVATAR_PLACEMENT.maxEnvelope.every(v=>v>0&&v<1.6));
 });
@@ -50,6 +55,10 @@ test('avatar fitted proportionately and aligned with existing manager armchair c
   assert.equal(result.name,'rhxr-mona-lisa-armchair-avatar');
   assert.equal(result.children[0],model);
   assert.deepEqual(result.position.xyz,[0,0,-4.45]);
+  assert.equal(result.rotation.y,Math.PI);
+  const baselineScale=Math.min(.91/(.693429+.695758),1.33/(.948494+.950264),.92/(.574576+.578279));
+  assert.ok(Math.abs(model.scale.current-baselineScale*1.1)<1e-10,
+    'Actual uniform model scale should increase by 10%');
   assert.ok(Math.abs(model.position.y-.950264*model.scale.current-ARMCHAIR_AVATAR_PLACEMENT.seatHeight)<.001);
   assert.ok(model.scale.current>.5&&model.scale.current<.8);
 });
@@ -63,4 +72,6 @@ test('failed Mona Lisa GLB load keeps geometric actor available',async()=>{
   assert.ok(room.includes('if(advanced){'));
   assert.ok(room.includes('void furnitureReady.then(()=>loadArmchairAvatar'));
   assert.ok(room.includes('basicAvatar.forEach(mesh=>{mesh.visible=false;})'));
+  assert.ok(room.includes("params.get('avatarYaw')==='0'?0:ARMCHAIR_AVATAR_PLACEMENT.yawRadians"),
+    'The 0° orientation should remain available as an explicit comparison only');
 });
