@@ -37,8 +37,8 @@ export async function mountRoom(stage) {
   playerRig.add(camera);
   scene.add(playerRig);
 
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x758fa1, 2.4));
-  const light = new THREE.DirectionalLight(0xfff6eb, 2.6);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x758fa1, premium?1.4:2.4));
+  const light = new THREE.DirectionalLight(0xfff6eb, premium?1.75:2.6);
   light.position.set(-3, 5, 4);
   scene.add(light);
   const material = color => new THREE.MeshStandardMaterial({ color, roughness: 0.75 });
