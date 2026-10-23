@@ -12,7 +12,8 @@ export async function mountRoom(stage) {
   if (initialized) return;
   const THREE = await import('https://esm.sh/three@0.169.0');
   const params=new URLSearchParams(window.location.search);
-  const premium=['v14','v14-1'].includes(params.get('office'))||window.location.pathname.includes('/rhxr-v14-1/');
+  const advanced=window.location.pathname.includes('/rhxr-v14-1/')||params.get('office')==='v14-1';
+  const premium=advanced||params.get('office')==='v14';
   const diagnostics=premium&&params.get('metrics')==='1';
   const perf=diagnostics?createMetricsSampler():null;
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'low-power' });
