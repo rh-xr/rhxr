@@ -64,3 +64,13 @@ test('standalone site and portal expose the V13 entry', () => {
   assert.ok(html.includes('Entrer en VR'));
   assert.ok(portal.includes('experiences/daci-v13/index.html'));
 });
+
+
+test('WebGL failure is non-blocking and never exposes an unusable VR button', () => {
+  const js = read('../experiences/daci-v13/v13-app.js');
+  const html = read('../experiences/daci-v13/index.html');
+  assert.match(js, /if\(!app\.gl\|\|app\.glError\)\{b\.disabled=true;/);
+  assert.match(js, /catch\(err\)\{app\.glError=true;app\.gl=null;/);
+  assert.match(js, /Contexte WebGL perdu · parcours textuel actif/);
+  assert.match(html, /href="\.\.\/\.\.\/index\.html"/);
+});
