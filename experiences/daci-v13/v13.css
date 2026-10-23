@@ -2,3 +2,14 @@
 .portal-back{display:inline-block;margin-top:13px;color:#c8f6ef;text-decoration:underline;text-underline-offset:3px;font-size:13px;font-weight:700}.portal-back:hover{color:#fff}.portal-back:focus-visible{outline:3px solid #ffca60;outline-offset:4px}
 
 .quick-nav{max-width:1600px;margin:10px auto -8px;padding:0 24px;font-size:13px}.quick-nav a{color:#096a7f;font-weight:750;text-underline-offset:3px}.quick-nav a:focus-visible{outline:3px solid #edb74b;outline-offset:3px}@media(min-width:1051px){.quick-nav{display:none}}
+
+/* V13 desktop 3D navigation and intentional WebXR progressive enhancement */
+.desktop-explanation{max-width:1550px;margin:12px auto 0;padding:11px 24px;color:#244a55;font-size:13px;line-height:1.5}
+.scene-buttons{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+#desktop-tour{padding:12px 14px;border-radius:9px;border:1px solid #e7c46b;background:#ffe9b2;color:#4e3911;font-weight:750;font-size:13px}
+#desktop-tour:disabled{opacity:.55;cursor:not-allowed}
+#stage:fullscreen{width:100vw;height:100vh;min-height:100vh;border-radius:0;background:#e7f1f4}
+#stage:fullscreen #canvas{width:100%;height:100%}
+#canvas:focus-visible{outline:3px solid #edb74b;outline-offset:-3px}
+#vr[disabled]{background:#657a83;color:#f3f7f9}
+@media(max-width:720px){.stage-tools{flex-wrap:wrap;gap:7px}.stage-tools span{max-width:none;flex:1 1 100%}.scene-buttons{width:100%;justify-content:stretch}.scene-buttons button{flex:1 1 auto;padding:9px 10px;font-size:11px}.desktop-explanation{padding:9px 16px}}
