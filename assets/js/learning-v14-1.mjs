@@ -1,0 +1,66 @@
+/** V14.1 — renderer-independent pedagogical state machine.
+ * Fictional DACI bundle is the authoritative source. S02 is preserved without invented citations.
+ */
+import {scenario as s02} from './scenario.mjs';
+
+export const MISSIONS=Object.freeze([
+  {id:'onboarding',label:'01  Accueil de Salma',topic:'Intégration'},
+  {id:'entretien',label:'02  Entretien avec Alex',topic:'Entretien'},
+  {id:'conflit',label:'03  Médiation Amina/Youssef',topic:'Conflit'},
+  {id:'s02',label:'04  Désaccord professionnel',topic:'S02'}
+]);
+const clean=t=>typeof t==='string'?t:'';
+export function createLearningSession(bundle){
+  if(bundle?.version!=='V13'||bundle.fictional_only!==true||!Array.isArray(bundle.stories)||!bundle.answers)
+    throw Error('Corpus fictif DACI V13 manquant ou invalide');
+  const bySlug=new Map(bundle.stories.map(s=>[s.slug,s]));
+  for(const m of MISSIONS.filter(m=>m.id!=='s02'))if(!bySlug.has(m.id))throw Error('Mission absente : '+m.id);
+  let mission='onboarding',nodeId=bySlug.get(mission).start,step=0,pending=null,showDoc=false,history=[];
+  function currentNode(){
+    return mission==='s02'?s02.exchanges[step]||null:bySlug.get(mission).nodes.find(n=>n.id===nodeId)||null;
+  }
+  const setMission=id=>{
+    if(!MISSIONS.some(m=>m.id===id))throw Error('Mission inconnue : '+id);
+    mission=id;nodeId=mission==='s02'?s02.exchanges[0].id:bySlug.get(mission).start;
+    step=0;pending=null;showDoc=false;history=[];
+    return view();
+  };
+  function choose(id){
+    if(pending||!currentNode())return false;
+    const n=currentNode(),choice=(n.choices||[]).find(c=>c.id===id);
+    if(!choice)return false;
+    if(mission==='s02'){
+      pending={id,response:{next_node_id:choice.next,quality:choice.points===2?'bonne pratique':choice.points===1?'à approfondir':'risque',
+        character_reaction:'',feedback:clean(choice.feedback),pedagogical_note:'Analyse formative fondée sur les choix de la simulation S02.',
+        source_title:'Repère pédagogique S02',citation:null,quote:null}};
+    }else{
+      const result=bundle.answers[mission+':'+n.id+':'+id];
+      if(result?.status!=='completed_step'||result.node_id!==n.id)return false;
+      pending={id,response:result};
+    }
+    showDoc=false;return true;
+  }
+  function next(){
+    if(!pending)return false;
+    history.push({mission,node_id:currentNode()?.id,choice_id:pending.id,quality:pending.response.quality});
+    if(mission==='s02')step++;else nodeId=pending.response.next_node_id;
+    pending=null;showDoc=false;return true;
+  }
+  function toggleDocument(){if(!pending||mission==='s02')return false;showDoc=!showDoc;return showDoc;}
+  function view(){
+    const spec=MISSIONS.find(m=>m.id===mission),n=currentNode(),ending=mission==='s02'?step>=s02.exchanges.length:!n||n.kind==='ending';
+    const r=pending?.response||null;
+    const citations=history.filter(h=>h.quality).length;
+    return {
+      mission,title:spec.label,topic:spec.topic,phase:clean(n?.phase),actor:clean(n?.actor)||(mission==='s02'?'Collaborateur':'Formateur'),
+      dialogue:mission==='s02'?clean(n?.avatar):clean(n?.dialogue),
+      question:mission==='s02'?'Quelle réponse choisissez-vous ?':clean(n?.question),
+      choices:pending||ending?[]:(n?.choices||[]).map((c,i)=>({id:c.id,label:clean(c.label||c.text),key:String.fromCharCode(65+i)})),
+      pending:!!pending,ending,showDoc,steps:history.length,quality:r?.quality||'',
+      reaction:clean(r?.character_reaction),feedback:clean(r?.feedback),note:clean(r?.pedagogical_note),
+      citation:clean(r?.citation),sourceTitle:clean(r?.source_title),quote:clean(r?.quote),
+      completed:citations,history:history.map(h=>({...h}))
+    };
+  }
+  return {view,setMission,choose,next,toggleDocument,reset:()=>setMission(mission),missions:MISSIONS};
+}
