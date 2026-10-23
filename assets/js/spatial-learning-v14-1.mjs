@@ -106,6 +106,7 @@ export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer}
     else if(id==='restart')session.reset();
     else if(id==='collapse')collapsed=true;
     else if(id==='restore')collapsed=false;
+    else if(id==='toggle')collapsed=!collapsed;
     else return false;
     display();return true;
   }
@@ -123,7 +124,7 @@ export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer}
     return ray.intersectObjects(clickable,false)[0]?.object||null;
   }
   function update(){
-    if(disposed||!renderer.xr.isPresenting){updateHighlight(null);return;}
+    if(disposed||!renderer.xr.isPresenting){updateHighlight(null);rays.forEach(line=>line.visible=false);return;}
     let target=null;
     for(const control of controllers){const obj=pickFromController(control);if(obj&&!target)target=obj;}
     updateHighlight(target);
