@@ -74,3 +74,16 @@ test('WebGL failure is non-blocking and never exposes an unusable VR button', ()
   assert.match(js, /Contexte WebGL perdu · parcours textuel actif/);
   assert.match(html, /href="\.\.\/\.\.\/index\.html"/);
 });
+
+
+test('V13 cockpit has VR scenario navigation and readable excerpt, with 2D quick access', () => {
+  const js = read('../experiences/daci-v13/v13-app.js');
+  const html = read('../experiences/daci-v13/index.html');
+  assert.match(js, /function switchStory\(direction\)/);
+  assert.match(js, /panel\('story-prev'/);
+  assert.match(js, /panel\('story-next'/);
+  assert.match(js, /pointed\?'#edb74b'/);
+  assert.match(js, /r\?\.quote/);
+  assert.match(js, /FERMER LE DOCUMENT/);
+  assert.match(html, /href="#scenario"/);
+});
