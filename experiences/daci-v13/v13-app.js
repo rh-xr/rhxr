@@ -6,7 +6,7 @@
   const app={bundle:null, story:null, current:null, pending:null, trace:[],sourceOpen:false, xrAnchors:[],
     session:null,baseSpace:null,refSpace:null,gl:null,canvas:null,program:null,mesh:{},panels:[],targets:[],
     hovered:new Map(),yaw:0,desktopYaw:0,desktopPitch:0,rig:{x:0,z:0},snapReady:true,lastTime:null,vrSupported:false,
-    camDrag:false,clientX:0,clientY:0,glError:false};
+    camDrag:false,clientX:0,clientY:0,glError:false,desktopPos:{x:0,z:1.55},desktopKeys:new Set(),dragStart:null,lastDesktopTime:null};
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const safeString=(s)=>typeof s==='string'?s:'';
   const sourceText=(s,max=190)=>{const t=safeString(s);return t.length>max?t.slice(0,max-1)+'…':t;};
@@ -96,11 +96,35 @@
       projection:gl.getUniformLocation(p,'uProjection'),view:gl.getUniformLocation(p,'uView'),model:gl.getUniformLocation(p,'uModel'),
       color:gl.getUniformLocation(p,'uColor'),useTex:gl.getUniformLocation(p,'uUseTexture'),tex:gl.getUniformLocation(p,'uTexture')};
     geometry();gl.enable(gl.DEPTH_TEST);gl.clearColor(.69,.84,.88,1);
-    canvas.addEventListener('pointerdown',e=>{if(app.session)return;app.camDrag=true;app.clientX=e.clientX;app.clientY=e.clientY;canvas.setPointerCapture(e.pointerId);});
-    canvas.addEventListener('pointerup',()=>app.camDrag=false);
+    canvas.tabIndex=0;
+    canvas.addEventListener('pointerdown',e=>{if(app.session)return;app.camDrag=true;app.clientX=e.clientX;app.clientY=e.clientY;
+      app.dragStart={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});
+    canvas.addEventListener('pointerup',e=>{
+      if(!app.session&&app.dragStart&&Math.hypot(e.clientX-app.dragStart.x,e.clientY-app.dragStart.y)<9){
+        activateHit(desktopPick(e.clientX,e.clientY));
+      }
+      app.dragStart=null;app.camDrag=false;
+    });
+    canvas.addEventListener('pointercancel',()=>{app.camDrag=false;app.dragStart=null;});
+    canvas.addEventListener('pointermove',e=>{
+      if(!app.session&&!app.camDrag){
+        const hit=desktopPick(e.clientX,e.clientY);app.hovered.set('desktop',hit);
+        canvas.style.cursor=hit?'pointer':'grab';
+      }
+    });
+    canvas.addEventListener('pointerleave',()=>app.hovered.delete('desktop'));
+    document.addEventListener('keydown',e=>{
+      if(app.session||!app.gl)return;
+      if(['INPUT','SELECT','TEXTAREA','BUTTON'].includes(document.activeElement?.tagName||''))return;
+      const supported=['KeyW','KeyA','KeyS','KeyD','KeyQ','KeyE','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Enter'];
+      if(supported.includes(e.code)){e.preventDefault();app.desktopKeys.add(e.code);}
+      if(e.code==='Enter'&&!e.repeat)activateHit(desktopPickCenter());
+    });
+    document.addEventListener('keyup',e=>app.desktopKeys.delete(e.code));
+    window.addEventListener('blur',()=>app.desktopKeys.clear());
     canvas.addEventListener('pointermove',e=>{if(!app.camDrag||app.session)return;
-      app.desktopYaw=clamp(app.desktopYaw+(e.clientX-app.clientX)*.006,-.7,.7);
-      app.desktopPitch=clamp(app.desktopPitch+(e.clientY-app.clientY)*.003,-.25,.32);app.clientX=e.clientX;app.clientY=e.clientY;});
+      app.desktopYaw+=(e.clientX-app.clientX)*.004;
+      app.desktopPitch=clamp(app.desktopPitch-(e.clientY-app.clientY)*.003,-1.22,1.22);app.clientX=e.clientX;app.clientY=e.clientY;});
     canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();app.glError=true;$('fallback').hidden=false;$('vr').disabled=true;setStatus('Contexte WebGL perdu · parcours textuel actif.');});
     return true;}
   function wrap(ctx,str,width,maxLines=5){const words=safeString(str).split(/\s+/);const lines=[];let line='';
@@ -181,14 +205,42 @@
       }
       draw('quad',model(p.x,p.y,p.z,p.w,p.h,1),[1,1,1,1],p.tex);}
   }
-  function frameDesktop(){if(!app.session&&!app.glError&&app.gl){const canvas=app.canvas,gl=app.gl;
+  function desktopCamera(){
+    const eye=[app.desktopPos.x,1.65,app.desktopPos.z],yaw=app.desktopYaw,pitch=app.desktopPitch;
+    const forward=[Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),-Math.cos(yaw)*Math.cos(pitch)];
+    return {eye,forward,right:[Math.cos(yaw),0,Math.sin(yaw)],
+      up:[-Math.sin(yaw)*Math.sin(pitch),Math.cos(pitch),Math.cos(yaw)*Math.sin(pitch)]};
+  }
+  function desktopPick(clientX,clientY){
+    if(!app.gl||app.session)return null;
+    const rect=app.canvas.getBoundingClientRect(),cam=desktopCamera();
+    if(!rect.width||!rect.height)return null;
+    const nx=2*(clientX-rect.left)/rect.width-1,ny=1-2*(clientY-rect.top)/rect.height;
+    const t=Math.tan(65*Math.PI/360),a=rect.width/rect.height;
+    return pointerHit(cam.eye,norm(cam.forward.map((v,i)=>v+cam.right[i]*nx*t*a+cam.up[i]*ny*t)));
+  }
+  function desktopPickCenter(){const r=app.canvas.getBoundingClientRect();return desktopPick(r.left+r.width/2,r.top+r.height/2);}
+  function updateDesktop(dt){
+    const k=app.desktopKeys;
+    const f=Number(k.has('KeyW')||k.has('ArrowUp'))-Number(k.has('KeyS')||k.has('ArrowDown'));
+    const strafe=Number(k.has('KeyD'))-Number(k.has('KeyA'));
+    const turn=Number(k.has('KeyE')||k.has('ArrowRight'))-Number(k.has('KeyQ')||k.has('ArrowLeft'));
+    app.desktopYaw+=turn*dt*1.4;
+    const length=Math.hypot(f,strafe)||1,speed=2.0*dt,yaw=app.desktopYaw;
+    app.desktopPos.x=clamp(app.desktopPos.x+speed*(Math.sin(yaw)*f+Math.cos(yaw)*strafe)/length,-4.4,4.4);
+    app.desktopPos.z=clamp(app.desktopPos.z+speed*(-Math.cos(yaw)*f+Math.sin(yaw)*strafe)/length,-7.8,2.75);
+  }
+  function frameDesktop(t){
+    const dt=app.lastDesktopTime===null?0:Math.min((t-app.lastDesktopTime)/1000,.05);app.lastDesktopTime=t;
+    if(!app.session&&!app.glError&&app.gl){const canvas=app.canvas,gl=app.gl;updateDesktop(dt);
       const ratio=clamp(window.devicePixelRatio||1,1,2);
       const w=Math.max(2,Math.floor(canvas.clientWidth*ratio)),h=Math.max(2,Math.floor(canvas.clientHeight*ratio));
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,w,h);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-      const ey=[Math.sin(app.desktopYaw)*1.4,1.60+app.desktopPitch*2,Math.cos(app.desktopYaw)*1.3+.15];
-      renderWorld(perspective(65*Math.PI/180,w/h,.05,80),lookAt(ey,[0,1.44,-2.65]));}
-    requestAnimationFrame(frameDesktop);}
+      const camera=desktopCamera(),center=camera.eye.map((v,i)=>v+camera.forward[i]);
+      renderWorld(perspective(65*Math.PI/180,w/h,.05,80),lookAt(camera.eye,center));}
+    requestAnimationFrame(frameDesktop);
+  }
   function inputAxes(source){const a=source?.gamepad?.axes||[];return a.length>=4?[a[2]||0,a[3]||0]:[a[0]||0,a[1]||0];}
   function updateLocomotion(session,delta){let changed=false;for(const source of session.inputSources){if(!source.gamepad)continue;
       const [x,y]=inputAxes(source);
@@ -251,11 +303,23 @@
     }catch(err){if(s&&!s.ended){try{await s.end();}catch(_){}}app.session=null;setStatus('Session VR indisponible : '+err.message);}
   }
   async function initVR(){const b=$('vr');b.onclick=enterVR;
+    const desktop=$('desktop-tour');
+    desktop.onclick=async()=>{
+      if(!app.gl||app.glError){setStatus('La visite 3D nécessite WebGL. Le parcours texte reste disponible.');return;}
+      try{if(document.fullscreenElement)await document.exitFullscreen();
+        else await $('stage').requestFullscreen();
+        app.canvas.focus({preventScroll:true});
+      }catch(e){setStatus('Visite 3D disponible dans la page · plein écran refusé : '+e.message);}
+    };
+    document.addEventListener('fullscreenchange',()=>{
+      desktop.textContent=document.fullscreenElement?'Quitter le plein écran':'Visite 3D sur PC · plein écran';
+    });
+    desktop.disabled=!app.gl||app.glError;
     if(!app.gl||app.glError){b.disabled=true;setStatus('WebGL indisponible · parcours textuel actif.');return;}
-    if(!navigator.xr||!window.isSecureContext){b.disabled=true;setStatus('Aperçu 3D actif · casque : HTTPS obligatoire');return;}
+    if(!navigator.xr||!window.isSecureContext){b.disabled=true;setStatus('Visite 3D sur PC disponible · VR immersive : casque WebXR requis.');return;}
     try{app.vrSupported=await navigator.xr.isSessionSupported('immersive-vr');b.disabled=!app.vrSupported;
-      setStatus(app.vrSupported?'WebXR disponible · activer la VR':'Aperçu 3D · aucun casque VR détecté');}
-    catch(e){b.disabled=true;setStatus('WebXR non disponible : '+e.message);}
+      setStatus(app.vrSupported?'Casque WebXR détecté · entrée VR disponible':'Visite 3D sur PC disponible · aucun casque VR détecté.');}
+    catch(e){b.disabled=true;setStatus('Visite 3D sur PC disponible · VR non détectée : '+e.message);}
   }
   async function boot(){try{
       const r=await fetch('./v13-bundle.json',{cache:'no-store'});
