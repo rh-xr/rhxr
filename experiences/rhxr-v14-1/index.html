@@ -38,6 +38,7 @@ select{width:100%;border-radius:9px;padding:11px;border:1px solid #9cbdc4;backgr
 .actions button{padding:10px 14px;border:1px solid #9fc9cf;border-radius:9px;background:#e5f2f2;color:#104c58;font-weight:750}
 .actions button.main{background:#0f6c78;color:white}
 .actions button[disabled]{opacity:.5;cursor:not-allowed}
+.avatar-state{margin:9px 0 14px;padding:9px 12px;border:1px solid #d7e4db;background:#f0f7f3;border-radius:8px;color:#315e55;font-size:12px;font-weight:700}
 .objective{padding:12px 13px;background:#f0f8f7;border:1px solid #d0e2de;border-radius:8px;color:#315761;font-size:13px;line-height:1.5;margin:9px 0 13px}.debrief{background:#edf5ef;padding:12px 15px;border-radius:10px;color:#294537;font-size:13px;white-space:pre-line;line-height:1.55;margin:12px 0}
 .hint{font-size:12px;color:#53737b;line-height:1.5;border-top:1px solid #dfebec;padding-top:13px;margin-top:14px}
 .badge{display:inline-block;font-size:11px;background:#e4efec;color:#315760;padding:5px 9px;border-radius:6px;font-weight:700}
@@ -58,10 +59,11 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 <div class="stage-status" id="stage-status" role="status">Chargement de la scène…</div>
 <div class="stage-bottom"><small id="stage-hint">WASD/flèches sur PC · joysticks Quest 3S en VR.</small>
 <button type="button" id="view-switch" hidden>Activer la 3D</button></div></div>
-<div class="scene-help">Quest : <strong>gâchette = sélectionner</strong>, stick gauche = déplacement, stick droit = rotation de 45°. Les panneaux pédagogiques accompagnent vos mouvements virtuels ; utilisez « Masquer » pour libérer la vue. Sur PC : cliquez sur les panneaux 3D ou utilisez les commandes accessibles à droite.</div>
+<div class="scene-help">Quest : <strong>gâchette = sélectionner</strong>, stick gauche = déplacement, stick droit = rotation de 45°. Le personnage assis dans le fauteuil RH est désormais le modèle original Mona Lisa GLB ; sa pose 3D est statique. Les panneaux pédagogiques accompagnent vos mouvements virtuels ; utilisez « Masquer » pour libérer la vue. Sur PC : cliquez sur les panneaux 3D ou utilisez les commandes accessibles à droite.</div>
 </article>
 <article class="panel"><span class="badge">Simulations fictives · aucune décision RH individuelle</span>
 <h2>Guide pédagogique DACI</h2>
+<div id="avatar-status" class="avatar-state" role="status">Avatar Mona Lisa · chargement du modèle 3D en cours…</div>
 <label for="mission">Mission à réaliser</label>
 <select id="mission" aria-label="Choisir une mission RH"></select>
 <div class="kicker" id="phase">Situation · introduction</div><div id="objective" class="objective"></div>
