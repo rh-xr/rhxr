@@ -16,7 +16,7 @@ test('pinned RH office GLBs are valid glTF 2 binary containers',()=>{
     assert.equal(file.toString('ascii',16,20),'JSON',spec.filename+' missing JSON chunk');
     const jsonBytes=file.subarray(20,20+file.readUInt32LE(12));
     const gltf=JSON.parse(jsonBytes.toString('utf8').replace(/\\u0000/g,'').trim());
-    assert.match(gltf.asset.version,/^2\\./);
+    assert.ok(String(gltf.asset.version).startsWith('2.'), 'Invalid glTF version');
     assert.ok(gltf.meshes?.length,spec.filename+' contains no meshes');
     const extensions=gltf.extensionsRequired||[];
     console.log(spec.filename+' '+(file.length/1e6).toFixed(2)+'MB meshes='+gltf.meshes.length+' textures='+(gltf.textures?.length||0)+' requiredExtensions='+extensions.join(','));
@@ -54,10 +54,10 @@ test('GLB loader failure keeps all low-poly furniture available',async()=>{
 test('the existing VR office keeps locomotion unchanged and loads local GLBs',()=>{
   const src=readFileSync(new URL('../assets/js/room.mjs',import.meta.url),'utf8');
   const html=readFileSync(new URL('../simulation.html',import.meta.url),'utf8');
-  assert.match(src,/loadOfficeFurniture\\(THREE,scene/);
-  assert.match(src,/fallback\\[id\\]\\.forEach/);
-  assert.match(src,/readSticks\\(session/);
-  assert.match(src,/snapAroundHead\\(turn\\.angle/);
-  assert.match(html,/type="importmap"/);
-  assert.match(html,/https:\\/\\/esm\\.sh\\/three@0\\.169\\.0/);
+  assert.ok(src.includes('loadOfficeFurniture(THREE,scene'));
+  assert.ok(src.includes('fallback[id].forEach'));
+  assert.ok(src.includes('readSticks(session'));
+  assert.ok(src.includes('snapAroundHead(turn.angle'));
+  assert.ok(html.includes('type="importmap"'));
+  assert.ok(html.includes('https://esm.sh/three@0.169.0'));
 });
