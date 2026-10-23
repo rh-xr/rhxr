@@ -30,3 +30,15 @@ Sur un Meta Quest 3S, depuis une **Preview HTTPS** (et non `127.0.0.1` du PC) :
 La présence d'un appel `requestSession('immersive-vr')` et les tests logiciels ne démontrent **pas** une validation réelle sur Meta Quest 3S. Les options sont strictement pédagogiques, fictives et non destinées aux décisions de carrière.
 
 Ne pas fusionner avant confirmation de la Preview HTTPS et de l'essai matériel Quest 3S.
+
+## Accès à la Preview et contrôle du repli 2D (audit du 23/10/2026)
+
+La Preview Vercel de la branche est marquée **Ready**, mais les paramètres du projet indiquent une **protection SSO** sur les URL `*.vercel.app`. Un navigateur non authentifié (y compris Quest Browser) peut être redirigé vers une page Vercel avant de voir l'expérience. Cela ne constitue pas une erreur WebXR : tester d'abord l'accès authentifié sur ordinateur, puis sur le casque. Ne pas désactiver la protection globalement pour contourner ce contrôle.
+
+Dans les environnements où WebGL est absent, perdu ou échoue lors de l'initialisation des shaders, vérifier que :
+- les **choix, explications et citations DACI restent accessibles** en mode texte ;
+- le statut annonce « WebGL indisponible · parcours textuel actif » ;
+- le bouton **Entrer en VR** reste désactivé, plutôt que de proposer une session impossible ;
+- le lien « Retour au portail RH·XR » permet de revenir à la page d'accueil.
+
+**Preuve disponible :** contrôles Chromium en mode WebGL absent et en mode initialisation GL simulée en échec, sans exception JavaScript non gérée. **Limite :** aucune confirmation physique Quest 3S et aucun test HTTP du contenu de la Preview derrière SSO ; GitHub CI et l'état Ready de Vercel ne suffisent pas à les remplacer.
