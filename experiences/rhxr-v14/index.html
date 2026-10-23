@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RH·XR V14 · Laboratoire premium Quest</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#162f3b;background:#f1f5f3}*{box-sizing:border-box}body{margin:0}
+header{background:linear-gradient(110deg,#0d3440,#1a5960);color:#fff;padding:54px max(22px,calc((100vw - 1060px)/2))}
+small{letter-spacing:.17em;text-transform:uppercase;color:#c6e9e6;font-weight:750}
+h1{font-size:clamp(30px,5vw,55px);margin:12px 0}header p{max-width:740px;line-height:1.65;color:#d9e9e8}
+main{max-width:1110px;margin:auto;padding:30px 22px 60px}.intro{font-size:15px;line-height:1.7;color:#415e69}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;margin:26px 0}
+article{background:#fff;padding:23px;border:1px solid #cfdfdf;border-radius:16px;box-shadow:0 8px 20px #1439450d}
+article h2{font-size:22px;margin:0 0 10px}article p{line-height:1.55;min-height:75px;color:#4f6470}
+a.cta{display:inline-block;padding:12px 16px;background:#106775;color:#fff;font-weight:750;border-radius:10px;text-decoration:none}
+a.cta.secondary{background:#e7eff1;color:#194855}
+nav a{color:#245b62}li{margin:9px 0;line-height:1.5}footer{text-align:center;font-size:12px;color:#587078;margin:35px 0}
+.notice{border-left:4px solid #ba8e49;background:#fff6df;padding:15px 18px;border-radius:8px;line-height:1.55}
+a:focus-visible{outline:3px solid #e3a943;outline-offset:3px}
+</style></head><body>
+<header><small>RH·XR · laboratoire de recherche et développement</small><h1>V14 — Premier prototype de bureau VR premium</h1>
+<p>Un nouvel environnement architectural, vos trois meubles GLB d'origine et les commandes WebXR existantes. Les mesures de performance sont locales, facultatives et servent à préparer la validation sur Meta Quest 3S.</p></header>
+<main>
+<p class="notice"><strong>Prototype et non version finale :</strong> le scénario de démonstration reste S02. Les trois parcours DACI V13 et le futur moteur pédagogique unifié ne sont pas encore intégrés dans cette nouvelle salle. Aucune mesure réelle Quest 3S n'a été certifiée.</p>
+<div class="grid">
+<article><h2>1. Découvrir le bureau V14</h2><p>Décor enrichi avec finitions et lumières ajustées. Les meubles réels desk, amrchair et chair restent chargés comme dans S02.</p>
+<a class="cta" href="../../simulation.html?office=v14">Entrer dans le prototype 3D →</a></article>
+<article><h2>2. Mesurer sur Quest 3S</h2><p>Identique au prototype V14 mais avec panneau de mesures en VR et bouton d'export JSON local. Aucun envoi de données.</p>
+<a class="cta" href="../../simulation.html?office=v14&amp;metrics=1">Tester avec diagnostic →</a></article>
+<article><h2>3. Comparer avec le bureau précédent</h2><p>Comparez les mêmes modèles GLB et le scénario S02 dans la pièce précédente pour apprécier les différences.</p>
+<a class="cta secondary" href="../../simulation.html?office=glb">Ouvrir la référence S02 →</a></article>
+<article><h2>4. Consulter les scénarios DACI</h2><p>Les trois parcours et leurs références restent opérationnels dans la salle V13 séparée, en attendant leur migration vers V14.</p>
+<a class="cta secondary" href="../daci-v13/index.html">Ouvrir DACI V13 →</a></article>
+</div>
+<h2>Que vérifier dans le Quest ?</h2>
+<ol><li>Ouvrir le bureau V14 dans Quest Browser, entrer en VR et confirmer que les trois meubles GLB sont visibles.</li>
+<li>Examiner les murs, l'éclairage, les matériaux, les fenêtres simulées et le logo RH·XR sans anomalies visibles.</li>
+<li>Tester manette gauche (déplacement), manette droite (rotation par 45°) et marche réelle.</li>
+<li>Revenir à la page de diagnostic pour observer les FPS estimées, les draw calls et les triangles dans le casque.</li>
+<li>Quitter la VR puis utiliser « Exporter diagnostic local » dans la vue navigateur afin de conserver un rapport JSON anonyme.</li>
+</ol>
+<p class="intro">Important : les FPS sont estimées à partir des intervalles entre rappels d'animation. Elles ne mesurent pas le temps GPU/CPU. Une validation approfondie nécessite un outil de performance Quest tel que OVR Metrics.</p>
+<nav><a href="../../index.html">← Retour au portail RH·XR</a></nav>
+</main><footer>RH·XR V14 · Démonstrateur fictif · Aucune décision RH réelle ni collecte nominative</footer>
+</body></html>
