@@ -122,12 +122,12 @@ export async function mountRoom(stage) {
   if(advanced){
     const avatarStatus=document.querySelector('#avatar-status');
     // Defer avatar decompression until the three original pieces of furniture load.
-    const avatarYaw=params.get('avatarYaw')==='180'?Math.PI:ARMCHAIR_AVATAR_PLACEMENT.yawRadians;
+    const avatarYaw=params.get('avatarYaw')==='0'?0:ARMCHAIR_AVATAR_PLACEMENT.yawRadians;
     void furnitureReady.then(()=>loadArmchairAvatar(THREE,scene,{
       placement:{...ARMCHAIR_AVATAR_PLACEMENT,yawRadians:avatarYaw},
       onLoaded(){
         basicAvatar.forEach(mesh=>{mesh.visible=false;});
-        if(avatarStatus)avatarStatus.textContent='Avatar Mona Lisa GLB sur le fauteuil RH · chargé · orientation '+(avatarYaw===Math.PI?'180°':'0°');
+        if(avatarStatus)avatarStatus.textContent='Avatar Mona Lisa GLB sur le fauteuil RH · chargé · orientation '+(avatarYaw===Math.PI?'180° (défaut)':'0° (comparaison)')+' · taille +10 %';
       },
       onFailed(){
         if(avatarStatus)avatarStatus.textContent='Avatar indisponible · personnage simplifié conservé';
