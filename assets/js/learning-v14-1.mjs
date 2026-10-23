@@ -9,6 +9,12 @@ export const MISSIONS=Object.freeze([
   {id:'conflit',label:'03  Médiation Amina/Youssef',topic:'Conflit'},
   {id:'s02',label:'04  Désaccord professionnel',topic:'S02'}
 ]);
+export const LEARNING_OBJECTIVES=Object.freeze({
+  onboarding:'Clarifier les missions, identifier les référents et sécuriser une première semaine d’intégration.',
+  entretien:'Instaurer un cadre d’échange, rechercher des faits, formuler des actions et préciser le suivi.',
+  conflit:'Écouter équitablement, distinguer faits et interprétations, désamorcer et organiser un suivi.',
+  s02:'Écoute active, clarification des faits et recherche d’une solution réalisable avec un suivi.'
+});
 const clean=t=>typeof t==='string'?t:'';
 export function createLearningSession(bundle){
   if(bundle?.version!=='V13'||bundle.fictional_only!==true||!Array.isArray(bundle.stories)||!bundle.answers)
@@ -42,7 +48,8 @@ export function createLearningSession(bundle){
   }
   function next(){
     if(!pending)return false;
-    history.push({mission,node_id:currentNode()?.id,choice_id:pending.id,quality:pending.response.quality});
+    history.push({mission,node_id:currentNode()?.id,choice_id:pending.id,quality:pending.response.quality,
+      feedback:pending.response.feedback,citation:pending.response.citation||null});
     if(mission==='s02')step++;else nodeId=pending.response.next_node_id;
     pending=null;showDoc=false;return true;
   }
@@ -50,16 +57,17 @@ export function createLearningSession(bundle){
   function view(){
     const spec=MISSIONS.find(m=>m.id===mission),n=currentNode(),ending=mission==='s02'?step>=s02.exchanges.length:!n||n.kind==='ending';
     const r=pending?.response||null;
-    const citations=history.filter(h=>h.quality).length;
+    const citations=history.filter(h=>h.citation).length;
     return {
-      mission,title:spec.label,topic:spec.topic,phase:clean(n?.phase),actor:clean(n?.actor)||(mission==='s02'?'Collaborateur':'Formateur'),
+      mission,title:spec.label,topic:spec.topic,objective:LEARNING_OBJECTIVES[mission],phase:clean(n?.phase),actor:clean(n?.actor)||(mission==='s02'?'Collaborateur':'Formateur'),
       dialogue:mission==='s02'?clean(n?.avatar):clean(n?.dialogue),
       question:mission==='s02'?'Quelle réponse choisissez-vous ?':clean(n?.question),
       choices:pending||ending?[]:(n?.choices||[]).map((c,i)=>({id:c.id,label:clean(c.label||c.text),key:String.fromCharCode(65+i)})),
       pending:!!pending,ending,showDoc,steps:history.length,quality:r?.quality||'',
       reaction:clean(r?.character_reaction),feedback:clean(r?.feedback),note:clean(r?.pedagogical_note),
       citation:clean(r?.citation),sourceTitle:clean(r?.source_title),quote:clean(r?.quote),
-      completed:citations,history:history.map(h=>({...h}))
+      completed:citations,history:history.map(h=>({...h})),
+      summary:ending?history.map((h,i)=>(i+1)+'. '+h.feedback).join('\\n'):''
     };
   }
   return {view,setMission,choose,next,toggleDocument,reset:()=>setMission(mission),missions:MISSIONS};
