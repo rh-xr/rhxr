@@ -33,7 +33,7 @@ export function createMetricsSampler({windowSize=METRICS_WINDOW}={}){
       triangles:Number.isFinite(render?.triangles)?render.triangles:null,
       geometries:Number.isFinite(memory?.geometries)?memory.geometries:null,
       textures:Number.isFinite(memory?.textures)?memory.textures:null};
-    return snapshot();
+    // Do not sort the frame window or allocate a report on every WebXR frame.
   }
   return {tick,snapshot,reset,markAsset};
 }
