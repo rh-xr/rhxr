@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RH·XR V14.1 — Bureau immersif RH + DACI</title>
+<script type="importmap">{"imports":{"three":"https://esm.sh/three@0.169.0"}}</script>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#15303b;background:#eef3f1;--ink:#15303b;--teal:#126778;--line:#d6e3e3}
+*{box-sizing:border-box}body{margin:0}button,select{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #dba755;outline-offset:3px}
+header{background:linear-gradient(105deg,#0b2a37,#135765);color:#f5fbfb;padding:20px max(22px,calc((100vw - 1510px)/2))}
+header .top{font-size:11px;letter-spacing:.13em;color:#b7e0dd;font-weight:800}header h1{font-size:clamp(24px,2.5vw,38px);margin:7px 0 5px}
+header p{max-width:940px;margin:0;line-height:1.5;color:#d5e7e7;font-size:14px}
+header nav{margin-top:13px;display:flex;flex-wrap:wrap;gap:17px;font-size:13px}header a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.layout{max-width:1550px;padding:18px;margin:auto;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(330px,.8fr);gap:18px;align-items:start}
+article{border-radius:16px;box-shadow:0 10px 32px #153a470c;background:white;overflow:hidden;border:1px solid var(--line)}
+#stage{height:min(68vh,740px);min-height:440px;position:relative;background:linear-gradient(#dcece8,#abbebb);overflow:hidden}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.stage-label{position:absolute;left:13px;top:12px;background:#133642eb;color:white;font-size:13px;font-weight:700;border-radius:9px;padding:10px;pointer-events:none;max-width:60%}
+.stage-status{position:absolute;top:12px;right:12px;font-size:11px;color:white;background:#143b43dc;border-radius:7px;padding:9px;max-width:35%}
+.stage-bottom{position:absolute;bottom:12px;left:12px;right:12px;display:flex;gap:8px;justify-content:space-between;align-items:end}
+.stage-bottom small{background:#123a44ed;border-radius:8px;padding:9px;color:white;line-height:1.4;max-width:55%}
+.stage-bottom button{border:0;border-radius:8px;padding:11px;background:#f0cf9a;color:#243a3e;font-weight:750}
+.room-controls button{font-weight:800}
+#stage .vr-btn{position:absolute;right:13px;top:58px;border:0;padding:12px 19px;background:#126b78;color:white;border-radius:9px;font-weight:800;z-index:8}
+#stage .avatar{display:none}
+.scene-help{font-size:13px;color:#56737a;padding:14px;line-height:1.5}
+.panel{padding:22px;max-height:83vh;overflow-y:auto}
+.panel h2{margin:0 0 8px;font-size:22px}label{font-weight:700;font-size:13px;color:#365767}
+select{width:100%;border-radius:9px;padding:11px;border:1px solid #9cbdc4;background:#f4f9f8;margin:7px 0 15px;color:#1c3945}
+.kicker{font-size:12px;letter-spacing:.04em;font-weight:750;color:#1c7685}
+#actor{margin:9px 0 6px;font-size:18px}
+#dialogue{background:#f2f7f5;border-left:4px solid #bc965f;border-radius:8px;padding:13px 15px;line-height:1.6}
+#question{font-size:15px;line-height:1.5}
+#choices{display:grid;gap:8px;margin-top:12px}
+#choices button{border:1px solid #accdd0;background:#eaf5f4;color:#123b4b;text-align:left;padding:12px 14px;border-radius:9px;font-size:13px;line-height:1.45}
+#choices button:hover{background:#cee9e6}
+#feedback{margin:12px 0;padding:15px;border-radius:10px;background:#fff4df;color:#493c27;font-size:13px;line-height:1.6;white-space:pre-line}
+#citation{border:1px solid #b8d4ce;border-radius:8px;padding:12px;background:#f1f7f5;font-size:13px;line-height:1.5;overflow-wrap:anywhere;margin:12px 0}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0}
+.actions button{padding:10px 14px;border:1px solid #9fc9cf;border-radius:9px;background:#e5f2f2;color:#104c58;font-weight:750}
+.actions button.main{background:#0f6c78;color:white}
+.actions button[disabled]{opacity:.5;cursor:not-allowed}
+.hint{font-size:12px;color:#53737b;line-height:1.5;border-top:1px solid #dfebec;padding-top:13px;margin-top:14px}
+.badge{display:inline-block;font-size:11px;background:#e4efec;color:#315760;padding:5px 9px;border-radius:6px;font-weight:700}
+footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;font-size:12px;color:#557179}
+[hidden]{display:none!important}
+@media(max-width:1020px){.layout{grid-template-columns:1fr}.panel{max-height:none}#stage{height:58vw;min-height:430px}}
+@media(max-width:580px){header{padding:18px}#stage{height:350px;min-height:350px}.layout{padding:10px}.panel{padding:15px}.stage-bottom small{font-size:10px}.stage-bottom button{font-size:11px}.scene-help{font-size:12px}}
+</style></head>
+<body>
+<header><span class="top">RH·XR / LABORATOIRE V14.1 / FICTION</span>
+<h1>Un bureau VR. Quatre missions RH. Les documents DACI en contexte.</h1>
+<p>Choisissez une situation depuis les panneaux du bureau ou depuis le guide textuel. En VR, pointez un panneau avec la manette et appuyez sur la gâchette. Chaque décision DACI mène à une conséquence et à une source fictive identifiable.</p>
+<nav><a href="../rhxr-v14/index.html">← Laboratoire V14</a><a href="../../simulation.html?office=v14">Bureau V14 initial</a><a href="../daci-v13/index.html">Parcours DACI V13</a><a href="../../index.html">Portail RH·XR</a></nav></header>
+<div class="layout">
+<article><div id="stage" aria-label="Bureau de formation RH·XR en 3D">
+<div class="avatar" aria-hidden="true"></div>
+<div class="stage-label">RH·XR V14.1 · Espace d'apprentissage</div>
+<div class="stage-status" id="stage-status" role="status">Chargement de la scène…</div>
+<div class="stage-bottom"><small id="stage-hint">WASD/flèches sur PC · joysticks Quest 3S en VR.</small>
+<button type="button" id="view-switch" hidden>Activer la 3D</button></div></div>
+<div class="scene-help">Quest : <strong>gâchette = sélectionner</strong>, stick gauche = déplacement, stick droit = rotation de 45°. Les panneaux pédagogiques accompagnent vos mouvements virtuels ; utilisez « Masquer » pour libérer la vue. Sur PC : cliquez sur les panneaux 3D ou utilisez les commandes accessibles à droite.</div>
+</article>
+<article class="panel"><span class="badge">Simulations fictives · aucune décision RH individuelle</span>
+<h2>Guide pédagogique DACI</h2>
+<label for="mission">Mission à réaliser</label>
+<select id="mission" aria-label="Choisir une mission RH"></select>
+<div class="kicker" id="phase">Situation · introduction</div>
+<h3 id="actor">—</h3>
+<p id="dialogue" aria-live="polite">Chargement du contenu…</p>
+<h4 id="question"></h4>
+<div id="choices"></div>
+<div id="feedback" role="status" hidden></div>
+<div id="citation" hidden></div>
+<div class="actions">
+<button class="main" id="continue" type="button" hidden>Continuer →</button>
+<button id="document" type="button" hidden>Voir le DACI cité</button>
+<button id="restart" type="button">Recommencer</button>
+<button id="guide-toggle" type="button">Masquer les panneaux VR</button>
+</div>
+<div class="hint" id="status" role="status">Le bureau et les scénarios se chargent séparément. Le parcours texte reste disponible si la VR n'est pas accessible.</div>
+</article>
+</div><footer>RH·XR V14.1 — démonstrateur pédagogique expérimental. Corpus et personnages fictifs. Les textes de S02 ne sont pas présentés comme des sources DACI vérifiées.</footer>
+<script type="module">
+import {mountRoom} from '../../assets/js/room.mjs';
+import {createLearningSession} from '../../assets/js/learning-v14-1.mjs';
+import {createSpatialLearningHub} from '../../assets/js/spatial-learning-v14-1.mjs';
+const $=id=>document.getElementById(id);let training=null,hub=null;
+const node=(tag,text)=>{const e=document.createElement(tag);e.textContent=String(text??'');return e;};
+function render(v){
+ $('mission').value=v.mission;
+ $('phase').textContent=v.title+(v.phase?' · '+v.phase:'')+' · '+v.steps+' décision(s)';
+ $('actor').textContent=v.actor;
+ $('dialogue').textContent=v.dialogue||(v.ending?'Parcours terminé. Revoyez vos choix ou passez à une autre mission.':'');
+ $('question').textContent=v.ending?'Bilan pédagogique':v.question;
+ const zone=$('choices');zone.replaceChildren();
+ if(v.ending)zone.append(node('p','Mission terminée. Recommencez ou choisissez une autre situation RH.'));
+ else if(!v.pending)v.choices.forEach(c=>{const b=node('button',c.key+' · '+c.label);b.type='button';
+   b.addEventListener('click',()=>perform('choice:'+c.id));zone.append(b);});
+ const f=$('feedback');f.hidden=!v.pending;
+ f.textContent=v.pending?[v.reaction,v.feedback,v.note].filter(Boolean).join('\n\n'):'';
+ $('continue').hidden=!v.pending;
+ $('document').hidden=!v.pending||!v.citation;
+ $('document').textContent=v.showDoc?'Fermer la référence DACI':'Voir le DACI cité';
+ const ref=$('citation');ref.hidden=!v.showDoc;ref.replaceChildren();
+ if(v.showDoc){ref.append(node('strong',v.sourceTitle||'Document DACI fictif'),node('p',v.quote||''),
+     node('code',v.citation));}
+}
+function perform(action){
+ if(!training)return;
+ if(hub){hub.action(action);return;}
+ if(action.startsWith('mission:'))training.setMission(action.slice(8));
+ else if(action.startsWith('choice:'))training.choose(action.slice(7));
+ else if(action==='next')training.next();
+ else if(action==='document')training.toggleDocument();
+ else if(action==='restart')training.reset();
+ render(training.view());
+}
+async function start(){
+ try{
+   const r=await fetch('../daci-v13/v13-bundle.json',{cache:'no-store'});
+   if(!r.ok)throw Error('Corpus DACI inaccessible : HTTP '+r.status);
+   training=createLearningSession(await r.json());
+   for(const mission of training.missions){const o=node('option',mission.label);o.value=mission.id;$('mission').append(o);}
+   $('mission').addEventListener('change',e=>perform('mission:'+e.target.value));
+   $('continue').onclick=()=>perform('next');$('document').onclick=()=>perform('document');
+   $('restart').onclick=()=>perform('restart');
+   $('guide-toggle').onclick=()=>{
+     if(!hub)return;
+     hub.action('toggle');
+   };
+   render(training.view());$('status').textContent='Corpus DACI chargé. Initialisation du bureau VR…';
+ }catch(error){$('status').textContent='Erreur pédagogique : '+error.message;return;}
+ try{
+   const room=await mountRoom($('stage'));
+   if(!room)throw Error('Salle VR non initialisée');
+   hub=createSpatialLearningHub(room.THREE,room,training,{onChange:render});
+   room.onFrame(()=>hub.update());
+   $('guide-toggle').onclick=()=>hub.action('toggle');
+   $('status').textContent='Quatre missions disponibles. Sur Quest, sélectionnez avec les gâchettes ; les mêmes décisions restent accessibles dans ce guide.';
+ }catch(error){console.warn('[RH·XR V14.1] 3D unavailable',error);
+   $('stage-status').textContent='3D indisponible · scénarios textuels actifs';
+   $('status').textContent='VR non disponible : '+error.message+' · Le parcours texte reste opérationnel.';
+ }
+}
+start();
+</script></body></html>
