@@ -57,3 +57,24 @@ test('V14 stays source-aligned with premium design and pedagogical separation',(
   assert.ok(!premium.includes('new THREE.PointLight'));
   assert.ok(premium.includes("scene.add(root)"));
 });
+
+
+test('V14 pilot page and root navigation expose separate normal and diagnostic modes',()=>{
+  const html=read('../experiences/rhxr-v14/index.html');
+  const portal=read('../assets/js/app.mjs');
+  assert.ok(html.includes('simulation.html?office=v14"'));
+  assert.ok(html.includes('simulation.html?office=v14&amp;metrics=1'));
+  assert.ok(html.includes('simulation.html?office=glb'));
+  assert.ok(html.includes('daci-v13/index.html'));
+  assert.ok(portal.includes('experiences/rhxr-v14/index.html'));
+  assert.ok(portal.includes("['glb','v14'].includes"));
+});
+
+test('optional diagnostics do not allocate reports in the every-frame path',()=>{
+  const sampler=read('../assets/js/metrics-v14.mjs');
+  const render=read('../assets/js/room.mjs');
+  assert.ok(sampler.includes('if(now-last<1000)return;'));
+  assert.ok(sampler.includes('GPU / CPU') || sampler.includes('GPU or CPU'));
+  assert.ok(render.includes('if(debugInfo&&time-lastDebugTextAt>=1000)'));
+  assert.ok(render.includes("renderer.xr.isPresenting?'xr':'desktop'"));
+});
