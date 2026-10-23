@@ -11,7 +11,7 @@ export async function mountRoom(stage) {
   if (initialized) return;
   const THREE = await import('https://esm.sh/three@0.169.0');
   const params=new URLSearchParams(window.location.search);
-  const premium=params.get('office')==='v14';
+  const premium=['v14','v14-1'].includes(params.get('office'))||window.location.pathname.includes('/rhxr-v14-1/');
   const diagnostics=premium&&params.get('metrics')==='1';
   const perf=diagnostics?createMetricsSampler():null;
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'low-power' });
@@ -176,6 +176,7 @@ export async function mountRoom(stage) {
     playerRig.updateMatrixWorld(true);
   }
 
+  const frameSubscribers=new Set();
   renderer.setAnimationLoop((time) => {
     const dt = Math.min(clock.getDelta(), 0.05);
     if (renderer.xr.isPresenting) {
@@ -210,6 +211,10 @@ export async function mountRoom(stage) {
       const move = displacement({ x: 0, y: vertical }, forward, dt, 2);
       playerRig.position.x = clamp(playerRig.position.x + move.x, -4.7, 4.7);
       playerRig.position.z = clamp(playerRig.position.z + move.z, -6.7, 5.1);
+    }
+    for(const subscriber of frameSubscribers){
+      try{subscriber({time,dt,xr:renderer.xr.isPresenting});}
+      catch(error){console.warn('[RH-XR V14.1] Frame subscriber error',error);frameSubscribers.delete(subscriber);}
     }
     renderer.render(scene, camera);
     if(perf){
@@ -286,4 +291,6 @@ export async function mountRoom(stage) {
     } catch (err) { console.warn('WebXR non disponible', err); }
   }
   initialized = true;
+  return {THREE,scene,renderer,playerRig,camera,stage,
+    onFrame(callback){frameSubscribers.add(callback);return ()=>frameSubscribers.delete(callback);}};
 }
