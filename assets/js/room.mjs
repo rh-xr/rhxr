@@ -75,6 +75,7 @@ export async function mountRoom(stage) {
   if(premium){
     // Design prototype: same Quest player rig, locomotion, GLBs and S02 state.
     createPremiumOffice(THREE,scene);
+    if(advanced)upgradeOfficeFinish(THREE,scene);
   }else{
     cube(11, .2, 13, 0, -.12, -1, mat.floor);
     cube(11, 5.6, .16, 0, 2.8, -7.6, mat.wall);
