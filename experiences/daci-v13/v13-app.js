@@ -97,7 +97,7 @@
     canvas.addEventListener('pointermove',e=>{if(!app.camDrag||app.session)return;
       app.desktopYaw=clamp(app.desktopYaw+(e.clientX-app.clientX)*.006,-.7,.7);
       app.desktopPitch=clamp(app.desktopPitch+(e.clientY-app.clientY)*.003,-.25,.32);app.clientX=e.clientX;app.clientY=e.clientY;});
-    canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();app.glError=true;setStatus('Contexte WebGL perdu ; utilisez le panneau texte.');});
+    canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();app.glError=true;$('fallback').hidden=false;$('vr').disabled=true;setStatus('Contexte WebGL perdu · parcours textuel actif.');});
     return true;}
   function wrap(ctx,str,width,maxLines=5){const words=safeString(str).split(/\s+/);const lines=[];let line='';
     for(const word of words){if(!word)continue;const candidate=line?line+' '+word:word;
@@ -215,6 +215,7 @@
     }
     session.requestAnimationFrame(xrFrame);}
   async function enterVR(){if(app.session){await app.session.end();return;}
+    if(!app.gl||app.glError){setStatus('WebGL indisponible · parcours textuel actif.');return;}
     if(!navigator.xr||!window.isSecureContext){setStatus('VR requiert HTTPS et un navigateur compatible.');return;}
     let s;
     try{
@@ -231,6 +232,7 @@
     }catch(err){if(s&&!s.ended){try{await s.end();}catch(_){}}app.session=null;setStatus('Session VR indisponible : '+err.message);}
   }
   async function initVR(){const b=$('vr');b.onclick=enterVR;
+    if(!app.gl||app.glError){b.disabled=true;setStatus('WebGL indisponible · parcours textuel actif.');return;}
     if(!navigator.xr||!window.isSecureContext){b.disabled=true;setStatus('Aperçu 3D actif · casque : HTTPS obligatoire');return;}
     try{app.vrSupported=await navigator.xr.isSessionSupported('immersive-vr');b.disabled=!app.vrSupported;
       setStatus(app.vrSupported?'WebXR disponible · activer la VR':'Aperçu 3D · aucun casque VR détecté');}
@@ -244,7 +246,10 @@
       if(!app.bundle.stories?.length||!app.bundle.answers)throw Error('Scénarios absents');
       const s=$('scenario');s.replaceChildren();app.bundle.stories.forEach(p=>{const o=node('option',p.title);o.value=p.slug;s.append(o);});
       s.onchange=()=>setScenario(s.value);$('restart').onclick=reset;$('continue').onclick=proceed;$('show-source').onclick=toggleSource;
-      if(initGL())requestAnimationFrame(frameDesktop);
+      let glReady=false;
+      try{glReady=initGL();}
+      catch(err){app.glError=true;app.gl=null;$('fallback').hidden=false;setStatus('Initialisation WebGL impossible · parcours textuel actif.');console.warn('WebGL V13',err);}
+      if(glReady)requestAnimationFrame(frameDesktop);
       setScenario(app.bundle.stories.find(x=>x.slug==='onboarding')?.slug||app.bundle.stories[0].slug);
       await initVR();
     }catch(err){setStatus('Erreur V13 : '+err.message);$('dialogue').textContent='Vérifiez les fichiers du kit et démarrez son serveur Windows.';}
