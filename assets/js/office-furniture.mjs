@@ -24,15 +24,23 @@ export function fitModel(THREE,object,spec){
   return pivot;
 }
 export async function loadOfficeFurniture(THREE,scene,{onItem,Loader}={}){
-  let LoaderClass=Loader;
+  let LoaderClass=Loader, draco=null;
   if(!LoaderClass){try{
-    ({GLTFLoader:LoaderClass}=await import('https://esm.sh/three@0.169.0/examples/jsm/loaders/GLTFLoader.js?external=three'));
+    const [gltf,dracoModule]=await Promise.all([
+      import('https://esm.sh/three@0.169.0/examples/jsm/loaders/GLTFLoader.js?external=three'),
+      import('https://esm.sh/three@0.169.0/examples/jsm/loaders/DRACOLoader.js?external=three')
+    ]);
+    LoaderClass=gltf.GLTFLoader;
+    draco=new dracoModule.DRACOLoader();
+    draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/libs/draco/gltf/');
+    draco.setWorkerLimit(2); // Limit worker/memory use on Quest 3S.
   }catch(error){
-    console.warn('[RH-XR] GLTF loader unavailable',error);
+    console.warn('[RH-XR] GLTF / Draco loader unavailable',error);
     return furniturePlan.map(spec=>{onItem?.(spec.id,false,null);return {id:spec.id,ok:false};});
   }}
   const loader=new LoaderClass();
-  return Promise.all(furniturePlan.map(async spec=>{
+  if(draco)loader.setDRACOLoader(draco);
+  const results=await Promise.all(furniturePlan.map(async spec=>{
     try{
       const gltf=await loader.loadAsync(modelHref(spec.filename));
       const root=fitModel(THREE,gltf.scene,spec);
@@ -44,4 +52,6 @@ export async function loadOfficeFurniture(THREE,scene,{onItem,Loader}={}){
       return {id:spec.id,ok:false};
     }
   }));
+  if(draco)draco.dispose();
+  return results;
 }
