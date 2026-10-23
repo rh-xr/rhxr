@@ -2,6 +2,7 @@
  * The same educational scenario remains available without XR.
  */
 import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotion.mjs';
+import { loadOfficeFurniture } from './office-furniture.mjs';
 
 let initialized = false;
 export async function mountRoom(stage) {
@@ -67,17 +68,31 @@ export async function mountRoom(stage) {
   cube(.15, 5.6, 13, -5.5, 2.8, -1, mat.wall);
   cube(.15, 5.6, 13, 5.5, 2.8, -1, mat.wall);
   cube(11, .15, 13, 0, 5.6, -1, mat.wall);
-  cube(3.7, .15, 1.7, 0, 1.03, -2.35, mat.wood);
-  for (const x of [-1.5, 1.5]) for (const z of [-2.95, -1.75]) cube(.12, 1, .12, x, .5, z, mat.metal);
+  const fallback={desk:[],manager:[],visitor:[]};
+  fallback.desk.push(cube(3.7, .15, 1.7, 0, 1.03, -2.35, mat.wood));
+  for (const x of [-1.5, 1.5]) for (const z of [-2.95, -1.75]) {
+    fallback.desk.push(cube(.12, 1, .12, x, .5, z, mat.metal));
+  }
 
   // The empty visitor chair faces the desk (-Z), so its back is +Z.
   // The occupied chair faces the visitor (+Z), so its back is -Z.
-  function chair(x, z, backSide) {
-    cube(.9, .15, .85, x, .55, z, mat.seat);
-    cube(.9, 1, .13, x, 1.05, z + .36 * backSide, mat.seat);
+  function chair(x,z,backSide,id){
+    fallback[id].push(cube(.9,.15,.85,x,.55,z,mat.seat));
+    fallback[id].push(cube(.9,1,.13,x,1.05,z+.36*backSide,mat.seat));
   }
-  chair(0, -4.5, -1);
-  chair(0, .1, +1); // 180° fix: empty chair now oriented toward the desk
+  chair(0,-4.5,-1,'manager');
+  chair(0,.05,+1,'visitor');
+  // Load local, pinned GLBs *without blocking the VR render loop*.
+  // Remove a low-poly placeholder only when the matching GLB is ready.
+  const furnitureLoaded=new Set();
+  const furnitureStatus=document.querySelector('#stage-status');
+  void loadOfficeFurniture(THREE,scene,{onItem(id,ready){
+    if(ready){fallback[id].forEach(m=>{m.visible=false;});furnitureLoaded.add(id);}
+    if(furnitureStatus){
+      furnitureStatus.textContent='Bureau 3D · mobilier GLB '+furnitureLoaded.size+'/3'+
+        (ready?'':' · repli actif');
+    }
+  }}).catch(error=>console.warn('[RH-XR] Furniture loader unavailable; placeholders retained',error));
 
   cylinder(.3, .25, .8, 0, 1.18, -4.5, mat.shirt);
   sphere(.28, 0, 1.83, -4.5, mat.skin);
