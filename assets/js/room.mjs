@@ -4,6 +4,7 @@
 import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotion.mjs';
 import { loadOfficeFurniture } from './office-furniture.mjs';
 import {createPremiumOffice} from './premium-office-v14.mjs';
+import {upgradeOfficeFinish} from './premium-finish-v14-1.mjs';
 import {createMetricsSampler,createMetricsDisplay} from './metrics-v14.mjs';
 
 let initialized = false;
