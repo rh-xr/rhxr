@@ -38,6 +38,7 @@ select{width:100%;border-radius:9px;padding:11px;border:1px solid #9cbdc4;backgr
 .actions button{padding:10px 14px;border:1px solid #9fc9cf;border-radius:9px;background:#e5f2f2;color:#104c58;font-weight:750}
 .actions button.main{background:#0f6c78;color:white}
 .actions button[disabled]{opacity:.5;cursor:not-allowed}
+.objective{padding:12px 13px;background:#f0f8f7;border:1px solid #d0e2de;border-radius:8px;color:#315761;font-size:13px;line-height:1.5;margin:9px 0 13px}.debrief{background:#edf5ef;padding:12px 15px;border-radius:10px;color:#294537;font-size:13px;white-space:pre-line;line-height:1.55;margin:12px 0}
 .hint{font-size:12px;color:#53737b;line-height:1.5;border-top:1px solid #dfebec;padding-top:13px;margin-top:14px}
 .badge{display:inline-block;font-size:11px;background:#e4efec;color:#315760;padding:5px 9px;border-radius:6px;font-weight:700}
 footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;font-size:12px;color:#557179}
@@ -63,12 +64,12 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 <h2>Guide pédagogique DACI</h2>
 <label for="mission">Mission à réaliser</label>
 <select id="mission" aria-label="Choisir une mission RH"></select>
-<div class="kicker" id="phase">Situation · introduction</div>
+<div class="kicker" id="phase">Situation · introduction</div><div id="objective" class="objective"></div>
 <h3 id="actor">—</h3>
 <p id="dialogue" aria-live="polite">Chargement du contenu…</p>
 <h4 id="question"></h4>
 <div id="choices"></div>
-<div id="feedback" role="status" hidden></div>
+<div id="feedback" role="status" hidden></div><div id="debrief" class="debrief" hidden></div>
 <div id="citation" hidden></div>
 <div class="actions">
 <button class="main" id="continue" type="button" hidden>Continuer →</button>
@@ -89,6 +90,9 @@ function render(v){
  $('mission').value=v.mission;
  $('phase').textContent=v.title+(v.phase?' · '+v.phase:'')+' · '+v.steps+' décision(s)';
  $('actor').textContent=v.actor;
+ $('objective').textContent='Objectifs pédagogiques : '+v.objective;
+ $('debrief').hidden=!v.ending;
+ $('debrief').textContent=v.ending?'Bilan des décisions (sans évaluation RH individuelle) :\\n'+v.summary:'';
  $('dialogue').textContent=v.dialogue||(v.ending?'Parcours terminé. Revoyez vos choix ou passez à une autre mission.':'');
  $('question').textContent=v.ending?'Bilan pédagogique':v.question;
  const zone=$('choices');zone.replaceChildren();
