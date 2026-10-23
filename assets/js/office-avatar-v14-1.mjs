@@ -10,7 +10,8 @@ export const AVATAR_SOURCE=Object.freeze({
 export const ARMCHAIR_AVATAR_PLACEMENT=Object.freeze({
   // Matches the original armchair at x=0, z=-4.45. No geometry distortion.
   position:[0,0,-4.45],seatHeight:0.51,
-  maxEnvelope:[0.91,1.33,0.92],yawRadians:0
+  // Uniform 10% enlargement over V14.1 baseline; 180° facing as default.
+  maxEnvelope:[1.001,1.463,1.012],yawRadians:Math.PI
 });
 export const avatarHref=()=>new URL("../models/mona-lisa.glb",import.meta.url).href;
 export function fitAvatarToArmchair(THREE,model,spec=ARMCHAIR_AVATAR_PLACEMENT){
