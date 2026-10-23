@@ -5,7 +5,7 @@ import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotio
 import { loadOfficeFurniture } from './office-furniture.mjs';
 import {createPremiumOffice} from './premium-office-v14.mjs';
 import {upgradeOfficeFinish} from './premium-finish-v14-1.mjs';
-import {loadArmchairAvatar} from './office-avatar-v14-1.mjs';
+import {loadArmchairAvatar,ARMCHAIR_AVATAR_PLACEMENT} from './office-avatar-v14-1.mjs';
 import {createMetricsSampler,createMetricsDisplay} from './metrics-v14.mjs';
 
 let initialized = false;
@@ -122,10 +122,12 @@ export async function mountRoom(stage) {
   if(advanced){
     const avatarStatus=document.querySelector('#avatar-status');
     // Defer avatar decompression until the three original pieces of furniture load.
+    const avatarYaw=params.get('avatarYaw')==='180'?Math.PI:ARMCHAIR_AVATAR_PLACEMENT.yawRadians;
     void furnitureReady.then(()=>loadArmchairAvatar(THREE,scene,{
+      placement:{...ARMCHAIR_AVATAR_PLACEMENT,yawRadians:avatarYaw},
       onLoaded(){
         basicAvatar.forEach(mesh=>{mesh.visible=false;});
-        if(avatarStatus)avatarStatus.textContent='Avatar Mona Lisa GLB sur le fauteuil RH · chargé';
+        if(avatarStatus)avatarStatus.textContent='Avatar Mona Lisa GLB sur le fauteuil RH · chargé · orientation '+(avatarYaw===Math.PI?'180°':'0°');
       },
       onFailed(){
         if(avatarStatus)avatarStatus.textContent='Avatar indisponible · personnage simplifié conservé';
