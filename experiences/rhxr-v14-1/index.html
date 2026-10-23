@@ -63,7 +63,7 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 </article>
 <article class="panel"><span class="badge">Simulations fictives · aucune décision RH individuelle</span>
 <h2>Guide pédagogique DACI</h2>
-<div id="avatar-status" class="avatar-state" role="status">Avatar Mona Lisa · chargement du modèle 3D en cours…</div>
+<div id="avatar-status" class="avatar-state" role="status">Avatar Mona Lisa · chargement du modèle 3D en cours…</div><div class="actions"><button id="avatar-turn" type="button" disabled>↻ Tourner Mona Lisa de 180°</button><span class="badge">Également disponible sur un panneau à droite du fauteuil en VR</span></div>
 <label for="mission">Mission à réaliser</label>
 <select id="mission" aria-label="Choisir une mission RH"></select>
 <div class="kicker" id="phase">Situation · introduction</div><div id="objective" class="objective"></div>
@@ -83,7 +83,7 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 </article>
 </div><footer>RH·XR V14.1 — démonstrateur pédagogique expérimental. Corpus et personnages fictifs. Les textes de S02 ne sont pas présentés comme des sources DACI vérifiées.</footer>
 <script type="module">
-import {mountRoom} from '../../assets/js/room.mjs';
+import {mountRoom} from '../../assets/js/room.mjs?v=20261023-quest-facing-1';
 import {createLearningSession} from '../../assets/js/learning-v14-1.mjs';
 import {createSpatialLearningHub} from '../../assets/js/spatial-learning-v14-1.mjs';
 const $=id=>document.getElementById(id);let training=null,hub=null;
