@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {ARMCHAIR_AVATAR_PLACEMENT,AVATAR_SOURCE,fitAvatarToArmchair,loadArmchairAvatar} from '../assets/js/office-avatar-v14-1.mjs';
 
 const sourceCommit='8587c40216a1bcbc881445b9123fe0168058f6ab';
 test('Mona Lisa avatar is original pinned glTF 2 GLB and inspect its structure',()=>{
@@ -20,4 +21,46 @@ test('Mona Lisa avatar is original pinned glTF 2 GLB and inspect its structure',
     positionBounds:bounding.slice(0,8),textures:doc.textures?.length||0
   }));
   assert.ok(b.length>=100000&&b.length<=12000000,'Avatar must fit the Quest prototype budget');
+});
+
+test('avatar retained at exact original Git blob and seated-height envelope is realistic',()=>{
+  assert.equal(AVATAR_SOURCE.blob,'b49417c0050d7e1c7dfe4773c8ea8d65806f4f6d');
+  assert.equal(AVATAR_SOURCE.commit,sourceCommit);
+  assert.equal(AVATAR_SOURCE.bytes,3020580);
+  assert.deepEqual(ARMCHAIR_AVATAR_PLACEMENT.position,[0,0,-4.45]);
+  assert.ok(ARMCHAIR_AVATAR_PLACEMENT.seatHeight>=.42&&ARMCHAIR_AVATAR_PLACEMENT.seatHeight<=.7);
+  assert.ok(ARMCHAIR_AVATAR_PLACEMENT.maxEnvelope.every(v=>v>0&&v<1.6));
+});
+
+test('avatar fitted proportionately and aligned with existing manager armchair cushion',()=>{
+  class Vector3 {constructor(x=0,y=0,z=0){Object.assign(this,{x,y,z});}}
+  class Box3{
+    setFromObject(obj){const k=obj.scale.current;
+      this.min=new Vector3(-.695758*k,-.950264*k,-.578279*k);
+      this.max=new Vector3(.693429*k,.948494*k,.574576*k);return this;}
+    isEmpty(){return false;}
+    getSize(){return new Vector3(this.max.x-this.min.x,this.max.y-this.min.y,this.max.z-this.min.z);}
+    getCenter(){return new Vector3((this.max.x+this.min.x)/2,(this.max.y+this.min.y)/2,(this.max.z+this.min.z)/2);}
+  }
+  class Group{constructor(){this.position={set(...values){this.xyz=values;}};this.rotation={y:0};this.children=[];}
+    add(obj){this.children.push(obj);}
+  }
+  const model={scale:{current:1,multiplyScalar(k){this.current*=k;}},position:{x:0,y:0,z:0},updateMatrixWorld(){}};
+  const result=fitAvatarToArmchair({Box3,Vector3,Group},model);
+  assert.equal(result.name,'rhxr-mona-lisa-armchair-avatar');
+  assert.equal(result.children[0],model);
+  assert.deepEqual(result.position.xyz,[0,0,-4.45]);
+  assert.ok(Math.abs(model.position.y-.950264*model.scale.current-ARMCHAIR_AVATAR_PLACEMENT.seatHeight)<.001);
+  assert.ok(model.scale.current>.5&&model.scale.current<.8);
+});
+
+test('failed Mona Lisa GLB load keeps geometric actor available',async()=>{
+  class FailLoader{async loadAsync(){throw Error('simulated Draco or GLB failure');}}
+  let called=false;
+  const r=await loadArmchairAvatar({},null,{Loader:FailLoader,onFailed:()=>{called=true;}});
+  assert.equal(r.ok,false);assert.equal(r.object,null);assert.equal(called,true);
+  const room=readFileSync(new URL('../assets/js/room.mjs',import.meta.url),'utf8');
+  assert.ok(room.includes('if(advanced){'));
+  assert.ok(room.includes('void furnitureReady.then(()=>loadArmchairAvatar'));
+  assert.ok(room.includes('basicAvatar.forEach(mesh=>{mesh.visible=false;})'));
 });
