@@ -42,3 +42,14 @@ Dans les environnements où WebGL est absent, perdu ou échoue lors de l'initial
 - le lien « Retour au portail RH·XR » permet de revenir à la page d'accueil.
 
 **Preuve disponible :** contrôles Chromium en mode WebGL absent et en mode initialisation GL simulée en échec, sans exception JavaScript non gérée. **Limite :** aucune confirmation physique Quest 3S et aucun test HTTP du contenu de la Preview derrière SSO ; GitHub CI et l'état Ready de Vercel ne suffisent pas à les remplacer.
+
+## Amélioration ergonomique V13 (23/10/2026)
+
+Les retours d'utilisabilité ont motivé les points suivants sur la branche isolée :
+- Commandes en VR pour parcourir les trois simulations sans retirer le casque (panneaux « parcours précédent/suivant »).
+- Mise en évidence dorée du panneau visé par une manette, lorsque la pose de pointage est disponible.
+- Extraits DACI affichés **en toutes lettres** sur un panneau VR temporaire, et non plus uniquement sous forme d'URN ; retour à la scène de décisions via « Fermer le document ».
+- Panneaux de décision réhaussés pour être plus facilement visibles.
+- Accès rapide aux choix et dialogues en mode mobile.
+
+Contrôles obtenus : six parcours de bout en bout (trois scénarios x ordinateur/mobile) avec vérification des références et du mode WebGL indisponible. Le rendu VR physique, les mouvements des contrôleurs et la lisibilité dans Meta Quest 3S ne sont **pas encore validés** ; il faut les tester avant fusion.
