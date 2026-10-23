@@ -27,6 +27,10 @@
     app.trace.push({node_id:response.node_id,choice_id:id});
     app.pending=null;app.sourceOpen=false;app.current=byId(response.next_node_id);render();}
   function toggleSource(){app.sourceOpen=!app.sourceOpen;render();}
+  function switchStory(direction){const stories=app.bundle?.stories||[];if(!stories.length)return;
+    const index=stories.findIndex(s=>s.slug===app.story?.slug);
+    setScenario(stories[(index+direction+stories.length)%stories.length].slug);
+  }
   function render(){const n=app.current;if(!n)return;
     $('actor').textContent=n.actor||'Formateur';
     $('dialogue').textContent=n.dialogue||'Fin de la simulation.';
@@ -122,23 +126,33 @@
   function clearPanels(){if(app.gl)for(const p of app.panels)app.gl.deleteTexture(p.tex);app.panels=[];app.targets=[];}
   function panel(id,x,y,z,w,h,title,body,kind,clickable=false){const p={id,x,y,z,w,h,tex:textTexture(title,body,kind),kind};app.panels.push(p);if(clickable)app.targets.push(p);}
   function buildPanels(){clearPanels();if(!app.gl||!app.current)return;const n=app.current;
-    panel('dialogue',0,2.03,-2.75,3.9,1.27,n.actor||'RH',sourceText(n.dialogue,250));
+    // Comfortable seated/standing reading zone (eye height approximately 1.6 m).
+    // When a reference is open, show its actual excerpt instead of an opaque URN alone.
+    if(app.sourceOpen){const r=app.pending?.response;
+      const citation=r?.citation||app.xrAnchors.find(a=>a.node_id===n.id)?.citation||'—';
+      const excerpt=r?.quote||'Sélectionnez une décision pour afficher un extrait documentaire.';
+      panel('reference',0,1.77,-2.32,3.9,1.96,r?.source_title||'DOCUMENT DACI FICTIF',
+        sourceText(excerpt+'   Référence : '+citation,400),'info');
+      panel('source',0,.46,-2.30,1.7,.55,'FERMER LE DOCUMENT','Retour aux décisions','action',true);
+      return;
+    }
+    panel('dialogue',0,2.16,-2.75,3.9,1.15,n.actor||'RH',sourceText(n.dialogue,250));
     if(n.kind==='ending'){
       panel('end',0,.99,-2.55,3.55,.85,'Parcours terminé','Aucun score RH. Recommencez pour explorer un autre déroulement.');
-      panel('restart',0,.17,-2.50,1.4,.48,'↻ RECOMMENCER','Sélectionnez avec la gâchette.','action',true);
+      panel('restart',0,.87,-2.50,1.4,.55,'↻ RECOMMENCER','Sélectionnez avec la gâchette.','action',true);
     }else if(app.pending){const r=app.pending.response;
-      panel('outcome',0,.99,-2.66,3.7,.9,'Conséquence · '+r.quality,sourceText(r.character_reaction+' '+r.feedback,185),'outcome');
-      panel('next',-.86,.16,-2.5,1.72,.5,'CONTINUER →',sourceText(r.next_question||'Étape suivante',70),'action',true);
-      panel('source',.98,.16,-2.5,1.55,.5,'DOCUMENT DACI',sourceText(r.source_title,50),'action',true);
+      panel('outcome',0,1.28,-2.66,3.7,.66,'Conséquence · '+r.quality,sourceText(r.character_reaction+' '+r.feedback,185),'outcome');
+      panel('next',-.86,.70,-2.5,1.72,.62,'CONTINUER →',sourceText(r.next_question||'Étape suivante',70),'action',true);
+      panel('source',.98,.70,-2.5,1.55,.62,'DOCUMENT DACI',sourceText(r.source_title,50),'action',true);
     }else{
-      panel('prompt',0,1.04,-2.65,3.45,.48,'QUESTION',sourceText(n.question,135));
+      panel('prompt',0,1.51,-2.65,3.45,.41,'QUESTION',sourceText(n.question,135));
       const choices=n.choices||[];
       choices.forEach((c,i)=>{const x=(i-(choices.length-1)/2)*1.3;
-        panel('choice:'+c.id,x,.31,-2.54,1.2,.75,`${String.fromCharCode(65+i)} · CHOISIR`,sourceText(c.label,95),'action',true);});
+        panel('choice:'+c.id,x,.92,-2.54,1.2,.65,`${String.fromCharCode(65+i)} · CHOISIR`,sourceText(c.label,95),'action',true);});
     }
-    if(app.sourceOpen){const r=app.pending?.response;
-      panel('reference',0,2.92,-2.8,3.2,.46,'SOURCE FICTIVE',sourceText(r?.citation||app.xrAnchors.find(a=>a.node_id===n.id)?.citation||'DACI fictif',115));
-    }
+    // Story navigation stays inside VR; changing paths never writes an employee record.
+    panel('story-prev',-2.62,1.13,-2.58,1.12,.64,'◀ PARCOURS','Précédent','action',true);
+    panel('story-next',2.62,1.13,-2.58,1.12,.64,'PARCOURS ▶','Suivant','action',true);
   }
   const COLOR=(s)=>{const r=parseInt(s.slice(1,3),16)/255,g=parseInt(s.slice(3,5),16)/255,b=parseInt(s.slice(5,7),16)/255;return [r,g,b,1];};
   function draw(mesh,m,col,tex){const gl=app.gl,l=app.loc,b=app.mesh[mesh];gl.bindBuffer(gl.ARRAY_BUFFER,b.buffer);
@@ -161,7 +175,10 @@
     cube(-2.45,1.05,-4.7,.47,.87,.26,'#237d84');cube(-2.45,1.68,-4.7,.31,.35,.31,'#d7b7a1');
     cube(-2.45,1.91,-4.72,.36,.12,.32,'#354b54');cube(-2.45,.38,-4.7,.15,.55,.19,'#345461');
     cube(-2.12,3.12,-8.78,2,.12,.12,'#62939e');cube(2.2,3.12,-8.78,2,.12,.12,'#62939e');
-    for(const p of app.panels){if(app.targets.includes(p))cube(p.x,p.y,p.z-.05,p.w+.025,p.h+.035,.08,'#1d6874');
+    for(const p of app.panels){if(app.targets.includes(p)){
+        const pointed=[...app.hovered.values()].includes(p);
+        cube(p.x,p.y,p.z-.05,p.w+(pointed?.09:.025),p.h+(pointed?.09:.035),.08,pointed?'#edb74b':'#1d6874');
+      }
       draw('quad',model(p.x,p.y,p.z,p.w,p.h,1),[1,1,1,1],p.tex);}
   }
   function frameDesktop(){if(!app.session&&!app.glError&&app.gl){const canvas=app.canvas,gl=app.gl;
@@ -202,7 +219,9 @@
     if(id.startsWith('choice:'))selectChoice(id.slice(7));
     else if(id==='next')proceed();
     else if(id==='source')toggleSource();
-    else if(id==='restart')reset();}
+    else if(id==='restart')reset();
+    else if(id==='story-prev')switchStory(-1);
+    else if(id==='story-next')switchStory(1);}
   function xrFrame(t,frame){if(!app.session)return;const session=frame.session;
     const delta=app.lastTime===null?0:Math.min((t-app.lastTime)/1000,.05);app.lastTime=t;
     updateLocomotion(session,delta);
