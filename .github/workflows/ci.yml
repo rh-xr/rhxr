@@ -1,9 +1,9 @@
 name: RH-XR Lot 0 checks
 on:
   push:
-    branches: [main, 'feature/**', 'codex/**']
+    branches: [main, 'feature/**', 'codex/**', 'design/**']
   pull_request:
-    branches: [main]
+    branches: [main, 'feature/**']
 permissions:
   contents: read
 jobs:
