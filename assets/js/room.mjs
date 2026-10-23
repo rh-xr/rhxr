@@ -5,6 +5,7 @@ import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotio
 import { loadOfficeFurniture } from './office-furniture.mjs';
 import {createPremiumOffice} from './premium-office-v14.mjs';
 import {upgradeOfficeFinish} from './premium-finish-v14-1.mjs';
+import {loadArmchairAvatar} from './office-avatar-v14-1.mjs';
 import {createMetricsSampler,createMetricsDisplay} from './metrics-v14.mjs';
 
 let initialized = false;
@@ -102,7 +103,7 @@ export async function mountRoom(stage) {
   // Remove a low-poly placeholder only when the matching GLB is ready.
   const furnitureLoaded=new Set();
   const furnitureStatus=document.querySelector('#stage-status');
-  void loadOfficeFurniture(THREE,scene,{onItem(id,ready){
+  const furnitureReady=loadOfficeFurniture(THREE,scene,{onItem(id,ready){
     if(ready){fallback[id].forEach(m=>{m.visible=false;});furnitureLoaded.add(id);}
     perf?.markAsset(id,ready);
     if(furnitureStatus){
@@ -111,10 +112,29 @@ export async function mountRoom(stage) {
     }
   }}).catch(error=>console.warn('[RH-XR] Furniture loader unavailable; placeholders retained',error));
 
-  cylinder(.3, .25, .8, 0, 1.18, -4.5, mat.shirt);
-  sphere(.28, 0, 1.83, -4.5, mat.skin);
-  cylinder(.09, .09, .55, -.35, 1.3, -4.5, mat.skin);
-  cylinder(.09, .09, .55, .35, 1.3, -4.5, mat.skin);
+  // Keep the existing geometric actor as a loading/failure fallback.
+  const basicAvatar=[
+    cylinder(.3, .25, .8, 0, 1.18, -4.5, mat.shirt),
+    sphere(.28, 0, 1.83, -4.5, mat.skin),
+    cylinder(.09, .09, .55, -.35, 1.3, -4.5, mat.skin),
+    cylinder(.09, .09, .55, .35, 1.3, -4.5, mat.skin)
+  ];
+  if(advanced){
+    const avatarStatus=document.querySelector('#avatar-status');
+    // Defer avatar decompression until the three original pieces of furniture load.
+    void furnitureReady.then(()=>loadArmchairAvatar(THREE,scene,{
+      onLoaded(){
+        basicAvatar.forEach(mesh=>{mesh.visible=false;});
+        if(avatarStatus)avatarStatus.textContent='Avatar Mona Lisa GLB sur le fauteuil RH · chargé';
+      },
+      onFailed(){
+        if(avatarStatus)avatarStatus.textContent='Avatar indisponible · personnage simplifié conservé';
+      }
+    })).catch(error=>{
+      console.warn('[RH-XR V14.1] Avatar initialization',error);
+      if(avatarStatus)avatarStatus.textContent='Avatar indisponible · personnage simplifié conservé';
+    });
+  }
   if(!premium){
     for (const x of [-4, 4]) {
       cylinder(.35, .30, .45, x, .24, -6, mat.wood);
