@@ -102,7 +102,7 @@ export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer}
     if(id.startsWith('mission:')){session.setMission(id.slice(8));collapsed=false;}
     else if(id.startsWith('choice:')){if(!session.choose(id.slice(7)))return false;}
     else if(id==='next'){if(!session.next())return false;}
-    else if(id==='document'){if(!session.toggleDocument())return false;}
+    else if(id==='document'){if(!session.view().pending)return false;session.toggleDocument();}
     else if(id==='restart')session.reset();
     else if(id==='collapse')collapsed=true;
     else if(id==='restore')collapsed=false;
