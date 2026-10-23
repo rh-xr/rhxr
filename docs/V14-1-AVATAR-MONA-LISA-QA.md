@@ -31,6 +31,30 @@ Le chargement de Mona Lisa commence **après celui des trois meubles GLB** afin 
 
 Cette modification est limitée à `/experiences/rhxr-v14-1/index.html` et au paramètre `office=v14-1`. Les routes V14, V13 et S02 sont conservées telles quelles.
 
+## Correctif de calibration interactive (23/10/2026)
+
+Après observation dans le Quest indiquant que Mona Lisa regardait toujours dans le sens opposé malgré le changement du défaut à 180°, la seule configuration numérique a été jugée insuffisante pour démontrer l'orientation du modèle.
+
+Le correctif ajoute :
+- un **bouton « Tourner Mona Lisa de 180° »** accessible dans le guide V14.1 sur ordinateur et dans le navigateur du Quest avant l'entrée VR ;
+- un **panneau 3D** « TOURNER MONA LISA » positionné à droite du fauteuil RH (x≈2,15 m, y≈1,80 m, z≈-3,85 m), sélectionnable par pointage + gâchette sur Quest ;
+- une rotation **à chaud du pivot Three.js de l'avatar déjà chargé** (0° ↔ 180°), sans rechargement du GLB, sans changement d'échelle ni déplacement du fauteuil ;
+- un statut affichant l'**angle effectivement lu sur le pivot** après chaque rotation ; l'étiquette n'annonce pas un angle théorique indépendant de la scène ;
+- un nouvel identifiant de chargement du module `room.mjs` sur la page V14.1 et de `office-avatar-v14-1.mjs` pour éviter la réutilisation d'une ancienne version mise en cache par le navigateur Quest.
+
+**L'orientation par défaut reste 180°**, avec `?avatarYaw=0` comme comparaison facultative. Il ne faut pas conclure que Mona Lisa regarde le visiteur simplement parce que l'angle vaut 180° : son axe visuel natif dans le GLB doit être confirmé visuellement sur Quest.
+
+### Vérification immédiate
+
+1. Ouvrir une nouvelle Preview de la PR #7 et **attendre « Mona Lisa GLB chargé »** dans le guide.
+2. Dans le casque, regarder le fauteuil et repérer le petit panneau **« TOURNER MONA LISA »** à sa droite.
+3. Le viser avec la manette et presser la gâchette **une fois** : Mona Lisa doit pivoter visiblement de 180° sur place. Le panneau indique son nouvel angle ; presser une seconde fois pour revenir.
+4. Hors VR, essayer également le bouton du guide. Vérifier que les deux commandes modifient le même objet 3D et qu'aucune ne multiplie la taille du personnage.
+5. Si l'orientation souhaitée est celle de 0°, cette observation permettra de corriger ensuite la valeur par défaut sans tâtonner ; si le modèle ne tourne pas malgré l'angle qui change, il faudra examiner sa géométrie d'origine dans Blender.
+6. S'assurer que les interactions DACI, les joysticks et le retour à la 3D restent fonctionnels.
+
+Les tests CI vérifient la variation de `rotation.y` du pivot et son maintien d'échelle, mais **la preuve perceptuelle de la rotation sur Quest exige le test matériel**.
+
 ## Validation sur Meta Quest 3S
 
 1. Ouvrir `/experiences/rhxr-v14-1/index.html` dans le navigateur du Quest et entrer en VR.
