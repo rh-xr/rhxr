@@ -34,7 +34,7 @@ test('furniture layout has non-overlapping office roles and metre-scale dimensio
     assert.ok(m.size.every(v=>v>=0.5&&v<=4));
     assert.ok(m.position.every(Number.isFinite));
     assert.ok(Number.isFinite(m.yaw));
-    assert.match(modelHref(m.filename),/\\/assets\\/models\\/[^/]+\\.glb$/);
+    assert.ok(modelHref(m.filename).endsWith('/assets/models/'+m.filename));
   }
   assert.ok(furniturePlan.find(m=>m.id==='visitor').position[2]>furniturePlan.find(m=>m.id==='desk').position[2]);
 });
