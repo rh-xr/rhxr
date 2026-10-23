@@ -216,9 +216,9 @@ export async function mountRoom(stage) {
       perf.tick(time,renderer.info.render,renderer.info.memory,renderer.xr.isPresenting?'xr':'desktop');
       metricPanel?.update(time);
       // This reports animation callback pacing, not measured GPU time.
-      const info=perf.snapshot();
       if(debugInfo&&time-lastDebugTextAt>=1000){
         lastDebugTextAt=time;
+        const info=perf.snapshot();
         debugInfo.textContent='V14 '+info.mode+' · '+(info.fpsEstimate??'…')+
           ' FPS estimées · '+(info.drawCalls??'…')+' draw calls · '+(info.triangles??'…')+' triangles';
       }
