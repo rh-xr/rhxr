@@ -61,17 +61,6 @@ export function createAvatarTurnControl(THREE,{scene,renderer,playerRig},avatar,
     controller.addEventListener('select',listener);
     controllers.push([controller,listener]);
   }
-  function onDesktopClick(event){
-    if(renderer.xr.isPresenting)return;
-    const rect=renderer.domElement.getBoundingClientRect();
-    if(rect.width===0||rect.height===0)return;
-    const pointer=new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1);
-    const cam=renderer.xr.isPresenting?renderer.xr.getCamera():scene.getObjectByName('rhxr-desktop-camera');
-    // Desktop 2D button is the primary alternate control; camera may not be named.
-    if(!cam)return;
-    raycaster.setFromCamera(pointer,cam);
-    if(raycaster.intersectObject(plaque,false).length)turn();
-  }
   // DOM button remains accessible on desktop and after exiting VR.
   // No desktop canvas listener: the same button works reliably without pointer-lock conflicts.
   paint();
