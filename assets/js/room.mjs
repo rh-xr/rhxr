@@ -6,7 +6,7 @@ import { loadOfficeFurniture,furniturePlanV141 } from './office-furniture.mjs?v=
 import {createPremiumOffice} from './premium-office-v14.mjs';
 import {upgradeOfficeFinish} from './premium-finish-v14-1.mjs';
 import {loadArmchairAvatar,ARMCHAIR_AVATAR_PLACEMENT} from './office-avatar-v14-1.mjs?v=20261024-wall312';
-import {createAvatarTurnControl,avatarYawDegrees} from './avatar-turn-v14-1.mjs?v=20261024-wall312';
+import {createAvatarTurnControl,avatarYawDegrees} from './avatar-turn-v14-1.mjs?v=20261024-readable96';
 import {createMetricsSampler,createMetricsDisplay} from './metrics-v14.mjs';
 
 let initialized = false;
