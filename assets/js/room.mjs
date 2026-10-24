@@ -2,8 +2,12 @@
  * The same educational scenario remains available without XR.
  */
 import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotion.mjs';
-import { loadOfficeFurniture } from './office-furniture.mjs';
+import { loadOfficeFurniture,furniturePlanV141 } from './office-furniture.mjs?v=20261024-badr-final';
 import {createPremiumOffice} from './premium-office-v14.mjs';
+import {upgradeOfficeFinish} from './premium-finish-v14-1.mjs';
+import {loadArmchairAvatar,ARMCHAIR_AVATAR_PLACEMENT} from './office-avatar-v14-1.mjs?v=20261024-wall312';
+import {createAvatarTurnControl,avatarYawDegrees} from './avatar-turn-v14-1.mjs?v=20261024-executive';
+import {loadExecutiveAssembly,EXECUTIVE_PLACEMENT} from './office-executive-v14-2.mjs?v=20261024-badr-final';
 import {createMetricsSampler,createMetricsDisplay} from './metrics-v14.mjs';
 
 let initialized = false;
@@ -11,7 +15,8 @@ export async function mountRoom(stage) {
   if (initialized) return;
   const THREE = await import('https://esm.sh/three@0.169.0');
   const params=new URLSearchParams(window.location.search);
-  const premium=params.get('office')==='v14';
+  const advanced=window.location.pathname.includes('/rhxr-v14-1/')||params.get('office')==='v14-1';
+  const premium=advanced||params.get('office')==='v14';
   const diagnostics=premium&&params.get('metrics')==='1';
   const perf=diagnostics?createMetricsSampler():null;
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'low-power' });
@@ -73,6 +78,7 @@ export async function mountRoom(stage) {
   if(premium){
     // Design prototype: same Quest player rig, locomotion, GLBs and S02 state.
     createPremiumOffice(THREE,scene);
+    if(advanced)upgradeOfficeFinish(THREE,scene);
   }else{
     cube(11, .2, 13, 0, -.12, -1, mat.floor);
     cube(11, 5.6, .16, 0, 2.8, -7.6, mat.wall);
@@ -81,25 +87,34 @@ export async function mountRoom(stage) {
     cube(11, .15, 13, 0, 5.6, -1, mat.wall);
   }
   const metricPanel=perf?createMetricsDisplay(THREE,scene,perf):null;
+  // Preserve the validated S02/V14 layout; only V14.1 opts into these adjustments.
+  // In V14.2 the executive GLB already includes its chair. Load the two
+  // remaining furniture GLBs first; only load legacy manager chair on failure.
+  const v141Layout=advanced?furniturePlanV141.filter(spec=>spec.id!=='manager'):null;
+  const deskCenter=advanced?-2.27:-2.35;
+  const managerZ=advanced?-3.75:-4.50;
+  const visitorZ=advanced?-.86:.05;
   const fallback={desk:[],manager:[],visitor:[]};
-  fallback.desk.push(cube(3.7, .15, 1.7, 0, 1.03, -2.35, mat.wood));
-  for (const x of [-1.5, 1.5]) for (const z of [-2.95, -1.75]) {
-    fallback.desk.push(cube(.12, 1, .12, x, .5, z, mat.metal));
-  }
+  fallback.desk.push(cube(advanced?3.30:3.7, advanced?.14:.15, advanced?1.62:1.7, 0, advanced?1.0:1.03, deskCenter, mat.wood));
+  for (const x of (advanced?[-1.35,1.35]:[-1.5,1.5]))
+    for (const z of (advanced?[-2.81,-1.73]:[-2.95,-1.75])) {
+      fallback.desk.push(cube(advanced?.11:.12,advanced?1:1,advanced?.11:.12,x,.5,z,mat.metal));
+    }
 
   // The empty visitor chair faces the desk (-Z), so its back is +Z.
   // The occupied chair faces the visitor (+Z), so its back is -Z.
   function chair(x,z,backSide,id){
-    fallback[id].push(cube(.9,.15,.85,x,.55,z,mat.seat));
-    fallback[id].push(cube(.9,1,.13,x,1.05,z+.36*backSide,mat.seat));
+    const wider=advanced&&id==='visitor';
+    fallback[id].push(cube(wider?1.06:.9,.15,wider?1.06:.85,x,.55,z,mat.seat));
+    fallback[id].push(cube(wider?1.06:.9,wider?1.08:1,.13,x,1.05,z+(wider?.45:.36)*backSide,mat.seat));
   }
-  chair(0,-4.5,-1,'manager');
-  chair(0,.05,+1,'visitor');
+  chair(0,managerZ,-1,'manager');
+  chair(0,visitorZ,+1,'visitor');
   // Load local, pinned GLBs *without blocking the VR render loop*.
   // Remove a low-poly placeholder only when the matching GLB is ready.
   const furnitureLoaded=new Set();
   const furnitureStatus=document.querySelector('#stage-status');
-  void loadOfficeFurniture(THREE,scene,{onItem(id,ready){
+  const furnitureReady=loadOfficeFurniture(THREE,scene,{plan:v141Layout||undefined,onItem(id,ready){
     if(ready){fallback[id].forEach(m=>{m.visible=false;});furnitureLoaded.add(id);}
     perf?.markAsset(id,ready);
     if(furnitureStatus){
@@ -108,10 +123,89 @@ export async function mountRoom(stage) {
     }
   }}).catch(error=>console.warn('[RH-XR] Furniture loader unavailable; placeholders retained',error));
 
-  cylinder(.3, .25, .8, 0, 1.18, -4.5, mat.shirt);
-  sphere(.28, 0, 1.83, -4.5, mat.skin);
-  cylinder(.09, .09, .55, -.35, 1.3, -4.5, mat.skin);
-  cylinder(.09, .09, .55, .35, 1.3, -4.5, mat.skin);
+  // Keep the existing geometric actor as a loading/failure fallback.
+  const basicAvatar=[
+    cylinder(.3, .25, .8, 0, 1.18, managerZ, mat.shirt),
+    sphere(.28, 0, 1.83, managerZ, mat.skin),
+    cylinder(.09, .09, .55, -.35, 1.3, managerZ, mat.skin),
+    cylinder(.09, .09, .55, .35, 1.3, managerZ, mat.skin)
+  ];
+  if(advanced){
+    const avatarStatus=document.querySelector('#avatar-status');
+    const avatarTurn=document.querySelector('#avatar-turn');
+    const avatarTurnBack=document.querySelector('#avatar-turn-back');
+    const yawParam=params.get('executiveYaw')??params.get('avatarYaw');
+    const yawDegrees=yawParam!==null&&/^[0-9]{1,3}$/.test(yawParam)&&Number(yawParam)<360?
+      Number(yawParam):312;
+    const modelYaw=yawDegrees*Math.PI/180;
+    function connectTurnButtons(model,designation){
+      const updateStatus=(angle)=>{
+        if(avatarStatus)avatarStatus.textContent=
+          designation+' chargé · orientation : '+angle+'° · rotation par 45°';
+      };
+      updateStatus(avatarYawDegrees(model));
+      try{
+        const controls=createAvatarTurnControl(THREE,{scene,renderer,playerRig},model,{
+          label:designation,onRotate:updateStatus
+        });
+        if(avatarTurn){
+          avatarTurn.disabled=false;
+          avatarTurn.onclick=()=>controls.turn(1);
+          avatarTurn.textContent='↻ Tourner le personnage +45°';
+        }
+        if(avatarTurnBack){
+          avatarTurnBack.disabled=false;
+          avatarTurnBack.onclick=()=>controls.turn(-1);
+          avatarTurnBack.textContent='↺ Tourner le personnage −45°';
+        }
+      }catch(error){console.warn('[RH-XR] Avatar rotation controls unavailable',error);}
+    }
+    async function restoreLegacyOccupiedChair(){
+      // Keep the old V14.1 actor/seat only for recovery when new GLB fails.
+      if(avatarStatus)avatarStatus.textContent='Nouveau modèle indisponible · repli vers le fauteuil précédent';
+      try{
+        await loadOfficeFurniture(THREE,scene,{
+          plan:furniturePlanV141.filter(spec=>spec.id==='manager'),
+          onItem(id,ready){
+            if(ready){fallback.manager.forEach(mesh=>{mesh.visible=false;});furnitureLoaded.add(id);}
+            perf?.markAsset(id,ready);
+          }
+        });
+        const legacy=await loadArmchairAvatar(THREE,scene,{
+          placement:{...ARMCHAIR_AVATAR_PLACEMENT,yawRadians:modelYaw},
+          onLoaded(model){
+            basicAvatar.forEach(mesh=>{mesh.visible=false;});
+            connectTurnButtons(model,'Mona Lisa (repli)');
+          },
+          onFailed(){
+            if(avatarStatus)avatarStatus.textContent='Modèles GLB indisponibles · personnages de secours affichés';
+          }
+        });
+        return legacy;
+      }catch(error){
+        console.warn('[RH-XR V14.2] Legacy avatar fallback failed',error);
+        if(avatarStatus)avatarStatus.textContent='Modèle intégré indisponible · géométrie de secours affichée';
+      }
+    }
+    // Only one occupied chair/person assembly at a time. The original chair
+    // GLB and Mona Lisa are not even downloaded when the new one succeeds.
+    void furnitureReady.then(async()=>{
+      const result=await loadExecutiveAssembly(THREE,scene,{
+        placement:{...EXECUTIVE_PLACEMENT,yawRadians:modelYaw},
+        onLoaded(model){
+          fallback.manager.forEach(mesh=>{mesh.visible=false;});
+          basicAvatar.forEach(mesh=>{mesh.visible=false;});
+          furnitureLoaded.add('manager');perf?.markAsset('manager',true);
+          if(furnitureStatus)furnitureStatus.textContent='V14 · mobilier et ensemble RH GLB 3/3';
+          connectTurnButtons(model,'Badr Han · fauteuil intégré');
+        }
+      });
+      if(!result.ok)await restoreLegacyOccupiedChair();
+    }).catch(async error=>{
+      console.warn('[RH-XR V14.2] Combined model initialization failed',error);
+      await restoreLegacyOccupiedChair();
+    });
+  }
   if(!premium){
     for (const x of [-4, 4]) {
       cylinder(.35, .30, .45, x, .24, -6, mat.wood);
@@ -176,6 +270,7 @@ export async function mountRoom(stage) {
     playerRig.updateMatrixWorld(true);
   }
 
+  const frameSubscribers=new Set();
   renderer.setAnimationLoop((time) => {
     const dt = Math.min(clock.getDelta(), 0.05);
     if (renderer.xr.isPresenting) {
@@ -210,6 +305,10 @@ export async function mountRoom(stage) {
       const move = displacement({ x: 0, y: vertical }, forward, dt, 2);
       playerRig.position.x = clamp(playerRig.position.x + move.x, -4.7, 4.7);
       playerRig.position.z = clamp(playerRig.position.z + move.z, -6.7, 5.1);
+    }
+    for(const subscriber of frameSubscribers){
+      try{subscriber({time,dt,xr:renderer.xr.isPresenting});}
+      catch(error){console.warn('[RH-XR V14.1] Frame subscriber error',error);frameSubscribers.delete(subscriber);}
     }
     renderer.render(scene, camera);
     if(perf){
@@ -286,4 +385,6 @@ export async function mountRoom(stage) {
     } catch (err) { console.warn('WebXR non disponible', err); }
   }
   initialized = true;
+  return {THREE,scene,renderer,playerRig,camera,stage,
+    onFrame(callback){frameSubscribers.add(callback);return ()=>frameSubscribers.delete(callback);}};
 }

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {furniturePlan,sourceCommit,modelHref,loadOfficeFurniture} from '../assets/js/office-furniture.mjs';
+import {furniturePlan,furniturePlanV141,sourceCommit,modelHref,loadOfficeFurniture} from '../assets/js/office-furniture.mjs';
 
 test('pinned RH office GLBs are valid glTF 2 binary containers',()=>{
   assert.equal(sourceCommit,'e9a337318157864cdbfef5aa70f68de6f0784e6b');
@@ -64,4 +64,43 @@ test('the existing VR office keeps locomotion unchanged and loads local GLBs',()
   assert.ok(src.includes('snapAroundHead(turn.angle'));
   assert.ok(html.includes('type="importmap"'));
   assert.ok(html.includes('https://esm.sh/three@0.169.0'));
+});
+
+test('V14.2 enlarges desk and visitor without exceeding sensible furniture proportions',()=>{
+  assert.equal(furniturePlanV141.length,3);
+  const byId=(plan,id)=>plan.find(p=>p.id===id);
+  const deskOld=byId(furniturePlan,'desk'),desk=byId(furniturePlanV141,'desk');
+  const visitorOld=byId(furniturePlan,'visitor'),visitor=byId(furniturePlanV141,'visitor');
+  const oldV141Desk=[3.195,1.035,1.575],oldV141Visitor=[1.02,1.18,1.02];
+  assert.deepEqual(desk.size,[3.30,1.07,1.62]);
+  assert.deepEqual(visitor.size,[1.06,1.23,1.06]);
+  for(let i=0;i<3;i++){
+    assert.ok(desk.size[i]>oldV141Desk[i]&&desk.size[i]<deskOld.size[i]);
+    assert.ok(visitor.size[i]>oldV141Visitor[i]);
+    assert.ok(visitor.size[i]/oldV141Visitor[i]<1.06);
+  }
+  assert.deepEqual(desk.position,[0,0,-2.27]);
+  assert.deepEqual(visitor.position,[0,0,-.86]);
+  assert.deepEqual(byId(furniturePlanV141,'manager').position,[0,0,-3.75],
+    'Legacy armchair location stays available for recovery only');
+});
+
+test('Desk-to-visitor envelope retains a small positive gap in final V14.2 layout',()=>{
+  const desk=furniturePlanV141.find(x=>x.id==='desk');
+  const visitor=furniturePlanV141.find(x=>x.id==='visitor');
+  const deskFront=desk.position[2]+desk.size[2]/2;
+  const visitorBack=visitor.position[2]-visitor.size[2]/2;
+  const gap=visitorBack-deskFront;
+  assert.ok(gap>=.055&&gap<=.12,'Visitor must not penetrate desk after scale up');
+  assert.ok(Math.abs(gap-.07)<.000001);
+});
+
+test('V14.1-specific plan does not alter legacy S02 or V14 defaults',()=>{
+  assert.equal(furniturePlan.find(x=>x.id==='manager').position[2],-4.45);
+  assert.equal(furniturePlan.find(x=>x.id==='visitor').position[2],.05);
+  const src=readFileSync(new URL('../assets/js/room.mjs',import.meta.url),'utf8');
+  assert.ok(src.includes('plan:v141Layout||undefined'));
+  assert.ok(src.includes('chair(0,managerZ'));
+  assert.ok(src.includes('chair(0,visitorZ'));
+  assert.ok(src.includes('if(advanced)'));
 });

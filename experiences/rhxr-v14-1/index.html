@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RH·XR V14.1 — Bureau immersif RH + DACI</title>
+<script type="importmap">{"imports":{"three":"https://esm.sh/three@0.169.0"}}</script>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#15303b;background:#eef3f1;--ink:#15303b;--teal:#126778;--line:#d6e3e3}
+*{box-sizing:border-box}body{margin:0}button,select{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #dba755;outline-offset:3px}
+header{background:linear-gradient(105deg,#0b2a37,#135765);color:#f5fbfb;padding:20px max(22px,calc((100vw - 1510px)/2))}
+header .top{font-size:11px;letter-spacing:.13em;color:#b7e0dd;font-weight:800}header h1{font-size:clamp(24px,2.5vw,38px);margin:7px 0 5px}
+header p{max-width:940px;margin:0;line-height:1.5;color:#d5e7e7;font-size:14px}
+header nav{margin-top:13px;display:flex;flex-wrap:wrap;gap:17px;font-size:13px}header a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.layout{max-width:1550px;padding:18px;margin:auto;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(330px,.8fr);gap:18px;align-items:start}
+article{border-radius:16px;box-shadow:0 10px 32px #153a470c;background:white;overflow:hidden;border:1px solid var(--line)}
+#stage{height:min(68vh,740px);min-height:440px;position:relative;background:linear-gradient(#dcece8,#abbebb);overflow:hidden}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.stage-label{position:absolute;left:13px;top:12px;background:#133642eb;color:white;font-size:13px;font-weight:700;border-radius:9px;padding:10px;pointer-events:none;max-width:60%}
+.stage-status{position:absolute;top:12px;right:12px;font-size:11px;color:white;background:#143b43dc;border-radius:7px;padding:9px;max-width:35%}
+.stage-bottom{position:absolute;bottom:12px;left:12px;right:12px;display:flex;gap:8px;justify-content:space-between;align-items:end}
+.stage-bottom small{background:#123a44ed;border-radius:8px;padding:9px;color:white;line-height:1.4;max-width:55%}
+.stage-bottom button{border:0;border-radius:8px;padding:11px;background:#f0cf9a;color:#243a3e;font-weight:750}
+.room-controls button{font-weight:800}
+#stage .vr-btn{position:absolute;right:13px;top:58px;border:0;padding:12px 19px;background:#126b78;color:white;border-radius:9px;font-weight:800;z-index:8}
+#stage .avatar{display:none}
+.scene-help{font-size:13px;color:#56737a;padding:14px;line-height:1.5}
+.panel{padding:22px;max-height:83vh;overflow-y:auto}
+.panel h2{margin:0 0 8px;font-size:22px}label{font-weight:700;font-size:13px;color:#365767}
+select{width:100%;border-radius:9px;padding:11px;border:1px solid #9cbdc4;background:#f4f9f8;margin:7px 0 15px;color:#1c3945}
+.kicker{font-size:12px;letter-spacing:.04em;font-weight:750;color:#1c7685}
+#actor{margin:9px 0 6px;font-size:18px}
+#dialogue{background:#f2f7f5;border-left:4px solid #bc965f;border-radius:8px;padding:13px 15px;line-height:1.6}
+#question{font-size:15px;line-height:1.5}
+#choices{display:grid;gap:8px;margin-top:12px}
+#choices button{border:1px solid #accdd0;background:#eaf5f4;color:#123b4b;text-align:left;padding:12px 14px;border-radius:9px;font-size:13px;line-height:1.45}
+#choices button:hover{background:#cee9e6}
+#feedback{margin:12px 0;padding:15px;border-radius:10px;background:#fff4df;color:#493c27;font-size:13px;line-height:1.6;white-space:pre-line}
+#citation{border:1px solid #b8d4ce;border-radius:8px;padding:12px;background:#f1f7f5;font-size:13px;line-height:1.5;overflow-wrap:anywhere;margin:12px 0}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0}
+.actions button{padding:10px 14px;border:1px solid #9fc9cf;border-radius:9px;background:#e5f2f2;color:#104c58;font-weight:750}
+.actions button.main{background:#0f6c78;color:white}
+.actions button[disabled]{opacity:.5;cursor:not-allowed}
+.avatar-state{margin:9px 0 14px;padding:9px 12px;border:1px solid #d7e4db;background:#f0f7f3;border-radius:8px;color:#315e55;font-size:12px;font-weight:700}
+ #mission-progress{width:100%;height:9px;accent-color:#177885;margin:8px 0 15px}.recap-note{font-size:12px;color:#406a70;line-height:1.55;margin:5px 0 12px}.case-file{background:#f3f8f7;border:1px solid #b6d6d1;border-radius:12px;padding:13px 15px;margin:7px 0 16px;font-size:13px;color:#224a4d;line-height:1.55}.case-file h3{font-size:15px;margin:0 0 8px}.case-file button{background:#cde5df;color:#164f55;border:1px solid #9dc4bd;border-radius:8px;padding:8px 11px;font-weight:750}.case-details{padding:9px 0 0;border-top:1px solid #c4dcd7;margin-top:10px}.case-details p{margin:7px 0}.case-skills{color:#386b70;font-size:12px;font-weight:700}.debrief strong{color:#164f55}
+.objective{padding:12px 13px;background:#f0f8f7;border:1px solid #d0e2de;border-radius:8px;color:#315761;font-size:13px;line-height:1.5;margin:9px 0 13px}.debrief{background:#edf5ef;padding:12px 15px;border-radius:10px;color:#294537;font-size:13px;white-space:pre-line;line-height:1.55;margin:12px 0}
+.hint{font-size:12px;color:#53737b;line-height:1.5;border-top:1px solid #dfebec;padding-top:13px;margin-top:14px}
+.badge{display:inline-block;font-size:11px;background:#e4efec;color:#315760;padding:5px 9px;border-radius:6px;font-weight:700}
+footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;font-size:12px;color:#557179}
+[hidden]{display:none!important}
+@media(max-width:1020px){.layout{grid-template-columns:1fr}.panel{max-height:none}#stage{height:58vw;min-height:430px}}
+@media(max-width:580px){header{padding:18px}#stage{height:350px;min-height:350px}.layout{padding:10px}.panel{padding:15px}.stage-bottom small{font-size:10px}.stage-bottom button{font-size:11px}.scene-help{font-size:12px}}
+</style></head>
+<body>
+<header><span class="top">RH·XR / LABORATOIRE V14.1 / FICTION</span>
+<h1>Un bureau VR. Sept missions RH. Des documents DACI et des débriefings en contexte.</h1>
+<p>Choisissez une situation depuis les panneaux du bureau ou depuis le guide textuel. En VR, pointez un panneau avec la manette et appuyez sur la gâchette. Chaque décision DACI mène à une conséquence et à une source fictive identifiable. Trois missions complémentaires abordent l’IA dans le recrutement, la confidentialité des données RH et la coopération hybride. Tous les documents d’exercice ajoutés sont fictifs. Le nouveau modèle 3D associe le personnage Badr Han et son fauteuil en une seule scène ; son orientation initiale est réglable depuis le Quest.</p>
+<nav><a href="./parcours.html">Catalogue des 7 parcours</a><a href="../rhxr-v14/index.html">← Laboratoire V14</a><a href="../../simulation.html?office=v14">Bureau V14 initial</a><a href="../daci-v13/index.html">Parcours DACI V13</a><a href="../../index.html">Portail RH·XR</a></nav></header>
+<div class="layout">
+<article><div id="stage" aria-label="Bureau de formation RH·XR en 3D">
+<div class="avatar" aria-hidden="true"></div>
+<div class="stage-label">RH·XR V14.1 · Espace d'apprentissage</div>
+<div class="stage-status" id="stage-status" role="status">Chargement de la scène…</div>
+<div class="stage-bottom"><small id="stage-hint">WASD/flèches sur PC · joysticks Quest 3S en VR.</small>
+<button type="button" id="view-switch" hidden>Activer la 3D</button></div></div>
+<div class="scene-help">Quest : <strong>gâchette = sélectionner</strong>, stick gauche = déplacement, stick droit = rotation de 45°. Le fauteuil RH et Mona Lisa sont remplacés par un ensemble GLB intégré (Badr Han et son fauteuil), orientable par pas de 45°. Pour harmoniser les proportions, le bureau et la chaise visiteur sont légèrement agrandis ; Badr est avancée de 8 cm vers le bureau et relevée de 9 cm afin de dégager ses chaussures du sol. Les panneaux pédagogiques restent derrière Mona Lisa, mais sont positionnés plus à gauche et plus bas, avancés vers le bureau et agrandis. Leur fond bleu nuit, opaque à 98,5 %, et leur typographie moderne facilitent la lecture dans le Quest. Ils ne suivent pas vos mouvements. Utilisez « Masquer » pour libérer la vue. Sur PC : cliquez sur les panneaux 3D ou utilisez les commandes accessibles à droite.</div>
+</article>
+<article class="panel"><span class="badge">Simulations fictives · aucune décision RH individuelle</span>
+<h2>Guide pédagogique DACI</h2>
+<div id="avatar-status" class="avatar-state" role="status">Ensemble personnage et fauteuil Badr Han · chargement du modèle 3D…</div><div class="actions"><button id="avatar-turn" type="button" disabled>↻ Tourner le personnage +45°</button><button id="avatar-turn-back" type="button" disabled>↺ Tourner le personnage −45°</button><span class="badge">Deux petits panneaux transparents contre le mur, sélectionnables dans le Quest</span></div>
+<label for="mission">Mission à réaliser</label>
+<select id="mission" aria-label="Choisir une mission RH"></select>
+<section class="case-file" aria-labelledby="case-title">
+<h3 id="case-title">Dossier de mission</h3>
+<p id="case-role"></p>
+<p class="case-skills" id="case-skills"></p>
+<button type="button" id="brief-toggle" aria-expanded="false" aria-controls="brief-detail">Consulter le dossier</button>
+<div id="brief-detail" class="case-details" hidden>
+<p><strong>Situation :</strong> <span id="case-setting"></span></p>
+<p><strong>Support :</strong> <span id="case-artifact"></span></p>
+<p><strong>Avant de décider :</strong> <span id="case-prepare"></span></p>
+<p><strong>Point de vigilance :</strong> <span id="case-warning"></span></p>
+</div>
+</section>
+<div class="kicker" id="phase">Situation · introduction</div><progress id="mission-progress" max="1" value="0" aria-label="Progression du parcours"></progress><div id="objective" class="objective"></div>
+<h3 id="actor">—</h3>
+<p id="dialogue" aria-live="polite">Chargement du contenu…</p>
+<h4 id="question"></h4>
+<div id="choices"></div>
+<div id="feedback" role="status" hidden></div><div id="debrief" class="debrief" hidden></div>
+<div id="citation" hidden></div>
+<div class="actions">
+<button class="main" id="continue" type="button" hidden>Continuer →</button>
+<button id="document" type="button" hidden>Voir le DACI cité</button>
+<button id="restart" type="button">Recommencer</button>
+<button id="recap-download" type="button" hidden>Enregistrer la fiche de transfert (.md)</button>
+<button id="guide-toggle" type="button">Masquer les panneaux VR</button>
+</div>
+<p class="recap-note" id="recap-note" hidden>Cette fiche pédagogique est générée dans votre navigateur. Elle ne contient que des décisions fictives et leurs retours, sans données d’employés.</p><div class="hint" id="status" role="status">Le bureau et les scénarios se chargent séparément. Le parcours texte reste disponible si la VR n'est pas accessible.</div>
+</article>
+</div><footer>RH·XR V14.1 — démonstrateur pédagogique expérimental. Corpus et personnages fictifs. Les textes de S02 ne sont pas présentés comme des sources DACI vérifiées.</footer>
+<script type="module">
+import {mountRoom} from '../../assets/js/room.mjs?v=20261024-badr-final-1';
+import {createLearningSession} from '../../assets/js/learning-v14-1.mjs?v=20261024-content-v3';
+import {buildLearningRecap,recapFilename} from '../../assets/js/learning-recap-v14-2.mjs';
+import {createSpatialLearningHub} from '../../assets/js/spatial-learning-v14-1.mjs?v=20261024-content-v2';
+const $=id=>document.getElementById(id);let training=null,hub=null;
+const node=(tag,text)=>{const e=document.createElement(tag);e.textContent=String(text??'');return e;};
+function render(v){
+ $('mission').value=v.mission;
+ $('phase').textContent=v.title+(v.phase?' · '+v.phase:'')+' · '+v.steps+'/'+v.totalDecisions+' décision(s)';
+ $('mission-progress').max=v.totalDecisions;
+ $('mission-progress').value=v.steps;
+ $('actor').textContent=v.actor;
+ $('objective').textContent='Objectifs pédagogiques : '+v.objective;
+ $('case-role').textContent='Votre rôle : '+v.caseFile.role;
+ $('case-skills').textContent='Compétences : '+v.competencies.join(' · ');
+ $('case-setting').textContent=v.setting;
+ $('case-artifact').textContent=v.caseFile.artefact;
+ $('case-prepare').textContent=v.caseFile.prepare;
+ $('case-warning').textContent=v.caseFile.vigilance;
+ $('brief-detail').hidden=!v.showBrief;
+ $('brief-toggle').setAttribute('aria-expanded',String(v.showBrief));
+ $('brief-toggle').textContent=v.showBrief?'Refermer le dossier':'Consulter le dossier de mission';
+ $('recap-download').hidden=!v.ending;
+ $('recap-note').hidden=!v.ending;
+ $('debrief').hidden=!v.ending;
+ $('debrief').textContent=v.ending?
+  'Bilan formatif du parcours (aucune évaluation individuelle RH) :\\n'+
+  v.debrief.takeaways.join(' · ')+'\\n\\n'+v.summary+
+  '\\n\\nExercice de transfert : '+v.debrief.recommendedAction+
+  '\\nVigilance : '+v.debrief.warning:'';
+ $('dialogue').textContent=v.dialogue||(v.ending?'Parcours terminé. Revoyez vos choix ou passez à une autre mission.':'');
+ $('question').textContent=v.ending?'Bilan pédagogique':v.question;
+ const zone=$('choices');zone.replaceChildren();
+ if(v.ending)zone.append(node('p','Mission terminée. Recommencez ou choisissez une autre situation RH.'));
+ else if(!v.pending)v.choices.forEach(c=>{const b=node('button',c.key+' · '+c.label);b.type='button';
+   b.addEventListener('click',()=>perform('choice:'+c.id));zone.append(b);});
+ const f=$('feedback');f.hidden=!v.pending;
+ f.textContent=v.pending?[v.reaction,v.feedback,v.note].filter(Boolean).join('\n\n'):'';
+ $('continue').hidden=!v.pending;
+ $('document').hidden=!v.pending||!v.citation;
+ $('document').textContent=v.showDoc?'Fermer la référence DACI':'Voir le DACI cité';
+ const ref=$('citation');ref.hidden=!v.showDoc;ref.replaceChildren();
+ if(v.showDoc){ref.append(node('strong',v.sourceTitle||'Document DACI fictif'),node('p',v.quote||''),
+     node('code',v.citation));}
+}
+function perform(action){
+ if(!training)return;
+ if(hub){hub.action(action);return;}
+ if(action.startsWith('mission:'))training.setMission(action.slice(8));
+ else if(action==='brief')training.toggleBrief();
+ else if(action.startsWith('choice:'))training.choose(action.slice(7));
+ else if(action==='next')training.next();
+ else if(action==='document')training.toggleDocument();
+ else if(action==='restart')training.reset();
+ render(training.view());
+}
+async function start(){
+ try{
+   const r=await fetch('../daci-v13/v13-bundle.json',{cache:'no-store'});
+   if(!r.ok)throw Error('Corpus DACI inaccessible : HTTP '+r.status);
+   training=createLearningSession(await r.json());
+   for(const mission of training.missions){const o=node('option',mission.label);o.value=mission.id;$('mission').append(o);}
+   $('mission').addEventListener('change',e=>perform('mission:'+e.target.value));
+   $('continue').onclick=()=>perform('next');$('document').onclick=()=>perform('document');
+   $('restart').onclick=()=>perform('restart');
+   $('brief-toggle').onclick=()=>perform('brief');
+   $('recap-download').onclick=()=>{
+     const completed=training.view();
+     if(!completed.ending)return;
+     const blob=new Blob([buildLearningRecap(completed)],{type:'text/markdown;charset=utf-8'});
+     const url=URL.createObjectURL(blob);
+     const anchor=document.createElement('a');
+     anchor.href=url;anchor.download=recapFilename(completed);
+     document.body.append(anchor);anchor.click();anchor.remove();
+     setTimeout(()=>URL.revokeObjectURL(url),1000);
+   };
+   $('guide-toggle').onclick=()=>{
+     if(!hub)return;
+     hub.action('toggle');
+   };
+   const requestedMission=new URLSearchParams(location.search).get('mission');
+   if(requestedMission&&training.missions.some(m=>m.id===requestedMission))
+     training.setMission(requestedMission);
+   render(training.view());$('status').textContent='Corpus DACI enrichi chargé. Initialisation du bureau VR…';
+ }catch(error){$('status').textContent='Erreur pédagogique : '+error.message;return;}
+ try{
+   const room=await mountRoom($('stage'));
+   if(!room)throw Error('Salle VR non initialisée');
+   hub=createSpatialLearningHub(room.THREE,room,training,{onChange:render});
+   room.onFrame(()=>hub.update());
+   $('guide-toggle').onclick=()=>hub.action('toggle');
+   $('status').textContent='Sept missions disponibles, réparties sur deux pages dans le Quest. Ouvrez un dossier de mission pour préparer la situation ; choix et débriefs restent accessibles dans ce guide.';
+ }catch(error){console.warn('[RH·XR V14.1] 3D unavailable',error);
+   $('stage-status').textContent='3D indisponible · scénarios textuels actifs';
+   $('status').textContent='VR non disponible : '+error.message+' · Le parcours texte reste opérationnel.';
+ }
+}
+start();
+</script></body></html>

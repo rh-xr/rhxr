@@ -5,6 +5,15 @@ export const furniturePlan=Object.freeze([
   Object.freeze({id:'manager',filename:'amrchair.glb',position:[0,0,-4.45],size:[1.12,1.42,1.05],yaw:0}),
   Object.freeze({id:'visitor',filename:'chair.glb',position:[0,0,0.05],size:[1.02,1.18,1.02],yaw:Math.PI})
 ]);
+/** V14.2 opt-in executive furniture proportions. Unmodified S02 / V14 use furniturePlan.
+ * Desk is slightly larger to match the Badr+chair assembly, with a small
+ * forward shift to keep both executive and visitor envelopes from overlapping.
+ */
+export const furniturePlanV141=Object.freeze([
+  Object.freeze({id:'desk',filename:'desk.glb',position:[0,0,-2.27],size:[3.30,1.07,1.62],yaw:0}),
+  Object.freeze({id:'manager',filename:'amrchair.glb',position:[0,0,-3.75],size:[1.12,1.42,1.05],yaw:0}),
+  Object.freeze({id:'visitor',filename:'chair.glb',position:[0,0,-0.86],size:[1.06,1.23,1.06],yaw:Math.PI})
+]);
 export const modelHref=filename=>new URL('../models/'+filename,import.meta.url).href;
 export function fitModel(THREE,object,spec){
   if(!spec||!spec.size||!object)throw Error('Missing furniture placement');
@@ -23,7 +32,7 @@ export function fitModel(THREE,object,spec){
   pivot.position.set(...spec.position);object.position.sub(pivot.position);pivot.rotation.y=spec.yaw;pivot.add(object);
   return pivot;
 }
-export async function loadOfficeFurniture(THREE,scene,{onItem,Loader}={}){
+export async function loadOfficeFurniture(THREE,scene,{onItem,Loader,plan=furniturePlan}={}){
   let LoaderClass=Loader, draco=null;
   if(!LoaderClass){try{
     const [gltf,dracoModule]=await Promise.all([
@@ -36,11 +45,11 @@ export async function loadOfficeFurniture(THREE,scene,{onItem,Loader}={}){
     draco.setWorkerLimit(2); // Limit worker/memory use on Quest 3S.
   }catch(error){
     console.warn('[RH-XR] GLTF / Draco loader unavailable',error);
-    return furniturePlan.map(spec=>{onItem?.(spec.id,false,null);return {id:spec.id,ok:false};});
+    return plan.map(spec=>{onItem?.(spec.id,false,null);return {id:spec.id,ok:false};});
   }}
   const loader=new LoaderClass();
   if(draco)loader.setDRACOLoader(draco);
-  const results=await Promise.all(furniturePlan.map(async spec=>{
+  const results=await Promise.all(plan.map(async spec=>{
     try{
       const gltf=await loader.loadAsync(modelHref(spec.filename));
       const root=fitModel(THREE,gltf.scene,spec);
