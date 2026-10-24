@@ -19,7 +19,7 @@ export function turnAvatarStep(object,steps=1){
   object.updateMatrixWorld?.(true);
   return next;
 }
-export function createAvatarTurnControl(THREE,{scene,renderer,playerRig},avatar,{onRotate}={}){
+export function createAvatarTurnControl(THREE,{scene,renderer,playerRig},avatar,{onRotate,label='Personnage RH'}={}){
   if(!scene||!renderer||!avatar)throw Error('Cannot create Mona Lisa rotation controls');
   const raycaster=new THREE.Raycaster();
   const origin=new THREE.Vector3(),direction=new THREE.Vector3();
@@ -55,8 +55,8 @@ export function createAvatarTurnControl(THREE,{scene,renderer,playerRig},avatar,
     plaques.push({steps,plaque,repaint,geometry,material,texture});
     return plaque;
   }
-  addPlaque(1,2.05,'↻  MONA LISA +45°');
-  addPlaque(-1,1.48,'↺  MONA LISA −45°');
+  addPlaque(1,2.05,'↻  '+label.toUpperCase()+' +45°');
+  addPlaque(-1,1.48,'↺  '+label.toUpperCase()+' −45°');
   function turn(steps=1){
     const next=turnAvatarStep(avatar,steps);
     plaques.forEach(p=>p.repaint());
