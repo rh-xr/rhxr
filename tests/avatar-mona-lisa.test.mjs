@@ -28,8 +28,8 @@ test('avatar retained at exact original Git blob and seated-height envelope is r
   assert.equal(AVATAR_SOURCE.blob,'b49417c0050d7e1c7dfe4773c8ea8d65806f4f6d');
   assert.equal(AVATAR_SOURCE.commit,sourceCommit);
   assert.equal(AVATAR_SOURCE.bytes,3020580);
-  assert.deepEqual(ARMCHAIR_AVATAR_PLACEMENT.position,[0,0,-4.10]);
-  assert.equal(ARMCHAIR_AVATAR_PLACEMENT.yawRadians,Math.PI,'Default avatar must face opposite direction');
+  assert.deepEqual(ARMCHAIR_AVATAR_PLACEMENT.position,[0,0,-3.75]);
+  assert.ok(Math.abs(ARMCHAIR_AVATAR_PLACEMENT.yawRadians-312*Math.PI/180)<1e-12,'312° is the user-confirmed default');
   assert.deepEqual(ARMCHAIR_AVATAR_PLACEMENT.maxEnvelope,[1.001,1.463,1.012]);
   for(const [updated,previous] of [[1.001,.91],[1.463,1.33],[1.012,.92]]){
     assert.ok(Math.abs(updated/previous-1.1)<1e-12,'Envelope grows exactly 10% per axis');
@@ -55,8 +55,8 @@ test('avatar fitted proportionately and aligned with existing manager armchair c
   const result=fitAvatarToArmchair({Box3,Vector3,Group},model);
   assert.equal(result.name,'rhxr-mona-lisa-armchair-avatar');
   assert.equal(result.children[0],model);
-  assert.deepEqual(result.position.xyz,[0,0,-4.10]);
-  assert.equal(result.rotation.y,Math.PI);
+  assert.deepEqual(result.position.xyz,[0,0,-3.75]);
+  assert.ok(Math.abs(result.rotation.y-312*Math.PI/180)<1e-12);
   const baselineScale=Math.min(.91/(.693429+.695758),1.33/(.948494+.950264),.92/(.574576+.578279));
   assert.ok(Math.abs(model.scale.current-baselineScale*1.1)<1e-10,
     'Actual uniform model scale should increase by 10%');
@@ -73,21 +73,21 @@ test('failed Mona Lisa GLB load keeps geometric actor available',async()=>{
   assert.ok(room.includes('if(advanced){'));
   assert.ok(room.includes('void furnitureReady.then(()=>loadArmchairAvatar'));
   assert.ok(room.includes('basicAvatar.forEach(mesh=>{mesh.visible=false;})'));
-  assert.ok(room.includes("params.get('avatarYaw')==='0'?0:ARMCHAIR_AVATAR_PLACEMENT.yawRadians"),
-    'The 0° orientation should remain available as an explicit comparison only');
+  assert.ok(room.includes('const yawDegrees=')&&room.includes('Number(yawParam):312'),
+    'Default yaw is 312°, with safe optional numeric comparison');
 });
 
 
 test('Mona Lisa rotation advances in ±45° steps without shifting or rescaling the avatar',()=>{
   const avatar={rotation:{y:Math.PI},scale:{x:.68,y:.68,z:.68},
-    position:{x:0,y:0,z:-4.10},updates:0,updateMatrixWorld(force){if(force)this.updates++;}};
+    position:{x:0,y:0,z:-3.75},updates:0,updateMatrixWorld(force){if(force)this.updates++;}};
   assert.equal(AVATAR_TURN_STEP_DEGREES,45);
   assert.equal(avatarYawDegrees(avatar),180);
   assert.equal(turnAvatarStep(avatar,1),225);
   assert.equal(turnAvatarStep(avatar,-1),180);
   assert.equal(turnAvatarStep(avatar,-1),135);
   assert.equal(avatar.scale.x,.68);
-  assert.deepEqual(avatar.position,{x:0,y:0,z:-4.10});
+  assert.deepEqual(avatar.position,{x:0,y:0,z:-3.75});
   for(let i=0;i<5;i++)turnAvatarStep(avatar,1);
   assert.equal(avatarYawDegrees(avatar),0);
   for(let i=0;i<8;i++)turnAvatarStep(avatar,1);
@@ -101,9 +101,9 @@ test('V14.1 loads fresh modules and exposes +45° / −45° Quest and desktop co
   const room=readFileSync(new URL('../assets/js/room.mjs',import.meta.url),'utf8');
   const html=readFileSync(new URL('../experiences/rhxr-v14-1/index.html',import.meta.url),'utf8');
   const control=readFileSync(new URL('../assets/js/avatar-turn-v14-1.mjs',import.meta.url),'utf8');
-  assert.ok(room.includes('office-avatar-v14-1.mjs?v=20261024-layout45'));
-  assert.ok(room.includes('avatar-turn-v14-1.mjs?v=20261024-layout45'));
-  assert.ok(html.includes('room.mjs?v=20261024-layout45-1'));
+  assert.ok(room.includes('office-avatar-v14-1.mjs?v=20261024-wall312'));
+  assert.ok(room.includes('avatar-turn-v14-1.mjs?v=20261024-wall312'));
+  assert.ok(html.includes('room.mjs?v=20261024-wall312-1'));
   assert.ok(html.includes('id="avatar-turn"'));
   assert.ok(html.includes('id="avatar-turn-back"'));
   assert.ok(room.includes('avatarTurn.onclick=()=>controls.turn(1)'));
@@ -112,4 +112,14 @@ test('V14.1 loads fresh modules and exposes +45° / −45° Quest and desktop co
   assert.ok(control.includes('intersectObjects(plaques.map(p=>p.plaque)'));
   assert.ok(control.includes('turnAvatarStep(avatar,steps)'));
   assert.ok(control.includes('avatarYawDegrees(avatar)'));
+});
+
+
+test('312° default responds to 45° steps without losing its exact calibrated angle',()=>{
+  const avatar={rotation:{y:312*Math.PI/180},updateMatrixWorld(){}};
+  assert.equal(avatarYawDegrees(avatar),312);
+  assert.equal(turnAvatarStep(avatar,1),357);
+  assert.equal(turnAvatarStep(avatar,1),42);
+  assert.equal(turnAvatarStep(avatar,-1),357);
+  assert.equal(turnAvatarStep(avatar,-1),312);
 });
