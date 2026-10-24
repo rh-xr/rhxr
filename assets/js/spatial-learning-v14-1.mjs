@@ -2,9 +2,12 @@
  * Deterministic content is supplied by createLearningSession().
  * The validated locomotion and WebXR session handling remain in room.mjs.
  */
-const roundRect=(ctx,x,y,w,h,r)=>{
-  ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();
-};
+// Wall-mounted documentation is no longer camera-following or an opaque overlay.
+export const WALL_DACI_LAYOUT=Object.freeze({
+  position:[0.72,2.65,-7.18],
+  scale:0.82,
+  transparent:true
+});
 function lines(ctx,value,maxWidth,max=4){
   const words=String(value||'').split(/\s+/),result=[];let current='';
   for(const word of words){if(!word)continue;
@@ -21,7 +24,7 @@ function face(THREE,width,height,draw,clickable=false){
   draw(ctx,1024,512);
   const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
   tex.anisotropy=2;
-  const mat=new THREE.MeshBasicMaterial({map:tex,transparent:false,depthTest:true,side:THREE.DoubleSide});
+  const mat=new THREE.MeshBasicMaterial({map:tex,transparent:true,depthWrite:false,depthTest:true,side:THREE.DoubleSide});
   const geo=new THREE.PlaneGeometry(width,height);
   const mesh=new THREE.Mesh(geo,mat);
   mesh.userData.hubClickable=clickable;
@@ -31,8 +34,11 @@ const palette={navy:'#092b38',teal:'#166c78',aqua:'#cce8e6',gold:'#eac486',paper
 export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer},session,{onChange}={}){
   if(!playerRig||!renderer||!session?.view)throw Error('V14.1 hub requires a scene and learning session');
   const root=new THREE.Group();root.name='rhxr-v14-1-spatial-learning-hub';
-  root.position.set(0,1.72,-2.35);
-  playerRig.add(root);
+  // The wall behind Mona Lisa lies at z≈−7.35; text sits a few centimetres
+  // in front of wall lettering to avoid z-fighting, without following the HMD.
+  root.position.set(...WALL_DACI_LAYOUT.position);
+  root.scale.setScalar(WALL_DACI_LAYOUT.scale);
+  scene.add(root);
   const ray=new THREE.Raycaster(),origin=new THREE.Vector3(),direction=new THREE.Vector3();
   const clickable=[],disposables=[],controllers=[],rays=[];
   let hover=null,collapsed=false,disposed=false;
@@ -45,13 +51,21 @@ export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer}
   }
   function paint(title,body,{small=false,accent=palette.teal,kind='body'}={}){
     return (ctx)=>{
-      ctx.fillStyle=palette.navy;ctx.fillRect(0,0,1024,512);
-      ctx.fillStyle=accent;ctx.fillRect(0,0,14,512);
-      ctx.fillStyle=kind==='button'?'#e3eeee':'#eac486';ctx.font=small?'700 45px system-ui':'700 51px system-ui';
-      lines(ctx,title,920,2).forEach((line,i)=>ctx.fillText(line,42,84+i*58));
-      ctx.fillStyle='#f5fbf9';ctx.font=small?'37px system-ui':'38px system-ui';
-      lines(ctx,body,922,small?5:7).forEach((line,i)=>ctx.fillText(line,43,175+i*49));
-      ctx.fillStyle='#2c6970';ctx.fillRect(25,475,970,3);
+      // Fully transparent background: contrast comes from a narrow text outline,
+      // not a large floating opaque rectangle.
+      ctx.clearRect(0,0,1024,512);
+      ctx.save();
+      ctx.lineJoin='round';
+      ctx.shadowColor='rgba(4,18,23,.85)';ctx.shadowBlur=9;
+      const drawLine=(label,x,y,fill)=>{
+        ctx.strokeStyle='rgba(7,31,37,.93)';ctx.lineWidth=11;
+        ctx.strokeText(label,x,y);ctx.fillStyle=fill;ctx.fillText(label,x,y);
+      };
+      ctx.font=small?'700 45px system-ui':'700 51px system-ui';
+      lines(ctx,title,920,2).forEach((line,i)=>drawLine(line,42,84+i*58,kind==='button'?'#f0dbad':'#ffdc99'));
+      ctx.font=small?'37px system-ui':'38px system-ui';
+      lines(ctx,body,922,small?5:7).forEach((line,i)=>drawLine(line,43,175+i*49,'#effaf6'));
+      ctx.restore();
     };
   }
   function add(id,x,y,w,h,title,body,action=null,kind=''){
@@ -154,7 +168,7 @@ export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer}
   return {
     view:()=>session.view(),action,update,refresh:display,
     dispose(){disposed=true;renderer.domElement.removeEventListener('click',onDesktopClick);
-      clear();playerRig.remove(root);
+      clear();scene.remove(root);
       for(const c of controllers){playerRig.remove(c);for(const child of [...c.children]){
         child.geometry?.dispose();child.material?.dispose();c.remove(child);
       }}
