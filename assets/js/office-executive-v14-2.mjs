@@ -9,11 +9,13 @@ export const EXECUTIVE_ASSET=Object.freeze({
   bytes:4846664
 });
 export const EXECUTIVE_PLACEMENT=Object.freeze({
-  position:[0,0,-3.75], // formerly the separate manager's chair
+  // Assembly is wider/deeper than the original chair. Set its *front edge*
+  // just behind the desk; no forced compression into the smaller chair box.
+  position:[0,0,-4.10],
   yawRadians:312*Math.PI/180,
-  // Fit the whole chair + figure within a desk-safe envelope, rather than
-  // stretching or setting an assumed body height.
-  maxEnvelope:[1.28,2.02,1.15]
+  // GLB accessor bounds indicate a ~1.9-unit high combined mesh. At 312°,
+  // this uniform-fit envelope yields ~1.82m height and ~8.75cm desk clearance.
+  maxEnvelope:[1.80,1.85,1.75]
 });
 export const executiveHref=()=>new URL('../models/badr-han-ch_c.glb',import.meta.url).href;
 
