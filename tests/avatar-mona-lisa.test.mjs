@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ARMCHAIR_AVATAR_PLACEMENT,AVATAR_SOURCE,fitAvatarToArmchair,loadArmchairAvatar} from '../assets/js/office-avatar-v14-1.mjs';
-import {avatarYawDegrees,turnAvatarHalfCircle} from '../assets/js/avatar-turn-v14-1.mjs';
+import {avatarYawDegrees,turnAvatarStep,AVATAR_TURN_STEP_DEGREES} from '../assets/js/avatar-turn-v14-1.mjs';
 
 const sourceCommit='8587c40216a1bcbc881445b9123fe0168058f6ab';
 test('Mona Lisa avatar is original pinned glTF 2 GLB and inspect its structure',()=>{
@@ -28,7 +28,7 @@ test('avatar retained at exact original Git blob and seated-height envelope is r
   assert.equal(AVATAR_SOURCE.blob,'b49417c0050d7e1c7dfe4773c8ea8d65806f4f6d');
   assert.equal(AVATAR_SOURCE.commit,sourceCommit);
   assert.equal(AVATAR_SOURCE.bytes,3020580);
-  assert.deepEqual(ARMCHAIR_AVATAR_PLACEMENT.position,[0,0,-4.45]);
+  assert.deepEqual(ARMCHAIR_AVATAR_PLACEMENT.position,[0,0,-4.10]);
   assert.equal(ARMCHAIR_AVATAR_PLACEMENT.yawRadians,Math.PI,'Default avatar must face opposite direction');
   assert.deepEqual(ARMCHAIR_AVATAR_PLACEMENT.maxEnvelope,[1.001,1.463,1.012]);
   for(const [updated,previous] of [[1.001,.91],[1.463,1.33],[1.012,.92]]){
@@ -55,7 +55,7 @@ test('avatar fitted proportionately and aligned with existing manager armchair c
   const result=fitAvatarToArmchair({Box3,Vector3,Group},model);
   assert.equal(result.name,'rhxr-mona-lisa-armchair-avatar');
   assert.equal(result.children[0],model);
-  assert.deepEqual(result.position.xyz,[0,0,-4.45]);
+  assert.deepEqual(result.position.xyz,[0,0,-4.10]);
   assert.equal(result.rotation.y,Math.PI);
   const baselineScale=Math.min(.91/(.693429+.695758),1.33/(.948494+.950264),.92/(.574576+.578279));
   assert.ok(Math.abs(model.scale.current-baselineScale*1.1)<1e-10,
@@ -78,30 +78,38 @@ test('failed Mona Lisa GLB load keeps geometric actor available',async()=>{
 });
 
 
-test('actual avatar pivot is turned by 180° without changing its scale or position',()=>{
-  const a={rotation:{y:Math.PI},scale:{x:.68,y:.68,z:.68},position:{x:0,y:0,z:-4.45},
-    worldUpdates:0,updateMatrixWorld(force){if(force)this.worldUpdates++;}};
-  assert.equal(avatarYawDegrees(a),180);
-  const next=turnAvatarHalfCircle(a);
-  assert.equal(next,0);
-  assert.equal(a.rotation.y,0);
-  assert.equal(a.scale.x,.68);
-  assert.equal(a.position.z,-4.45);
-  assert.equal(turnAvatarHalfCircle(a),180);
-  assert.equal(a.rotation.y,Math.PI);
-  assert.equal(a.worldUpdates,2);
+test('Mona Lisa rotation advances in ±45° steps without shifting or rescaling the avatar',()=>{
+  const avatar={rotation:{y:Math.PI},scale:{x:.68,y:.68,z:.68},
+    position:{x:0,y:0,z:-4.10},updates:0,updateMatrixWorld(force){if(force)this.updates++;}};
+  assert.equal(AVATAR_TURN_STEP_DEGREES,45);
+  assert.equal(avatarYawDegrees(avatar),180);
+  assert.equal(turnAvatarStep(avatar,1),225);
+  assert.equal(turnAvatarStep(avatar,-1),180);
+  assert.equal(turnAvatarStep(avatar,-1),135);
+  assert.equal(avatar.scale.x,.68);
+  assert.deepEqual(avatar.position,{x:0,y:0,z:-4.10});
+  for(let i=0;i<5;i++)turnAvatarStep(avatar,1);
+  assert.equal(avatarYawDegrees(avatar),0);
+  for(let i=0;i<8;i++)turnAvatarStep(avatar,1);
+  assert.equal(avatarYawDegrees(avatar),0);
+  assert.throws(()=>turnAvatarStep(avatar,4),/one 45/);
+  assert.throws(()=>turnAvatarStep(avatar,0),/one 45/);
+  assert.ok(avatar.updates>=12);
 });
 
-test('V14.1 explicitly bypasses old Quest cache and provides a VR + desktop yaw control',()=>{
+test('V14.1 loads fresh modules and exposes +45° / −45° Quest and desktop controls',()=>{
   const room=readFileSync(new URL('../assets/js/room.mjs',import.meta.url),'utf8');
   const html=readFileSync(new URL('../experiences/rhxr-v14-1/index.html',import.meta.url),'utf8');
   const control=readFileSync(new URL('../assets/js/avatar-turn-v14-1.mjs',import.meta.url),'utf8');
-  assert.ok(room.includes("office-avatar-v14-1.mjs?v=20261023-quest-facing"));
-  assert.ok(html.includes("room.mjs?v=20261023-quest-facing-1"));
+  assert.ok(room.includes('office-avatar-v14-1.mjs?v=20261024-layout45'));
+  assert.ok(room.includes('avatar-turn-v14-1.mjs?v=20261024-layout45'));
+  assert.ok(html.includes('room.mjs?v=20261024-layout45-1'));
   assert.ok(html.includes('id="avatar-turn"'));
-  assert.ok(room.includes("avatarTurn.onclick=()=>controls.turn()"));
+  assert.ok(html.includes('id="avatar-turn-back"'));
+  assert.ok(room.includes('avatarTurn.onclick=()=>controls.turn(1)'));
+  assert.ok(room.includes('avatarTurnBack.onclick=()=>controls.turn(-1)'));
   assert.ok(control.includes("controller.addEventListener('select',listener)"));
-  assert.ok(control.includes("raycaster.intersectObject(plaque,false)"));
-  assert.ok(control.includes('turnAvatarHalfCircle(avatar)'));
+  assert.ok(control.includes('intersectObjects(plaques.map(p=>p.plaque)'));
+  assert.ok(control.includes('turnAvatarStep(avatar,steps)'));
   assert.ok(control.includes('avatarYawDegrees(avatar)'));
 });
