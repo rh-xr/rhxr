@@ -113,7 +113,7 @@ test('DACI remains behind Mona Lisa with larger text, high-opacity backdrop and 
   assert.ok(hub.includes('root.position.set(...WALL_DACI_LAYOUT.position)'));
   assert.ok(hub.includes('root.scale.setScalar(WALL_DACI_LAYOUT.scale)'));
   assert.ok(hub.includes('transparent:true,depthWrite:false'));
-  assert.ok(hub.includes('ctx.fillRect(0,0,1024,512)'),'DACI backdrop must cover the canvas');
+  assert.ok(hub.includes('roundedPanel(ctx,8,8,1008,496,28,gradient'),'DACI should draw nearly opaque rounded background');
   assert.equal(PANEL_TYPOGRAPHY.titlePx,66);
   assert.deepEqual(PANEL_TYPOGRAPHY.bodySizes,[50,47,44,41,38,35,32]);
   assert.ok(avatarControl.includes('transparent:true,depthTest:true,depthWrite:false'));
