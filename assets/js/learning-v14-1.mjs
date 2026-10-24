@@ -65,6 +65,7 @@ export function createLearningSession(bundle){
     const spec=MISSIONS.find(m=>m.id===mission),n=currentNode(),ending=mission==='s02'?step>=s02.exchanges.length:!n||n.kind==='ending';
     const r=pending?.response||null;
     const citations=history.filter(h=>h.citation).length;
+    const totalDecisions=mission==='s02'?s02.exchanges.length:bySlug.get(mission).nodes.filter(n=>n.kind==='decision').length;
     const caseFile=CASE_FILES[mission];
     const story=mission==='s02'?null:bySlug.get(mission);
     const competencies=mission==='s02'?s02.competencies:story.skills;
@@ -77,7 +78,7 @@ export function createLearningSession(bundle){
       mission,title:spec.label,topic:spec.topic,objective:LEARNING_OBJECTIVES[mission],
       setting:mission==='s02'?'Vous êtes responsable d’une équipe fictive et devez répondre à un désaccord sur la répartition des urgences.':story.setting,
       competencies:[...competencies],caseFile:{...caseFile},
-      showBrief,qualityProfile,phase:clean(n?.phase),actor:clean(n?.actor)||(mission==='s02'?'Collaborateur':'Formateur'),
+      showBrief,qualityProfile,totalDecisions,phase:clean(n?.phase),actor:clean(n?.actor)||(mission==='s02'?'Collaborateur':'Formateur'),
       dialogue:mission==='s02'?clean(n?.avatar):clean(n?.dialogue),
       question:mission==='s02'?'Quelle réponse choisissez-vous ?':clean(n?.question),
       choices:pending||ending?[]:(n?.choices||[]).map((c,i)=>({id:c.id,label:clean(c.label||c.text),key:String.fromCharCode(65+i)})),
