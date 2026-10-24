@@ -1,3 +1,4 @@
+import {spawnSync} from 'node:child_process';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -149,4 +150,20 @@ test('HTML provides a source-preserving case dossier and completion-only local e
   assert.ok(html.includes("const requestedMission=new URLSearchParams(location.search).get('mission')"));
   assert.ok(html.includes('id=\"case-prepare\"'));
   assert.ok(html.includes('id=\"case-warning\"'));
+});
+
+test('the curriculum catalog offers all 7 deep links and a printable learner path',()=>{
+  const page=source('../experiences/rhxr-v14-1/parcours.html');
+  const main=source('../experiences/rhxr-v14-1/index.html');
+  assert.match(page,/Sept situations RH/);
+  assert.ok(page.includes('for(const mission of MISSIONS)'));
+  assert.ok(page.includes('encodeURIComponent(mission.id)'));
+  assert.ok(page.includes('@media print'));
+  assert.ok(page.includes("CASE_FILES"));
+  assert.ok(main.includes('href="./parcours.html"'));
+  assert.ok(main.includes("get('mission')"));
+  const moduleScript=page.match(/<script type="module">([\s\S]*?)<\/script>/);
+  assert.ok(moduleScript);
+  const result=spawnSync(process.execPath,['--input-type=module','--check'],{input:moduleScript[1],encoding:'utf8'});
+  assert.equal(result.status,0,result.stderr);
 });
