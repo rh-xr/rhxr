@@ -134,7 +134,7 @@ export async function mountRoom(stage) {
       'Mona Lisa GLB chargé · orientation effective : '+angle+'° · taille ×1,10 · pas de 45°';};
     // Defer avatar decompression until the three original pieces of furniture load.
     const yawParam=params.get('avatarYaw');
-    const yawDegrees=yawParam!==null&&/^\\d{1,3}$/.test(yawParam)&&Number(yawParam)<360?Number(yawParam):312;
+    const yawDegrees=yawParam!==null&&/^[0-9]{1,3}$/.test(yawParam)&&Number(yawParam)<360?Number(yawParam):312;
     const avatarYaw=yawDegrees*Math.PI/180;
     void furnitureReady.then(()=>loadArmchairAvatar(THREE,scene,{
       placement:{...ARMCHAIR_AVATAR_PLACEMENT,yawRadians:avatarYaw},
