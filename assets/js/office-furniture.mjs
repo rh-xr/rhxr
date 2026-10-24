@@ -5,13 +5,14 @@ export const furniturePlan=Object.freeze([
   Object.freeze({id:'manager',filename:'amrchair.glb',position:[0,0,-4.45],size:[1.12,1.42,1.05],yaw:0}),
   Object.freeze({id:'visitor',filename:'chair.glb',position:[0,0,0.05],size:[1.02,1.18,1.02],yaw:Math.PI})
 ]);
-/** V14.1 opt-in layout only; preserve the previously validated S02 and V14 room layout.
- * The chairs are tucked close to the desk with 7–9 cm envelope clearance; desk is 90%.
+/** V14.2 opt-in executive furniture proportions. Unmodified S02 / V14 use furniturePlan.
+ * Desk is slightly larger to match the Badr+chair assembly, with a small
+ * forward shift to keep both executive and visitor envelopes from overlapping.
  */
 export const furniturePlanV141=Object.freeze([
-  Object.freeze({id:'desk',filename:'desk.glb',position:[0,0,-2.35],size:[3.195,1.035,1.575],yaw:0}),
+  Object.freeze({id:'desk',filename:'desk.glb',position:[0,0,-2.27],size:[3.30,1.07,1.62],yaw:0}),
   Object.freeze({id:'manager',filename:'amrchair.glb',position:[0,0,-3.75],size:[1.12,1.42,1.05],yaw:0}),
-  Object.freeze({id:'visitor',filename:'chair.glb',position:[0,0,-0.98],size:[1.02,1.18,1.02],yaw:Math.PI})
+  Object.freeze({id:'visitor',filename:'chair.glb',position:[0,0,-0.86],size:[1.06,1.23,1.06],yaw:Math.PI})
 ]);
 export const modelHref=filename=>new URL('../models/'+filename,import.meta.url).href;
 export function fitModel(THREE,object,spec){
