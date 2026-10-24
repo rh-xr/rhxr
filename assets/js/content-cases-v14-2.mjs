@@ -113,7 +113,7 @@ export const EXTRA_CASES=Object.freeze([
         choice('b','Supprimer les messages envoyés et ne rien signaler.','risky',
           'Adam : « Nous risquons de perdre des informations nécessaires pour comprendre l’erreur. »','Cacher une transmission ne supprime pas ses conséquences.'),
         choice('c','Attendre qu’un destinataire se plaigne avant de vérifier.','incomplete',
-          'Nadia : « Un signalement précoce peut éviter une diffusion plus large. »','L’inaction retarde la maîtrise du risque.')
+          'Nadia : « Un signalement précoce peut éviter une diffusion plus large. »','L’inaction retarde la maîtrise du risque et empêche le service compétent de limiter la diffusion du document.')
       ])
   ]),
   entry('hybride','07  Coopération hybride','Travail hybride',
