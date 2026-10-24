@@ -9,12 +9,12 @@ export const EXECUTIVE_ASSET=Object.freeze({
   bytes:4846664
 });
 export const EXECUTIVE_PLACEMENT=Object.freeze({
-  // Assembly is wider/deeper than the original chair. Set its *front edge*
-  // just behind the desk; no forced compression into the smaller chair box.
-  position:[0,0,-4.10],
+  // 8 cm forward from previous Badr position, 9 cm higher so that footwear
+  // is visible above the floor. Whole single-piece chair/avatar moves together.
+  position:[0,0.09,-4.02],
   yawRadians:312*Math.PI/180,
-  // GLB accessor bounds indicate a ~1.9-unit high combined mesh. At 312°,
-  // this uniform-fit envelope yields ~1.82m height and ~8.75cm desk clearance.
+  // Preserve uniform scale and previous approved silhouette proportions.
+  // Desk/visitor adjustments keep a theoretical >=6 cm furniture clearance.
   maxEnvelope:[1.80,1.85,1.75]
 });
 export const executiveHref=()=>new URL('../models/badr-han-ch_c.glb',import.meta.url).href;
