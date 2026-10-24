@@ -71,7 +71,8 @@ test('failed Mona Lisa GLB load keeps geometric actor available',async()=>{
   assert.equal(r.ok,false);assert.equal(r.object,null);assert.equal(called,true);
   const room=readFileSync(new URL('../assets/js/room.mjs',import.meta.url),'utf8');
   assert.ok(room.includes('if(advanced){'));
-  assert.ok(room.includes('void furnitureReady.then(()=>loadArmchairAvatar'));
+  assert.ok(room.includes('loadExecutiveAssembly(THREE,scene'));
+  assert.ok(room.includes('restoreLegacyOccupiedChair'));
   assert.ok(room.includes('basicAvatar.forEach(mesh=>{mesh.visible=false;})'));
   assert.ok(room.includes('const yawDegrees=')&&room.includes('Number(yawParam):312'),
     'Default yaw is 312°, with safe optional numeric comparison');
@@ -102,8 +103,8 @@ test('V14.1 loads fresh modules and exposes +45° / −45° Quest and desktop co
   const html=readFileSync(new URL('../experiences/rhxr-v14-1/index.html',import.meta.url),'utf8');
   const control=readFileSync(new URL('../assets/js/avatar-turn-v14-1.mjs',import.meta.url),'utf8');
   assert.ok(room.includes('office-avatar-v14-1.mjs?v=20261024-wall312'));
-  assert.ok(room.includes('avatar-turn-v14-1.mjs?v=20261024-readable96'));
-  assert.ok(html.includes('room.mjs?v=20261024-readable96-1'));
+  assert.ok(room.includes('avatar-turn-v14-1.mjs?v=20261024-executive'));
+  assert.ok(html.includes('room.mjs?v=20261024-executive-1'));
   assert.ok(html.includes('id="avatar-turn"'));
   assert.ok(html.includes('id="avatar-turn-back"'));
   assert.ok(room.includes('avatarTurn.onclick=()=>controls.turn(1)'));
