@@ -13,7 +13,7 @@ const bundle=JSON.parse(read('../experiences/daci-v13/v13-bundle.json'));
 test('V14.1 respects the original V13 bundle and its 54 authored answers',()=>{
   assert.equal(bundle.version,'V13');assert.equal(bundle.fictional_only,true);
   assert.equal(Object.keys(bundle.answers).length,54);
-  assert.equal(MISSIONS.length,4);
+  assert.equal(MISSIONS.length,7);
   for(const s of bundle.stories){
     for(const node of s.nodes.filter(n=>n.kind==='decision'))
       for(const choice of node.choices){
@@ -24,7 +24,7 @@ test('V14.1 respects the original V13 bundle and its 54 authored answers',()=>{
   }
 });
 
-test('all 4 V14.1 missions can be completed via the renderer-free state machine',()=>{
+test('all seven RH missions can be completed via the renderer-free state machine',()=>{
   const h=createLearningSession(bundle);
   for(const mission of MISSIONS){
     h.setMission(mission.id);let v=h.view(),count=0;
