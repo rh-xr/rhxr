@@ -59,7 +59,7 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 <div class="stage-status" id="stage-status" role="status">Chargement de la scène…</div>
 <div class="stage-bottom"><small id="stage-hint">WASD/flèches sur PC · joysticks Quest 3S en VR.</small>
 <button type="button" id="view-switch" hidden>Activer la 3D</button></div></div>
-<div class="scene-help">Quest : <strong>gâchette = sélectionner</strong>, stick gauche = déplacement, stick droit = rotation de 45°. Le personnage sur le fauteuil RH est Mona Lisa GLB (pose statique), orientable par pas de 45°. Le bureau est réduit de 10 %, et les deux sièges sont avancés vers celui-ci. Les panneaux pédagogiques restent derrière Mona Lisa, mais sont légèrement éloignés du mur, agrandis et dotés d’un fond bleu nuit opaque à 96 % pour améliorer leur lisibilité dans le Quest. Ils ne suivent pas vos mouvements. Utilisez « Masquer » pour libérer la vue. Sur PC : cliquez sur les panneaux 3D ou utilisez les commandes accessibles à droite.</div>
+<div class="scene-help">Quest : <strong>gâchette = sélectionner</strong>, stick gauche = déplacement, stick droit = rotation de 45°. Le personnage sur le fauteuil RH est Mona Lisa GLB (pose statique), orientable par pas de 45°. Le bureau est réduit de 10 %, et les deux sièges sont avancés vers celui-ci. Les panneaux pédagogiques restent derrière Mona Lisa, mais sont positionnés plus à gauche et plus bas, avancés vers le bureau et agrandis. Leur fond bleu nuit, opaque à 98,5 %, et leur typographie moderne facilitent la lecture dans le Quest. Ils ne suivent pas vos mouvements. Utilisez « Masquer » pour libérer la vue. Sur PC : cliquez sur les panneaux 3D ou utilisez les commandes accessibles à droite.</div>
 </article>
 <article class="panel"><span class="badge">Simulations fictives · aucune décision RH individuelle</span>
 <h2>Guide pédagogique DACI</h2>
@@ -85,7 +85,7 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 <script type="module">
 import {mountRoom} from '../../assets/js/room.mjs?v=20261024-readable96-1';
 import {createLearningSession} from '../../assets/js/learning-v14-1.mjs';
-import {createSpatialLearningHub} from '../../assets/js/spatial-learning-v14-1.mjs?v=20261024-readable96';
+import {createSpatialLearningHub} from '../../assets/js/spatial-learning-v14-1.mjs?v=20261024-final-panels';
 const $=id=>document.getElementById(id);let training=null,hub=null;
 const node=(tag,text)=>{const e=document.createElement(tag);e.textContent=String(text??'');return e;};
 function render(v){
