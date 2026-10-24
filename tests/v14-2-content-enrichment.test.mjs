@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {EXTRA_CASES,EXTRA_DESCRIPTORS,CASE_FILES,extendDaciBundle} from '../assets/js/content-cases-v14-2.mjs';
 import {MISSIONS,createLearningSession} from '../assets/js/learning-v14-1.mjs';
+import {buildLearningRecap,recapFilename} from '../assets/js/learning-recap-v14-2.mjs';
 const source=path=>readFileSync(new URL(path,import.meta.url),'utf8');
 const original=JSON.parse(source('../experiences/daci-v13/v13-bundle.json'));
 
@@ -114,4 +115,38 @@ test('Quest mission paging and case dossier are integrated without changing VR r
   assert.ok(page.includes('Sept missions disponibles'));
   assert.ok(room.includes("const managerZ=advanced?-3.75:-4.50"));
   assert.ok(!hub.includes('playerRig.add(root)'));
+});
+
+test('Completion enables an anonymous printable DACI learning trace, never a staff appraisal',()=>{
+  const h=createLearningSession(original);
+  h.setMission('recrutement');
+  assert.throws(()=>buildLearningRecap(h.view()),/uniquement à la fin/);
+  let v=h.view();
+  while(!v.ending){
+    assert.equal(!!v.totalDecisions,true);
+    assert.ok(h.choose(v.choices[0].id));
+    assert.ok(h.next());
+    v=h.view();
+  }
+  assert.equal(v.totalDecisions,4);
+  const report=buildLearningRecap(v);
+  assert.match(report,/# RH·XR — Fiche pédagogique de transfert/);
+  assert.match(report,/Exercice à réaliser/);
+  assert.match(report,/critères/i);
+  assert.match(report,/urn:rhxr:daci:fiche-exercice-v14/);
+  assert.match(report,/aucune décision RH individuelle|ne pas utiliser pour des décisions RH individuelles/i);
+  assert.ok(report.includes(v.debrief.recommendedAction));
+  assert.equal(recapFilename(v),'rhxr-daci-fiche-recrutement.md');
+  assert.ok(!report.includes('https://'));
+});
+test('HTML provides a source-preserving case dossier and completion-only local export',()=>{
+  const html=source('../experiences/rhxr-v14-1/index.html');
+  assert.ok(html.includes("id=\"mission-progress\""));
+  assert.ok(html.includes("id=\"recap-download\""));
+  assert.ok(html.includes('buildLearningRecap(completed)'));
+  assert.ok(html.includes('new Blob([buildLearningRecap(completed)]'));
+  assert.ok(html.includes('if(!completed.ending)return'));
+  assert.ok(html.includes("const requestedMission=new URLSearchParams(location.search).get('mission')"));
+  assert.ok(html.includes('id=\"case-prepare\"'));
+  assert.ok(html.includes('id=\"case-warning\"'));
 });
