@@ -1,5 +1,24 @@
 # RH·XR V14.1 — Avatar Mona Lisa sur le fauteuil RH
 
+## Révision du 24 octobre 2026 — implantation compacte et DACI sur le mur
+
+Ces choix remplacent les essais d'espacement et d'orientation décrits dans l'historique ci-dessous.
+
+- **Mona Lisa orientée par défaut à 312°**, valeur jugée correcte lors de la vérification réelle de l'utilisateur dans Quest 3S. Le GLB reste statique, en taille 110 % de la première enveloppe.
+- **Bureau principal** : toujours à `z=-2,35`, enveloppe réduite de 10 % : 3,195 × 1,035 × 1,575 m.
+- **Fauteuil du responsable** : `z=-3,75`, avancé de 35 cm depuis l'essai précédent ; **chaise visiteur** : `z=-0,98`, avancée de 68 cm. Les séparations géométriques entre leurs enveloppes et celle du bureau sont **8,75 cm** et **7,25 cm** respectivement. Il s'agit de marges théoriques de boîtes englobantes, non d'une garantie contre des collisions avec les accoudoirs ou Mona Lisa.
+- **Avatar Mona Lisa** aligné sur le fauteuil : position `[0,0,-3,75]`, assise visuelle `y=0,51`.
+- **Panneaux pédagogiques DACI** : déplacés de l'ancrage devant le regard utilisateur vers **le mur derrière Mona Lisa** ; position du groupe `[0,72, 2,65, -7,18]` m, facteur d'échelle **0,82**, soit une réduction d'environ 18 %.
+- Les fonds des textures des panneaux DACI sont **entièrement transparents**, avec bordures fines sur les caractères pour le contraste. Ces panneaux sont immobiles dans la salle : ils ne suivent plus le casque.
+- Les deux petits contrôles de rotation de Mona Lisa sont aussi déplacés contre le mur, à `x=4,02`, `z=-7,17`, avec fond transparent et dimension réduite. Les boutons du guide restent disponibles sur ordinateur.
+- Les commandes de rotation **±45°** restent disponibles, en partant désormais de 312° (par ex. 312° → 357° → 42°).
+- Ces changements sont limités à **V14.1**, pas au bureau S02/V14 stable. Les imports JavaScript de la V14.1 utilisent de nouveaux identifiants de cache.
+
+**Recette Quest à réaliser** : vérifier l'espacement réel des meubles (y compris les accoudoirs, les jambes et les vêtements), confirmer le visage de Mona Lisa à 312°, s'approcher du mur pour lire et sélectionner les contenus DACI, vérifier que les panneaux n'occultent plus la conversation ni la vue, tester les deux commandes de rotation et les quatre missions. Les marges de 7–9 cm doivent être ajustées si les modèles se traversent visiblement.
+
+---
+
+
 ## Mise à jour du 24 octobre 2026 — mobilier rapproché et rotation à 45°
 
 Le **réglage actuel** dans V14.1 est le suivant :
