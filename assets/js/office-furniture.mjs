@@ -6,12 +6,12 @@ export const furniturePlan=Object.freeze([
   Object.freeze({id:'visitor',filename:'chair.glb',position:[0,0,0.05],size:[1.02,1.18,1.02],yaw:Math.PI})
 ]);
 /** V14.1 opt-in layout only; preserve the previously validated S02 and V14 room layout.
- * Seat centres are each moved 35 cm toward the desk; desk envelope is uniformly 90%.
+ * The chairs are tucked close to the desk with 7–9 cm envelope clearance; desk is 90%.
  */
 export const furniturePlanV141=Object.freeze([
   Object.freeze({id:'desk',filename:'desk.glb',position:[0,0,-2.35],size:[3.195,1.035,1.575],yaw:0}),
-  Object.freeze({id:'manager',filename:'amrchair.glb',position:[0,0,-4.10],size:[1.12,1.42,1.05],yaw:0}),
-  Object.freeze({id:'visitor',filename:'chair.glb',position:[0,0,-0.30],size:[1.02,1.18,1.02],yaw:Math.PI})
+  Object.freeze({id:'manager',filename:'amrchair.glb',position:[0,0,-3.75],size:[1.12,1.42,1.05],yaw:0}),
+  Object.freeze({id:'visitor',filename:'chair.glb',position:[0,0,-0.98],size:[1.02,1.18,1.02],yaw:Math.PI})
 ]);
 export const modelHref=filename=>new URL('../models/'+filename,import.meta.url).href;
 export function fitModel(THREE,object,spec){
