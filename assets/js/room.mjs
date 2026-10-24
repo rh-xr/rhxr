@@ -2,12 +2,12 @@
  * The same educational scenario remains available without XR.
  */
 import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotion.mjs';
-import { loadOfficeFurniture,furniturePlanV141 } from './office-furniture.mjs?v=20261024-wall312';
+import { loadOfficeFurniture,furniturePlanV141 } from './office-furniture.mjs?v=20261024-badr-final';
 import {createPremiumOffice} from './premium-office-v14.mjs';
 import {upgradeOfficeFinish} from './premium-finish-v14-1.mjs';
 import {loadArmchairAvatar,ARMCHAIR_AVATAR_PLACEMENT} from './office-avatar-v14-1.mjs?v=20261024-wall312';
 import {createAvatarTurnControl,avatarYawDegrees} from './avatar-turn-v14-1.mjs?v=20261024-executive';
-import {loadExecutiveAssembly,EXECUTIVE_PLACEMENT} from './office-executive-v14-2.mjs';
+import {loadExecutiveAssembly,EXECUTIVE_PLACEMENT} from './office-executive-v14-2.mjs?v=20261024-badr-final';
 import {createMetricsSampler,createMetricsDisplay} from './metrics-v14.mjs';
 
 let initialized = false;
@@ -91,21 +91,22 @@ export async function mountRoom(stage) {
   // In V14.2 the executive GLB already includes its chair. Load the two
   // remaining furniture GLBs first; only load legacy manager chair on failure.
   const v141Layout=advanced?furniturePlanV141.filter(spec=>spec.id!=='manager'):null;
-  const deskCenter=-2.35;
+  const deskCenter=advanced?-2.27:-2.35;
   const managerZ=advanced?-3.75:-4.50;
-  const visitorZ=advanced?-.98:.05;
+  const visitorZ=advanced?-.86:.05;
   const fallback={desk:[],manager:[],visitor:[]};
-  fallback.desk.push(cube(advanced?3.33:3.7, advanced?.135:.15, advanced?1.53:1.7, 0, advanced?.927:1.03, deskCenter, mat.wood));
+  fallback.desk.push(cube(advanced?3.30:3.7, advanced?.14:.15, advanced?1.62:1.7, 0, advanced?1.0:1.03, deskCenter, mat.wood));
   for (const x of (advanced?[-1.35,1.35]:[-1.5,1.5]))
-    for (const z of (advanced?[-2.89,-1.81]:[-2.95,-1.75])) {
-      fallback.desk.push(cube(advanced?.108:.12,advanced?.9:1,advanced?.108:.12,x,advanced?.45:.5,z,mat.metal));
+    for (const z of (advanced?[-2.81,-1.73]:[-2.95,-1.75])) {
+      fallback.desk.push(cube(advanced?.11:.12,advanced?1:1,advanced?.11:.12,x,.5,z,mat.metal));
     }
 
   // The empty visitor chair faces the desk (-Z), so its back is +Z.
   // The occupied chair faces the visitor (+Z), so its back is -Z.
   function chair(x,z,backSide,id){
-    fallback[id].push(cube(.9,.15,.85,x,.55,z,mat.seat));
-    fallback[id].push(cube(.9,1,.13,x,1.05,z+.36*backSide,mat.seat));
+    const wider=advanced&&id==='visitor';
+    fallback[id].push(cube(wider?1.06:.9,.15,wider?1.06:.85,x,.55,z,mat.seat));
+    fallback[id].push(cube(wider?1.06:.9,wider?1.08:1,.13,x,1.05,z+(wider?.45:.36)*backSide,mat.seat));
   }
   chair(0,managerZ,-1,'manager');
   chair(0,visitorZ,+1,'visitor');
