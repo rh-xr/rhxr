@@ -32,7 +32,7 @@ test('Integrated Badr Han + chair GLB matches the pinned original binary source'
 
 test('Executive positioning uses a ground-level, uniformly-scaled assembly',()=>{
   const c=EXECUTIVE_PLACEMENT;
-  assert.deepEqual(c.position,[0,0,-3.75]);
+  assert.deepEqual(c.position,[0,0,-4.10]);
   assert.ok(Math.abs(c.yawRadians-312*Math.PI/180)<1e-10);
   assert.ok(c.maxEnvelope.every(v=>v>0));
   class Vector3{constructor(x=0,y=0,z=0){Object.assign(this,{x,y,z});}}
@@ -55,7 +55,7 @@ test('Executive positioning uses a ground-level, uniformly-scaled assembly',()=>
   const model={position:{x:0,y:0,z:0},updateMatrixWorld(){}};
   const result=fitExecutiveAssembly({Box3,Vector3,Group},model);
   assert.equal(result.name,'rhxr-executive-chair-assembly');
-  assert.deepEqual(result.position.values,[0,0,-3.75]);
+  assert.deepEqual(result.position.values,[0,0,-4.10]);
   assert.equal(result.rotation.y,c.yawRadians);
   assert.equal(result.children[0],model);
   assert.ok(result.scale.factor>0&&result.scale.factor<=1.3);
@@ -88,4 +88,25 @@ test('Previous desk/visitor remain untouched and original V14/ S02 paths use the
   const html=file('../experiences/rhxr-v14-1/index.html');
   assert.ok(html.includes('Ensemble personnage et fauteuil Badr Han'));
   assert.ok(html.includes('room.mjs?v=20261024-executive-1'));
+});
+
+test('The rotated original 3D bounds preserve near-life-size appearance beside the desk',()=>{
+  const b=readFileSync(new URL('../assets/models/badr-han-ch_c.glb',import.meta.url));
+  const meta=JSON.parse(b.subarray(20,20+b.readUInt32LE(12)).toString('utf8').trim());
+  const pos=meta.accessors.find(a=>a.type==='VEC3'&&a.min&&a.max);
+  assert.ok(pos,'GLB accessors need position bounds for size checks');
+  const [w,h,d]=pos.min.map((v,i)=>pos.max[i]-v);
+  const angle=EXECUTIVE_PLACEMENT.yawRadians;
+  const rotatedWidth=Math.abs(w*Math.cos(angle))+Math.abs(d*Math.sin(angle));
+  const rotatedDepth=Math.abs(w*Math.sin(angle))+Math.abs(d*Math.cos(angle));
+  const scale=Math.min(EXECUTIVE_PLACEMENT.maxEnvelope[0]/rotatedWidth,
+    EXECUTIVE_PLACEMENT.maxEnvelope[1]/h,
+    EXECUTIVE_PLACEMENT.maxEnvelope[2]/rotatedDepth);
+  const height=h*scale,depth=rotatedDepth*scale;
+  const deskRearEdge=-2.35-1.575/2;
+  const frontEdge=EXECUTIVE_PLACEMENT.position[2]+depth/2;
+  const clearance=deskRearEdge-frontEdge;
+  assert.ok(height>1.70&&height<2.05,'Full chair-and-figure model should be near human scale');
+  assert.ok(clearance>.05&&clearance<.3,'Assembled chair should fit close to desk without overlapping');
+  console.log('[RH-XR executive fit estimate]',JSON.stringify({scale,height,depth,clearance}));
 });
