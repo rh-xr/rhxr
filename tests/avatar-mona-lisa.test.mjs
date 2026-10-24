@@ -102,8 +102,8 @@ test('V14.1 loads fresh modules and exposes +45° / −45° Quest and desktop co
   const html=readFileSync(new URL('../experiences/rhxr-v14-1/index.html',import.meta.url),'utf8');
   const control=readFileSync(new URL('../assets/js/avatar-turn-v14-1.mjs',import.meta.url),'utf8');
   assert.ok(room.includes('office-avatar-v14-1.mjs?v=20261024-wall312'));
-  assert.ok(room.includes('avatar-turn-v14-1.mjs?v=20261024-wall312'));
-  assert.ok(html.includes('room.mjs?v=20261024-wall312-1'));
+  assert.ok(room.includes('avatar-turn-v14-1.mjs?v=20261024-readable96'));
+  assert.ok(html.includes('room.mjs?v=20261024-readable96-1'));
   assert.ok(html.includes('id="avatar-turn"'));
   assert.ok(html.includes('id="avatar-turn-back"'));
   assert.ok(room.includes('avatarTurn.onclick=()=>controls.turn(1)'));
