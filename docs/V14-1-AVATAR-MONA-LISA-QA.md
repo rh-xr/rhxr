@@ -1,5 +1,26 @@
 # RH·XR V14.1 — Avatar Mona Lisa sur le fauteuil RH
 
+## Version finale candidate des panneaux pédagogiques — 24 octobre 2026
+
+**Retour utilisateur :** la première rangée n'était pas suffisamment visible ; les textes devaient descendre, se déplacer à gauche et avancer vers Mona Lisa, sans dépasser sa position.
+
+**Réglages du module DACI :**
+- `WALL_DACI_LAYOUT.position` passe de `[0.72,2.65,-6.52]` à **`[0.34,2.35,-6.12]`**. Déplacement de 38 cm vers la gauche, 30 cm vers le bas et 40 cm vers Mona Lisa.
+- Le panneau reste **2,37 m derrière** le centre de Mona Lisa (`z=-3.75`) et se situe environ 1,23 m en avant du mur arrière (`z≈-7.35`).
+- `scale` passe de 1,05 à **1,12**, soit un accroissement de taille de 6,7 % supplémentaire. L'affichage est désormais 36,6 % plus grand que l'ancienne version échelle 0,82.
+- `backgroundAlpha` passe de 0,96 à **0,985** (fond presque opaque, 1,5 % de transparence).
+- Style : fond bleu nuit en dégradé, coins arrondis et bordure discrète ; liseré turquoise/or ; titres dorés, corps de texte blanc légèrement cassé. Police moderne `Inter` avec repli `Segoe UI`, `system-ui`, `sans-serif` sans dépendance réseau obligatoire.
+- Titres 66 px (ou 58 px pour les cartes d'action), texte 50 px en taille maximale sur texture canvas 1024 × 512 ; adaptation progressive de la taille pour les passages longs.
+- Le bandeau de titres commence plus bas dans le canevas pour éviter le masquage de la première rangée.
+- Le panneau reste intégré à la scène (ne suit pas la tête du joueur). Les chemins des missions et le guide accessible en HTML ne sont pas modifiés.
+
+**Invariants :** angle initial Mona Lisa **312°**, fauteuil du responsable `z=-3.75`, chaise visiteur `z=-0.98`, bureau `z=-2.35` et enveloppe réduite de 10 %. Aucune modification de leurs GLB ni de la locomotion.
+
+**Tests matériels encore nécessaires** : première rangée visible, tailles et couleurs réellement confortables en Quest 3S, absence de superposition avec Mona Lisa, sélection des choix avec manettes et lisibilité des passages longs. Les tests Node et un déploiement Vercel réussi ne remplacent pas cette recette.
+
+---
+
+
 ## Révision lisibilité du 24 octobre 2026 — validée dans le code, à vérifier sur Quest
 
 La disposition **déjà validée en conditions réelles** est conservée à l'identique :
