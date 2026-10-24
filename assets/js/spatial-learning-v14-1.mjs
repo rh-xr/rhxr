@@ -2,11 +2,13 @@
  * Deterministic content is supplied by createLearningSession().
  * The validated locomotion and WebXR session handling remain in room.mjs.
  */
-// Wall-mounted documentation is no longer camera-following or an opaque overlay.
+// Screen-space texts remain static in the room behind Mona Lisa, but are placed
+// well clear of the decorated wall and use a near-opaque high-contrast backing.
 export const WALL_DACI_LAYOUT=Object.freeze({
-  position:[0.72,2.65,-7.18],
-  scale:0.82,
-  transparent:true
+  position:[0.72,2.65,-6.52],
+  scale:1.05,
+  transparent:true,
+  backgroundAlpha:0.96
 });
 function lines(ctx,value,maxWidth,max=4){
   const words=String(value||'').split(/\s+/),result=[];let current='';
@@ -34,8 +36,8 @@ const palette={navy:'#092b38',teal:'#166c78',aqua:'#cce8e6',gold:'#eac486',paper
 export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer},session,{onChange}={}){
   if(!playerRig||!renderer||!session?.view)throw Error('V14.1 hub requires a scene and learning session');
   const root=new THREE.Group();root.name='rhxr-v14-1-spatial-learning-hub';
-  // The wall behind Mona Lisa lies at z≈−7.35; text sits a few centimetres
-  // in front of wall lettering to avoid z-fighting, without following the HMD.
+  // Rear wall z≈−7.35; shift panels 0.83m in front of it, still 2.77m behind
+  // Mona Lisa. Never attach these panels to the HMD/player rig.
   root.position.set(...WALL_DACI_LAYOUT.position);
   root.scale.setScalar(WALL_DACI_LAYOUT.scale);
   scene.add(root);
@@ -50,22 +52,48 @@ export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer}
     clickable.length=0;disposables.length=0;hover=null;
   }
   function paint(title,body,{small=false,accent=palette.teal,kind='body'}={}){
-    return (ctx)=>{
-      // Fully transparent background: contrast comes from a narrow text outline,
-      // not a large floating opaque rectangle.
+    return ctx=>{
       ctx.clearRect(0,0,1024,512);
-      ctx.save();
-      ctx.lineJoin='round';
-      ctx.shadowColor='rgba(4,18,23,.85)';ctx.shadowBlur=9;
-      const drawLine=(label,x,y,fill)=>{
-        ctx.strokeStyle='rgba(7,31,37,.93)';ctx.lineWidth=11;
-        ctx.strokeText(label,x,y);ctx.fillStyle=fill;ctx.fillText(label,x,y);
-      };
-      ctx.font=small?'700 45px system-ui':'700 51px system-ui';
-      lines(ctx,title,920,2).forEach((line,i)=>drawLine(line,42,84+i*58,kind==='button'?'#f0dbad':'#ffdc99'));
-      ctx.font=small?'37px system-ui':'38px system-ui';
-      lines(ctx,body,922,small?5:7).forEach((line,i)=>drawLine(line,43,175+i*49,'#effaf6'));
-      ctx.restore();
+      // 96% opacity: wall decoration is only very faintly perceptible through
+      // the panel, keeping text readable on Quest while retaining slight depth.
+      ctx.fillStyle='rgba(8,31,41,'+WALL_DACI_LAYOUT.backgroundAlpha+')';
+      ctx.fillRect(0,0,1024,512);
+      ctx.fillStyle=accent;
+      ctx.fillRect(0,0,13,512);
+      ctx.strokeStyle='rgba(211,232,227,.7)';
+      ctx.lineWidth=3;ctx.strokeRect(3,3,1018,506);
+
+      // Larger heading and body text than the previous 0.82x panel version.
+      // Adapt font size only when the authored text cannot fit on this canvas.
+      ctx.textBaseline='alphabetic';
+      ctx.textAlign='left';
+      ctx.font=(small?'700 53px':'700 60px')+' system-ui';
+      const headline=lines(ctx,title,925,2);
+      const titleStart=76;
+      ctx.fillStyle=kind==='button'?'#ffe8b8':'#ffde9c';
+      headline.forEach((line,i)=>ctx.fillText(line,42,titleStart+i*62));
+
+      const bodyTop=headline.length>1?205:169;
+      const bodyText=String(body||'');
+      const sizes=small?[45,42,39,36,33]:[46,43,40,37,34,31];
+      let fontSize=sizes[sizes.length-1],bodyLines=[],spacing=fontSize*1.22;
+      for(const size of sizes){
+        ctx.font=size+'px system-ui';
+        const candidate=lines(ctx,bodyText,932,80);
+        const step=Math.round(size*1.22);
+        if(bodyTop+Math.max(0,candidate.length-1)*step<=475){
+          fontSize=size;bodyLines=candidate;spacing=step;break;
+        }
+      }
+      ctx.font=fontSize+'px system-ui';
+      const maxLines=Math.max(1,Math.floor((475-bodyTop)/spacing)+1);
+      if(!bodyLines.length)bodyLines=lines(ctx,bodyText,932,maxLines);
+      if(bodyLines.length>maxLines){
+        bodyLines=bodyLines.slice(0,maxLines);
+        bodyLines[maxLines-1]=bodyLines[maxLines-1].replace(/.{0,3}$/,'…');
+      }
+      ctx.fillStyle='#f6fffd';
+      bodyLines.forEach((line,i)=>ctx.fillText(line,43,bodyTop+i*spacing));
     };
   }
   function add(id,x,y,w,h,title,body,action=null,kind=''){
