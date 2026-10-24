@@ -63,7 +63,8 @@ export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer}
   scene.add(root);
   const ray=new THREE.Raycaster(),origin=new THREE.Vector3(),direction=new THREE.Vector3();
   const clickable=[],disposables=[],controllers=[],rays=[];
-  let hover=null,collapsed=false,disposed=false;
+  let hover=null,collapsed=false,disposed=false,missionPage=0;
+  const pageSize=4;
   const emit=()=>onChange?.(session.view());
 
   function clear(){
@@ -131,10 +132,25 @@ export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer}
   function display(){
     clear();const s=session.view();
     if(collapsed){add('restore',1.40,.60,1.85,.45,'OUVRIR LE GUIDE','Afficher missions et décisions','restore');emit();return;}
-    for(let i=0;i<session.missions.length;i++){
-      const m=session.missions[i];
+    // Seven missions cannot be compressed into a four-slot Quest panel row.
+    // Page them at four without changing the accessible HTML mission list.
+    const visibleMissions=session.missions.slice(missionPage*pageSize,missionPage*pageSize+pageSize);
+    for(let i=0;i<visibleMissions.length;i++){
+      const m=visibleMissions[i];
       add('mission-'+m.id,-1.68+i*1.13,1.10,1.08,.37,
-        m.id===s.mission?'● '+m.topic:m.topic,'Changer de mission','mission:'+m.id);
+        m.id===s.mission?'● '+m.topic:m.topic,'Choisir la mission','mission:'+m.id);
+    }
+    if(session.missions.length>pageSize)
+      add('mission-page',2.52,1.10,.46,.36,missionPage===0?'→':'←',
+        missionPage===0?'Autres missions':'Retour','mission-page');
+    if(s.showBrief){
+      const file=s.caseFile;
+      add('brief',0,.14,3.96,1.88,'DOSSIER · '+s.topic,
+        s.setting+' Rôle : '+file.role+'. Document : '+file.artefact+'. Préparer : '+file.prepare);
+      add('brief-close',1.05,-1.10,1.70,.43,'DÉMARRER →',
+        'Retour à la décision','brief');
+      add('collapse',-1.46,-1.15,1.28,.37,'MASQUER','Libérer la vue','collapse');
+      emit();return;
     }
     if(s.showDoc){
       add('document',0,.07,3.95,1.74,s.sourceTitle||'DOCUMENT DACI',
@@ -142,10 +158,11 @@ export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer}
       add('return',1.00,-1.11,1.56,.44,'← RETOUR','Revenir au dialogue','document');
     }else{
       const headline=s.ending?'PARCOURS TERMINÉ':s.actor+' · '+s.phase;
-      const lead=s.ending?s.objective:s.pending?(s.feedback+' '+s.note):s.dialogue;
+      const lead=s.ending?s.debrief.recommendedAction:s.pending?(s.feedback+' '+s.note):s.dialogue;
       add('story',-1.00,.30,1.96,1.29,headline,lead);
       if(s.ending){
-        add('end',1.07,.43,1.99,.65,'BILAN',s.steps+' décisions · '+s.completed+' référence(s) DACI');
+        add('end',1.07,.43,1.99,.65,'BILAN',
+          s.steps+' décisions · '+s.qualityProfile.appropriate+' solides · '+s.qualityProfile.risky+' à réexaminer');
         add('restart',1.07,-.35,1.99,.61,'RECOMMENCER','Reprendre le parcours','restart');
       }else if(s.pending){
         add('reaction',1.07,.40,1.99,.73,'CONSÉQUENCE · '+s.quality,
@@ -159,12 +176,19 @@ export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer}
           c.key+' · '+c.label,'Appuyez sur la gâchette','choice:'+c.id));
       }
     }
+    add('open-brief',-1.46,-.71,1.60,.37,'DOSSIER RH',
+      'Objectif et préparation','brief');
     add('collapse',-1.46,-1.15,1.28,.37,'MASQUER','Libérer la vue','collapse');
     emit();
   }
   function action(id){
     if(!id)return false;
-    if(id.startsWith('mission:')){session.setMission(id.slice(8));collapsed=false;}
+    if(id.startsWith('mission:')){
+      session.setMission(id.slice(8));collapsed=false;
+      missionPage=Math.floor(session.missions.findIndex(m=>m.id===id.slice(8))/pageSize);
+    }
+    else if(id==='mission-page')missionPage=missionPage===0?1:0;
+    else if(id==='brief'){session.toggleBrief();}
     else if(id.startsWith('choice:')){if(!session.choose(id.slice(7)))return false;}
     else if(id==='next'){if(!session.next())return false;}
     else if(id==='document'){if(!session.view().pending)return false;session.toggleDocument();}
