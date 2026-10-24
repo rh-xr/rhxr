@@ -51,7 +51,7 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 <body>
 <header><span class="top">RH·XR / LABORATOIRE V14.1 / FICTION</span>
 <h1>Un bureau VR. Sept missions RH. Des documents DACI et des débriefings en contexte.</h1>
-<p>Choisissez une situation depuis les panneaux du bureau ou depuis le guide textuel. En VR, pointez un panneau avec la manette et appuyez sur la gâchette. Chaque décision DACI mène à une conséquence et à une source fictive identifiable. Trois missions complémentaires abordent l’IA dans le recrutement, la confidentialité des données RH et la coopération hybride. Tous les documents d’exercice ajoutés sont fictifs. Mona Lisa est orientée par défaut à 312°.</p>
+<p>Choisissez une situation depuis les panneaux du bureau ou depuis le guide textuel. En VR, pointez un panneau avec la manette et appuyez sur la gâchette. Chaque décision DACI mène à une conséquence et à une source fictive identifiable. Trois missions complémentaires abordent l’IA dans le recrutement, la confidentialité des données RH et la coopération hybride. Tous les documents d’exercice ajoutés sont fictifs. Le nouveau modèle 3D associe le personnage Badr Han et son fauteuil en une seule scène ; son orientation initiale est réglable depuis le Quest.</p>
 <nav><a href="./parcours.html">Catalogue des 7 parcours</a><a href="../rhxr-v14/index.html">← Laboratoire V14</a><a href="../../simulation.html?office=v14">Bureau V14 initial</a><a href="../daci-v13/index.html">Parcours DACI V13</a><a href="../../index.html">Portail RH·XR</a></nav></header>
 <div class="layout">
 <article><div id="stage" aria-label="Bureau de formation RH·XR en 3D">
@@ -60,11 +60,11 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 <div class="stage-status" id="stage-status" role="status">Chargement de la scène…</div>
 <div class="stage-bottom"><small id="stage-hint">WASD/flèches sur PC · joysticks Quest 3S en VR.</small>
 <button type="button" id="view-switch" hidden>Activer la 3D</button></div></div>
-<div class="scene-help">Quest : <strong>gâchette = sélectionner</strong>, stick gauche = déplacement, stick droit = rotation de 45°. Le personnage sur le fauteuil RH est Mona Lisa GLB (pose statique), orientable par pas de 45°. Le bureau est réduit de 10 %, et les deux sièges sont avancés vers celui-ci. Les panneaux pédagogiques restent derrière Mona Lisa, mais sont positionnés plus à gauche et plus bas, avancés vers le bureau et agrandis. Leur fond bleu nuit, opaque à 98,5 %, et leur typographie moderne facilitent la lecture dans le Quest. Ils ne suivent pas vos mouvements. Utilisez « Masquer » pour libérer la vue. Sur PC : cliquez sur les panneaux 3D ou utilisez les commandes accessibles à droite.</div>
+<div class="scene-help">Quest : <strong>gâchette = sélectionner</strong>, stick gauche = déplacement, stick droit = rotation de 45°. Le fauteuil RH et Mona Lisa sont remplacés par un modèle GLB intégré (Badr Han et fauteuil), orientable par pas de 45°. Le bureau reste réduit de 10 % et la chaise visiteur conserve son placement validé. Les panneaux pédagogiques restent derrière Mona Lisa, mais sont positionnés plus à gauche et plus bas, avancés vers le bureau et agrandis. Leur fond bleu nuit, opaque à 98,5 %, et leur typographie moderne facilitent la lecture dans le Quest. Ils ne suivent pas vos mouvements. Utilisez « Masquer » pour libérer la vue. Sur PC : cliquez sur les panneaux 3D ou utilisez les commandes accessibles à droite.</div>
 </article>
 <article class="panel"><span class="badge">Simulations fictives · aucune décision RH individuelle</span>
 <h2>Guide pédagogique DACI</h2>
-<div id="avatar-status" class="avatar-state" role="status">Avatar Mona Lisa · chargement du modèle 3D en cours…</div><div class="actions"><button id="avatar-turn" type="button" disabled>↻ Tourner Mona Lisa +45°</button><button id="avatar-turn-back" type="button" disabled>↺ Tourner Mona Lisa −45°</button><span class="badge">Deux petits panneaux transparents contre le mur, sélectionnables dans le Quest</span></div>
+<div id="avatar-status" class="avatar-state" role="status">Ensemble personnage et fauteuil Badr Han · chargement du modèle 3D…</div><div class="actions"><button id="avatar-turn" type="button" disabled>↻ Tourner le personnage +45°</button><button id="avatar-turn-back" type="button" disabled>↺ Tourner le personnage −45°</button><span class="badge">Deux petits panneaux transparents contre le mur, sélectionnables dans le Quest</span></div>
 <label for="mission">Mission à réaliser</label>
 <select id="mission" aria-label="Choisir une mission RH"></select>
 <section class="case-file" aria-labelledby="case-title">
@@ -97,7 +97,7 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 </article>
 </div><footer>RH·XR V14.1 — démonstrateur pédagogique expérimental. Corpus et personnages fictifs. Les textes de S02 ne sont pas présentés comme des sources DACI vérifiées.</footer>
 <script type="module">
-import {mountRoom} from '../../assets/js/room.mjs?v=20261024-readable96-1';
+import {mountRoom} from '../../assets/js/room.mjs?v=20261024-executive-1';
 import {createLearningSession} from '../../assets/js/learning-v14-1.mjs?v=20261024-content-v3';
 import {buildLearningRecap,recapFilename} from '../../assets/js/learning-recap-v14-2.mjs';
 import {createSpatialLearningHub} from '../../assets/js/spatial-learning-v14-1.mjs?v=20261024-content-v2';
