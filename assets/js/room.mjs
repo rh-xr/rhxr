@@ -2,11 +2,11 @@
  * The same educational scenario remains available without XR.
  */
 import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotion.mjs';
-import { loadOfficeFurniture } from './office-furniture.mjs';
+import { loadOfficeFurniture,furniturePlanV141 } from './office-furniture.mjs?v=20261024-layout45';
 import {createPremiumOffice} from './premium-office-v14.mjs';
 import {upgradeOfficeFinish} from './premium-finish-v14-1.mjs';
-import {loadArmchairAvatar,ARMCHAIR_AVATAR_PLACEMENT} from './office-avatar-v14-1.mjs?v=20261023-quest-facing';
-import {createAvatarTurnControl,avatarYawDegrees} from './avatar-turn-v14-1.mjs';
+import {loadArmchairAvatar,ARMCHAIR_AVATAR_PLACEMENT} from './office-avatar-v14-1.mjs?v=20261024-layout45';
+import {createAvatarTurnControl,avatarYawDegrees} from './avatar-turn-v14-1.mjs?v=20261024-layout45';
 import {createMetricsSampler,createMetricsDisplay} from './metrics-v14.mjs';
 
 let initialized = false;
@@ -86,11 +86,17 @@ export async function mountRoom(stage) {
     cube(11, .15, 13, 0, 5.6, -1, mat.wall);
   }
   const metricPanel=perf?createMetricsDisplay(THREE,scene,perf):null;
+  // Preserve the validated S02/V14 layout; only V14.1 opts into these adjustments.
+  const v141Layout=advanced?furniturePlanV141:null;
+  const deskCenter=-2.35;
+  const managerZ=advanced?-4.10:-4.50;
+  const visitorZ=advanced?-.30:.05;
   const fallback={desk:[],manager:[],visitor:[]};
-  fallback.desk.push(cube(3.7, .15, 1.7, 0, 1.03, -2.35, mat.wood));
-  for (const x of [-1.5, 1.5]) for (const z of [-2.95, -1.75]) {
-    fallback.desk.push(cube(.12, 1, .12, x, .5, z, mat.metal));
-  }
+  fallback.desk.push(cube(advanced?3.33:3.7, advanced?.135:.15, advanced?1.53:1.7, 0, advanced?.927:1.03, deskCenter, mat.wood));
+  for (const x of (advanced?[-1.35,1.35]:[-1.5,1.5]))
+    for (const z of (advanced?[-2.89,-1.81]:[-2.95,-1.75])) {
+      fallback.desk.push(cube(advanced?.108:.12,advanced?.9:1,advanced?.108:.12,x,advanced?.45:.5,z,mat.metal));
+    }
 
   // The empty visitor chair faces the desk (-Z), so its back is +Z.
   // The occupied chair faces the visitor (+Z), so its back is -Z.
@@ -98,13 +104,13 @@ export async function mountRoom(stage) {
     fallback[id].push(cube(.9,.15,.85,x,.55,z,mat.seat));
     fallback[id].push(cube(.9,1,.13,x,1.05,z+.36*backSide,mat.seat));
   }
-  chair(0,-4.5,-1,'manager');
-  chair(0,.05,+1,'visitor');
+  chair(0,managerZ,-1,'manager');
+  chair(0,visitorZ,+1,'visitor');
   // Load local, pinned GLBs *without blocking the VR render loop*.
   // Remove a low-poly placeholder only when the matching GLB is ready.
   const furnitureLoaded=new Set();
   const furnitureStatus=document.querySelector('#stage-status');
-  const furnitureReady=loadOfficeFurniture(THREE,scene,{onItem(id,ready){
+  const furnitureReady=loadOfficeFurniture(THREE,scene,{plan:v141Layout||undefined,onItem(id,ready){
     if(ready){fallback[id].forEach(m=>{m.visible=false;});furnitureLoaded.add(id);}
     perf?.markAsset(id,ready);
     if(furnitureStatus){
@@ -115,16 +121,17 @@ export async function mountRoom(stage) {
 
   // Keep the existing geometric actor as a loading/failure fallback.
   const basicAvatar=[
-    cylinder(.3, .25, .8, 0, 1.18, -4.5, mat.shirt),
-    sphere(.28, 0, 1.83, -4.5, mat.skin),
-    cylinder(.09, .09, .55, -.35, 1.3, -4.5, mat.skin),
-    cylinder(.09, .09, .55, .35, 1.3, -4.5, mat.skin)
+    cylinder(.3, .25, .8, 0, 1.18, managerZ, mat.shirt),
+    sphere(.28, 0, 1.83, managerZ, mat.skin),
+    cylinder(.09, .09, .55, -.35, 1.3, managerZ, mat.skin),
+    cylinder(.09, .09, .55, .35, 1.3, managerZ, mat.skin)
   ];
   if(advanced){
     const avatarStatus=document.querySelector('#avatar-status');
     const avatarTurn=document.querySelector('#avatar-turn');
+    const avatarTurnBack=document.querySelector('#avatar-turn-back');
     const updateAvatarStatus=(angle)=>{if(avatarStatus)avatarStatus.textContent=
-      'Mona Lisa GLB chargé · orientation effective : '+angle+'° · taille ×1,10';};
+      'Mona Lisa GLB chargé · orientation effective : '+angle+'° · taille ×1,10 · pas de 45°';};
     // Defer avatar decompression until the three original pieces of furniture load.
     const avatarYaw=params.get('avatarYaw')==='0'?0:ARMCHAIR_AVATAR_PLACEMENT.yawRadians;
     void furnitureReady.then(()=>loadArmchairAvatar(THREE,scene,{
@@ -138,13 +145,19 @@ export async function mountRoom(stage) {
         updateAvatarStatus(avatarYawDegrees(model));
         if(avatarTurn){
           avatarTurn.disabled=false;
-          avatarTurn.onclick=()=>controls.turn();
-          avatarTurn.textContent='↻ Tourner Mona Lisa de 180°';
+          avatarTurn.onclick=()=>controls.turn(1);
+          avatarTurn.textContent='↻ Tourner Mona Lisa +45°';
+        }
+        if(avatarTurnBack){
+          avatarTurnBack.disabled=false;
+          avatarTurnBack.onclick=()=>controls.turn(-1);
+          avatarTurnBack.textContent='↺ Tourner Mona Lisa −45°';
         }
       },
       onFailed(){
         if(avatarStatus)avatarStatus.textContent='Avatar indisponible · personnage simplifié conservé';
         if(avatarTurn)avatarTurn.disabled=true;
+        if(avatarTurnBack)avatarTurnBack.disabled=true;
       }
     })).catch(error=>{
       console.warn('[RH-XR V14.1] Avatar initialization',error);
