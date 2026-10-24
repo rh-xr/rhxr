@@ -30,27 +30,30 @@ export function createAvatarTurnControl(THREE,{scene,renderer,playerRig},avatar,
     const ctx=canvas.getContext('2d');
     if(!ctx)return null;
     const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
-    const material=new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide,depthTest:true,depthWrite:true});
-    const geometry=new THREE.PlaneGeometry(1.92,.53);
+    const material=new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide,transparent:true,depthTest:true,depthWrite:false});
+    const geometry=new THREE.PlaneGeometry(1.48,.42);
     const plaque=new THREE.Mesh(geometry,material);
     plaque.name=steps>0?'rhxr-mona-lisa-turn-plus45':'rhxr-mona-lisa-turn-minus45';
-    plaque.position.set(2.15,y,-3.85);
+    // Calibration controls share the wall, away from the avatar's face.
+    plaque.position.set(4.02,y,-7.17);
     scene.add(plaque);
     const repaint=()=>{
-      ctx.fillStyle='#133b49';ctx.fillRect(0,0,1024,300);
-      ctx.fillStyle='#e5b76b';ctx.fillRect(0,0,14,300);
-      ctx.fillStyle='#ffffff';ctx.font='bold 58px system-ui';ctx.fillText(label,36,100);
-      ctx.fillStyle='#cfe8e6';ctx.font='42px system-ui';
-      ctx.fillText('Orientation actuelle : '+avatarYawDegrees(avatar)+'°',36,192);
-      ctx.fillStyle='#e5b76b';ctx.font='29px system-ui';
-      ctx.fillText('Pointez et pressez la gâchette',36,265);
+      ctx.clearRect(0,0,1024,300);
+      ctx.lineJoin='round';ctx.strokeStyle='rgba(8,31,39,.94)';ctx.lineWidth=9;
+      const draw=(text,x,y,color)=>{
+        ctx.strokeText(text,x,y);ctx.fillStyle=color;ctx.fillText(text,x,y);
+      };
+      ctx.font='bold 58px system-ui';draw(label,36,100,'#fbe2ab');
+      ctx.font='42px system-ui';
+      draw('Orientation : '+avatarYawDegrees(avatar)+'°',36,192,'#e9f7f3');
+      ctx.font='29px system-ui';draw('Pointer + gâchette',36,265,'#fbe2ab');
       texture.needsUpdate=true;
     };
     plaques.push({steps,plaque,repaint,geometry,material,texture});
     return plaque;
   }
-  addPlaque(1,1.82,'↻  MONA LISA +45°');
-  addPlaque(-1,1.16,'↺  MONA LISA −45°');
+  addPlaque(1,2.05,'↻  MONA LISA +45°');
+  addPlaque(-1,1.48,'↺  MONA LISA −45°');
   function turn(steps=1){
     const next=turnAvatarStep(avatar,steps);
     plaques.forEach(p=>p.repaint());
