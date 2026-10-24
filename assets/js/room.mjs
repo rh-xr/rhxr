@@ -6,7 +6,8 @@ import { loadOfficeFurniture,furniturePlanV141 } from './office-furniture.mjs?v=
 import {createPremiumOffice} from './premium-office-v14.mjs';
 import {upgradeOfficeFinish} from './premium-finish-v14-1.mjs';
 import {loadArmchairAvatar,ARMCHAIR_AVATAR_PLACEMENT} from './office-avatar-v14-1.mjs?v=20261024-wall312';
-import {createAvatarTurnControl,avatarYawDegrees} from './avatar-turn-v14-1.mjs?v=20261024-readable96';
+import {createAvatarTurnControl,avatarYawDegrees} from './avatar-turn-v14-1.mjs?v=20261024-executive';
+import {loadExecutiveAssembly,EXECUTIVE_PLACEMENT} from './office-executive-v14-2.mjs';
 import {createMetricsSampler,createMetricsDisplay} from './metrics-v14.mjs';
 
 let initialized = false;
@@ -87,7 +88,9 @@ export async function mountRoom(stage) {
   }
   const metricPanel=perf?createMetricsDisplay(THREE,scene,perf):null;
   // Preserve the validated S02/V14 layout; only V14.1 opts into these adjustments.
-  const v141Layout=advanced?furniturePlanV141:null;
+  // In V14.2 the executive GLB already includes its chair. Load the two
+  // remaining furniture GLBs first; only load legacy manager chair on failure.
+  const v141Layout=advanced?furniturePlanV141.filter(spec=>spec.id!=='manager'):null;
   const deskCenter=-2.35;
   const managerZ=advanced?-3.75:-4.50;
   const visitorZ=advanced?-.98:.05;
@@ -130,40 +133,76 @@ export async function mountRoom(stage) {
     const avatarStatus=document.querySelector('#avatar-status');
     const avatarTurn=document.querySelector('#avatar-turn');
     const avatarTurnBack=document.querySelector('#avatar-turn-back');
-    const updateAvatarStatus=(angle)=>{if(avatarStatus)avatarStatus.textContent=
-      'Mona Lisa GLB chargé · orientation effective : '+angle+'° · taille ×1,10 · pas de 45°';};
-    // Defer avatar decompression until the three original pieces of furniture load.
-    const yawParam=params.get('avatarYaw');
-    const yawDegrees=yawParam!==null&&/^[0-9]{1,3}$/.test(yawParam)&&Number(yawParam)<360?Number(yawParam):312;
-    const avatarYaw=yawDegrees*Math.PI/180;
-    void furnitureReady.then(()=>loadArmchairAvatar(THREE,scene,{
-      placement:{...ARMCHAIR_AVATAR_PLACEMENT,yawRadians:avatarYaw},
-      onLoaded(model){
-        basicAvatar.forEach(mesh=>{mesh.visible=false;});
-        model.updateMatrixWorld(true);
+    const yawParam=params.get('executiveYaw')??params.get('avatarYaw');
+    const yawDegrees=yawParam!==null&&/^[0-9]{1,3}$/.test(yawParam)&&Number(yawParam)<360?
+      Number(yawParam):312;
+    const modelYaw=yawDegrees*Math.PI/180;
+    function connectTurnButtons(model,designation){
+      const updateStatus=(angle)=>{
+        if(avatarStatus)avatarStatus.textContent=
+          designation+' chargé · orientation : '+angle+'° · rotation par 45°';
+      };
+      updateStatus(avatarYawDegrees(model));
+      try{
         const controls=createAvatarTurnControl(THREE,{scene,renderer,playerRig},model,{
-          onRotate:updateAvatarStatus
+          label:designation,onRotate:updateStatus
         });
-        updateAvatarStatus(avatarYawDegrees(model));
         if(avatarTurn){
           avatarTurn.disabled=false;
           avatarTurn.onclick=()=>controls.turn(1);
-          avatarTurn.textContent='↻ Tourner Mona Lisa +45°';
+          avatarTurn.textContent='↻ Tourner le personnage +45°';
         }
         if(avatarTurnBack){
           avatarTurnBack.disabled=false;
           avatarTurnBack.onclick=()=>controls.turn(-1);
-          avatarTurnBack.textContent='↺ Tourner Mona Lisa −45°';
+          avatarTurnBack.textContent='↺ Tourner le personnage −45°';
         }
-      },
-      onFailed(){
-        if(avatarStatus)avatarStatus.textContent='Avatar indisponible · personnage simplifié conservé';
-        if(avatarTurn)avatarTurn.disabled=true;
-        if(avatarTurnBack)avatarTurnBack.disabled=true;
+      }catch(error){console.warn('[RH-XR] Avatar rotation controls unavailable',error);}
+    }
+    async function restoreLegacyOccupiedChair(){
+      // Keep the old V14.1 actor/seat only for recovery when new GLB fails.
+      if(avatarStatus)avatarStatus.textContent='Nouveau modèle indisponible · repli vers le fauteuil précédent';
+      try{
+        await loadOfficeFurniture(THREE,scene,{
+          plan:furniturePlanV141.filter(spec=>spec.id==='manager'),
+          onItem(id,ready){
+            if(ready){fallback.manager.forEach(mesh=>{mesh.visible=false;});furnitureLoaded.add(id);}
+            perf?.markAsset(id,ready);
+          }
+        });
+        const legacy=await loadArmchairAvatar(THREE,scene,{
+          placement:{...ARMCHAIR_AVATAR_PLACEMENT,yawRadians:modelYaw},
+          onLoaded(model){
+            basicAvatar.forEach(mesh=>{mesh.visible=false;});
+            connectTurnButtons(model,'Mona Lisa (repli)');
+          },
+          onFailed(){
+            if(avatarStatus)avatarStatus.textContent='Modèles GLB indisponibles · personnages de secours affichés';
+          }
+        });
+        return legacy;
+      }catch(error){
+        console.warn('[RH-XR V14.2] Legacy avatar fallback failed',error);
+        if(avatarStatus)avatarStatus.textContent='Modèle intégré indisponible · géométrie de secours affichée';
       }
-    })).catch(error=>{
-      console.warn('[RH-XR V14.1] Avatar initialization',error);
-      if(avatarStatus)avatarStatus.textContent='Avatar indisponible · personnage simplifié conservé';
+    }
+    // Only one occupied chair/person assembly at a time. The original chair
+    // GLB and Mona Lisa are not even downloaded when the new one succeeds.
+    void furnitureReady.then(async()=>{
+      const result=await loadExecutiveAssembly(THREE,scene,{
+        placement:{...EXECUTIVE_PLACEMENT,yawRadians:modelYaw},
+        onLoaded(model){
+          fallback.manager.forEach(mesh=>{mesh.visible=false;});
+          basicAvatar.forEach(mesh=>{mesh.visible=false;});
+          furnitureLoaded.add('manager');perf?.markAsset('manager',true);
+          if(furnitureStatus)furnitureStatus.textContent='V14 · mobilier et ensemble RH GLB 3/3';
+          connectTurnButtons(model,'Badr Han · fauteuil intégré');
+        }
+      });
+      if(!result.ok)await restoreLegacyOccupiedChair();
+    }).catch(async error=>{
+      console.warn('[RH-XR V14.2] Combined model initialization failed',error);
+      await restoreLegacyOccupiedChair();
     });
   }
   if(!premium){
