@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {MISSIONS,createLearningSession} from '../assets/js/learning-v14-1.mjs';
+import {WALL_DACI_LAYOUT} from '../assets/js/spatial-learning-v14-1.mjs';
 
 const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
 const bundle=JSON.parse(read('../experiences/daci-v13/v13-bundle.json'));
@@ -67,7 +68,11 @@ test('Quest panels and DOM guide share one authority with no separate data write
   const html=read('../experiences/rhxr-v14-1/index.html');
   assert.ok(hub.includes('renderer.xr.getController(i)'));
   assert.ok(hub.includes("controller.addEventListener('select'"));
-  assert.ok(hub.includes('playerRig.add(root)'));
+  assert.ok(hub.includes('scene.add(root)'));
+  assert.ok(hub.includes('scene.remove(root)'));
+  assert.ok(!hub.includes('playerRig.add(root)'));
+  assert.ok(hub.includes('transparent:true'));
+  assert.ok(hub.includes('ctx.clearRect(0,0,1024,512)'));
   assert.ok(hub.includes("action('toggle')")||hub.includes("id==='toggle'"));
   assert.ok(hub.includes('session.toggleDocument()'));
   assert.ok(html.includes('createLearningSession'));
@@ -91,4 +96,20 @@ test('V14.1 upgraded visuals are optional and preserve stable V14 entry and loco
   assert.ok(premium.includes('RepeatWrapping'));
   assert.ok(!premium.includes('PointLight'));
   assert.ok(!premium.includes('castShadow=true'));
+});
+
+
+test('DACI and Mona Lisa calibration panels are transparent, smaller, and close to back wall',()=>{
+  const hub=read('../assets/js/spatial-learning-v14-1.mjs');
+  const avatarControl=read('../assets/js/avatar-turn-v14-1.mjs');
+  assert.ok(WALL_DACI_LAYOUT.transparent);
+  assert.ok(WALL_DACI_LAYOUT.scale<1&&WALL_DACI_LAYOUT.scale>=.75);
+  assert.ok(WALL_DACI_LAYOUT.position[2]<-7.0&&WALL_DACI_LAYOUT.position[2]>-7.33);
+  assert.ok(WALL_DACI_LAYOUT.position[1]>2.3);
+  assert.ok(hub.includes('root.position.set(...WALL_DACI_LAYOUT.position)'));
+  assert.ok(hub.includes('root.scale.setScalar(WALL_DACI_LAYOUT.scale)'));
+  assert.ok(hub.includes('transparent:true,depthWrite:false'));
+  assert.ok(avatarControl.includes('transparent:true,depthTest:true,depthWrite:false'));
+  assert.ok(avatarControl.includes('plaque.position.set(4.02,y,-7.17)'));
+  assert.ok(!avatarControl.includes("ctx.fillStyle='#133b49';ctx.fillRect"));
 });
