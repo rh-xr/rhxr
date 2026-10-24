@@ -50,7 +50,7 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 <body>
 <header><span class="top">RH·XR / LABORATOIRE V14.1 / FICTION</span>
 <h1>Un bureau VR. Quatre missions RH. Les documents DACI en contexte.</h1>
-<p>Choisissez une situation depuis les panneaux du bureau ou depuis le guide textuel. En VR, pointez un panneau avec la manette et appuyez sur la gâchette. Chaque décision DACI mène à une conséquence et à une source fictive identifiable.</p>
+<p>Choisissez une situation depuis les panneaux du bureau ou depuis le guide textuel. En VR, pointez un panneau avec la manette et appuyez sur la gâchette. Chaque décision DACI mène à une conséquence et à une source fictive identifiable. Mona Lisa est orientée par défaut à 312°.</p>
 <nav><a href="../rhxr-v14/index.html">← Laboratoire V14</a><a href="../../simulation.html?office=v14">Bureau V14 initial</a><a href="../daci-v13/index.html">Parcours DACI V13</a><a href="../../index.html">Portail RH·XR</a></nav></header>
 <div class="layout">
 <article><div id="stage" aria-label="Bureau de formation RH·XR en 3D">
@@ -59,11 +59,11 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 <div class="stage-status" id="stage-status" role="status">Chargement de la scène…</div>
 <div class="stage-bottom"><small id="stage-hint">WASD/flèches sur PC · joysticks Quest 3S en VR.</small>
 <button type="button" id="view-switch" hidden>Activer la 3D</button></div></div>
-<div class="scene-help">Quest : <strong>gâchette = sélectionner</strong>, stick gauche = déplacement, stick droit = rotation de 45°. Le personnage sur le fauteuil RH est Mona Lisa GLB (pose statique), orientable par pas de 45°. Le bureau est réduit de 10 %, et les deux sièges sont avancés vers celui-ci. Les panneaux pédagogiques accompagnent vos mouvements virtuels ; utilisez « Masquer » pour libérer la vue. Sur PC : cliquez sur les panneaux 3D ou utilisez les commandes accessibles à droite.</div>
+<div class="scene-help">Quest : <strong>gâchette = sélectionner</strong>, stick gauche = déplacement, stick droit = rotation de 45°. Le personnage sur le fauteuil RH est Mona Lisa GLB (pose statique), orientable par pas de 45°. Le bureau est réduit de 10 %, et les deux sièges sont avancés vers celui-ci. Les panneaux pédagogiques sont désormais plus discrets, transparents et fixés contre le mur derrière Mona Lisa, sans suivre vos mouvements ; rapprochez-vous du mur pour les lire. Utilisez « Masquer » pour libérer la vue. Sur PC : cliquez sur les panneaux 3D ou utilisez les commandes accessibles à droite.</div>
 </article>
 <article class="panel"><span class="badge">Simulations fictives · aucune décision RH individuelle</span>
 <h2>Guide pédagogique DACI</h2>
-<div id="avatar-status" class="avatar-state" role="status">Avatar Mona Lisa · chargement du modèle 3D en cours…</div><div class="actions"><button id="avatar-turn" type="button" disabled>↻ Tourner Mona Lisa +45°</button><button id="avatar-turn-back" type="button" disabled>↺ Tourner Mona Lisa −45°</button><span class="badge">Deux panneaux près du fauteuil, sélectionnables dans le Quest</span></div>
+<div id="avatar-status" class="avatar-state" role="status">Avatar Mona Lisa · chargement du modèle 3D en cours…</div><div class="actions"><button id="avatar-turn" type="button" disabled>↻ Tourner Mona Lisa +45°</button><button id="avatar-turn-back" type="button" disabled>↺ Tourner Mona Lisa −45°</button><span class="badge">Deux petits panneaux transparents contre le mur, sélectionnables dans le Quest</span></div>
 <label for="mission">Mission à réaliser</label>
 <select id="mission" aria-label="Choisir une mission RH"></select>
 <div class="kicker" id="phase">Situation · introduction</div><div id="objective" class="objective"></div>
@@ -83,9 +83,9 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 </article>
 </div><footer>RH·XR V14.1 — démonstrateur pédagogique expérimental. Corpus et personnages fictifs. Les textes de S02 ne sont pas présentés comme des sources DACI vérifiées.</footer>
 <script type="module">
-import {mountRoom} from '../../assets/js/room.mjs?v=20261024-layout45-1';
+import {mountRoom} from '../../assets/js/room.mjs?v=20261024-wall312-1';
 import {createLearningSession} from '../../assets/js/learning-v14-1.mjs';
-import {createSpatialLearningHub} from '../../assets/js/spatial-learning-v14-1.mjs';
+import {createSpatialLearningHub} from '../../assets/js/spatial-learning-v14-1.mjs?v=20261024-wall312';
 const $=id=>document.getElementById(id);let training=null,hub=null;
 const node=(tag,text)=>{const e=document.createElement(tag);e.textContent=String(text??'');return e;};
 function render(v){
