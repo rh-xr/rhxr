@@ -1,5 +1,28 @@
 # RH·XR V14.1 — Avatar Mona Lisa sur le fauteuil RH
 
+## Révision lisibilité du 24 octobre 2026 — validée dans le code, à vérifier sur Quest
+
+La disposition **déjà validée en conditions réelles** est conservée à l'identique :
+- Mona Lisa : **312°**, fauteuil RH centré à `z=-3,75` ; taille avatar ×1,10.
+- Bureau : centre `z=-2,35`, enveloppe 3,195 × 1,035 × 1,575 m.
+- Chaise visiteur : `z=-0,98`. Aucune géométrie/translation de ces objets n'a été modifiée.
+
+Après retour utilisateur signalant que le texte était trop petit et que le mur gênait la lecture :
+- Groupe DACI initial `[0,72, 2,65, -7,18]` → désormais **`[0,72, 2,65, -6,52]`** : le texte est avancé de **66 cm** par rapport à sa position précédente, tout en restant **2,77 m derrière l'avatar** sur l'axe Z.
+- Distance de l'écran au mur arrière (z ≈ −7,35) : environ **83 cm**.
+- Échelle du groupe **0,82 → 1,05**, soit un agrandissement géométrique de **28 %** ; tailles de caractères principales également augmentées, avec ajustement automatique du corps des textes longs pour éviter un débordement.
+- Nouveau fond : **bleu nuit avec 96 % d'opacité** (4 % de transparence), fin liseré et police blanche/crème à contraste élevé ; le décor derrière n'interfère presque plus.
+- Panneaux de rotation Mona Lisa : déplacés avec le texte de `z=-7,17` à `z=-6,52`, passés à 1,64 × 0,46 m et eux aussi dotés d'un fond opaque à **96 %**.
+- Le groupe DACI reste **fixé à la scène** (pas au casque), les interactions par raycast et les contrôles de locomotion Quest restent identiques.
+- Une version d'URL JavaScript unique évite de recharger les précédents panneaux transparents depuis le cache du Quest.
+
+**À tester dans le casque** : distance de lecture sans se pencher, panneaux assez grands pour les choix, lisibilité des passages DACI longs, absence de chevauchement avec le fauteuil et le corps de Mona Lisa, sélections par gâchette, stabilité des FPS.
+
+> Les anciens paragraphes du présent document décrivent les étapes antérieures et ne remplacent pas cette configuration actualisée.
+
+---
+
+
 ## Révision du 24 octobre 2026 — implantation compacte et DACI sur le mur
 
 Ces choix remplacent les essais d'espacement et d'orientation décrits dans l'historique ci-dessous.
