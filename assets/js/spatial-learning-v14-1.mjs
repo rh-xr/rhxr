@@ -2,14 +2,34 @@
  * Deterministic content is supplied by createLearningSession().
  * The validated locomotion and WebXR session handling remain in room.mjs.
  */
-// Screen-space texts remain static in the room behind Mona Lisa, but are placed
-// well clear of the decorated wall and use a near-opaque high-contrast backing.
+// V14.1 final: anchored to the room, behind Mona Lisa, never to the headset.
+// Higher contrast and a lower/left/forward placement respond to Quest legibility tests.
 export const WALL_DACI_LAYOUT=Object.freeze({
-  position:[0.72,2.65,-6.52],
-  scale:1.05,
+  position:[0.34,2.35,-6.12],
+  scale:1.12,
   transparent:true,
-  backgroundAlpha:0.96
+  backgroundAlpha:0.985
 });
+export const PANEL_TYPOGRAPHY=Object.freeze({
+  family:'"Inter","Segoe UI",system-ui,sans-serif',
+  titlePx:66,smallTitlePx:58,
+  bodySizes:[50,47,44,41,38,35,32],
+  smallBodySizes:[48,45,42,39,36,33]
+});
+export function roundedPanel(ctx,x,y,w,h,r,fill,stroke=null){
+  // RoundRect is available in current Quest Browser; provide a path fallback.
+  ctx.beginPath();
+  if(typeof ctx.roundRect==='function')ctx.roundRect(x,y,w,h,r);
+  else{
+    ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+    ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+    ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);
+    ctx.closePath();
+  }
+  ctx.fillStyle=fill;ctx.fill();
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=3;ctx.stroke();}
+}
 function lines(ctx,value,maxWidth,max=4){
   const words=String(value||'').split(/\s+/),result=[];let current='';
   for(const word of words){if(!word)continue;
@@ -36,8 +56,8 @@ const palette={navy:'#092b38',teal:'#166c78',aqua:'#cce8e6',gold:'#eac486',paper
 export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer},session,{onChange}={}){
   if(!playerRig||!renderer||!session?.view)throw Error('V14.1 hub requires a scene and learning session');
   const root=new THREE.Group();root.name='rhxr-v14-1-spatial-learning-hub';
-  // Rear wall z≈−7.35; shift panels 0.83m in front of it, still 2.77m behind
-  // Mona Lisa. Never attach these panels to the HMD/player rig.
+  // Rear wall z≈−7.35; the panels are 1.23m in front of it and 2.37m
+  // behind Mona Lisa (z=-3.75). First row sits lower in the user's view.
   root.position.set(...WALL_DACI_LAYOUT.position);
   root.scale.setScalar(WALL_DACI_LAYOUT.scale);
   scene.add(root);
@@ -54,46 +74,49 @@ export function createSpatialLearningHub(THREE,{scene,playerRig,camera,renderer}
   function paint(title,body,{small=false,accent=palette.teal,kind='body'}={}){
     return ctx=>{
       ctx.clearRect(0,0,1024,512);
-      // 96% opacity: wall decoration is only very faintly perceptible through
-      // the panel, keeping text readable on Quest while retaining slight depth.
-      ctx.fillStyle='rgba(8,31,41,'+WALL_DACI_LAYOUT.backgroundAlpha+')';
-      ctx.fillRect(0,0,1024,512);
-      ctx.fillStyle=accent;
-      ctx.fillRect(0,0,13,512);
-      ctx.strokeStyle='rgba(211,232,227,.7)';
-      ctx.lineWidth=3;ctx.strokeRect(3,3,1018,506);
+      ctx.save();
+      // Almost opaque, professional dark gradient prevents wall decoration
+      // from competing with the text. Rounded borders keep the overlay elegant.
+      const gradient=ctx.createLinearGradient(8,8,1016,504);
+      const opacity=WALL_DACI_LAYOUT.backgroundAlpha;
+      gradient.addColorStop(0,'rgba(8,27,39,'+opacity+')');
+      gradient.addColorStop(1,'rgba(15,47,59,'+opacity+')');
+      roundedPanel(ctx,8,8,1008,496,28,gradient,'rgba(211,231,232,.86)');
+      roundedPanel(ctx,19,21,12,470,6,accent);
 
-      // Larger heading and body text than the previous 0.82x panel version.
-      // Adapt font size only when the authored text cannot fit on this canvas.
-      ctx.textBaseline='alphabetic';
       ctx.textAlign='left';
-      ctx.font=(small?'700 53px':'700 60px')+' system-ui';
-      const headline=lines(ctx,title,925,2);
-      const titleStart=76;
-      ctx.fillStyle=kind==='button'?'#ffe8b8':'#ffde9c';
-      headline.forEach((line,i)=>ctx.fillText(line,42,titleStart+i*62));
+      ctx.textBaseline='alphabetic';
+      ctx.font='700 '+(small?PANEL_TYPOGRAPHY.smallTitlePx:PANEL_TYPOGRAPHY.titlePx)+
+        'px '+PANEL_TYPOGRAPHY.family;
+      const headings=lines(ctx,title,895,2);
+      ctx.fillStyle=kind==='button'?'#ffe2a3':'#ffd48a';
+      headings.forEach((line,index)=>ctx.fillText(line,55,108+index*68));
 
-      const bodyTop=headline.length>1?205:169;
+      const bodyTop=headings.length>1?250:195;
       const bodyText=String(body||'');
-      const sizes=small?[45,42,39,36,33]:[46,43,40,37,34,31];
-      let fontSize=sizes[sizes.length-1],bodyLines=[],spacing=fontSize*1.22;
-      for(const size of sizes){
-        ctx.font=size+'px system-ui';
-        const candidate=lines(ctx,bodyText,932,80);
-        const step=Math.round(size*1.22);
-        if(bodyTop+Math.max(0,candidate.length-1)*step<=475){
-          fontSize=size;bodyLines=candidate;spacing=step;break;
+      const choices=small?PANEL_TYPOGRAPHY.smallBodySizes:PANEL_TYPOGRAPHY.bodySizes;
+      const bodyFont=size=>size+'px '+PANEL_TYPOGRAPHY.family;
+      const bottom=468;
+      let textLines=[],sizeUsed=choices[choices.length-1],lineStep=Math.round(sizeUsed*1.22);
+      for(const size of choices){
+        ctx.font=bodyFont(size);
+        const candidate=lines(ctx,bodyText,905,80);
+        const step=Math.round(size*1.23);
+        if(bodyTop+Math.max(0,candidate.length-1)*step<=bottom){
+          textLines=candidate;sizeUsed=size;lineStep=step;break;
         }
       }
-      ctx.font=fontSize+'px system-ui';
-      const maxLines=Math.max(1,Math.floor((475-bodyTop)/spacing)+1);
-      if(!bodyLines.length)bodyLines=lines(ctx,bodyText,932,maxLines);
-      if(bodyLines.length>maxLines){
-        bodyLines=bodyLines.slice(0,maxLines);
-        bodyLines[maxLines-1]=bodyLines[maxLines-1].replace(/.{0,3}$/,'…');
+      ctx.font=bodyFont(sizeUsed);
+      const maxVisibleLines=Math.max(1,Math.floor((bottom-bodyTop)/lineStep)+1);
+      if(textLines.length===0)textLines=lines(ctx,bodyText,905,maxVisibleLines);
+      if(textLines.length>maxVisibleLines){
+        textLines=textLines.slice(0,maxVisibleLines);
+        const last=textLines.length-1;
+        textLines[last]=textLines[last].replace(/.{0,3}$/,'…');
       }
-      ctx.fillStyle='#f6fffd';
-      bodyLines.forEach((line,i)=>ctx.fillText(line,43,bodyTop+i*spacing));
+      ctx.fillStyle='#f7fbff';
+      textLines.forEach((line,index)=>ctx.fillText(line,55,bodyTop+index*lineStep));
+      ctx.restore();
     };
   }
   function add(id,x,y,w,h,title,body,action=null,kind=''){
