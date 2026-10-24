@@ -88,7 +88,7 @@ test('Previous desk/visitor remain untouched and original V14/ S02 paths use the
   assert.ok(room.includes("plan:v141Layout||undefined"));
   const html=file('../experiences/rhxr-v14-1/index.html');
   assert.ok(html.includes('Ensemble personnage et fauteuil Badr Han'));
-  assert.ok(html.includes('room.mjs?v=20261024-executive-1'));
+  assert.ok(html.includes('room.mjs?v=20261024-badr-final-1'));
 });
 
 test('The rotated original 3D bounds preserve near-life-size appearance beside the desk',()=>{
