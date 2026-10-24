@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {EXECUTIVE_ASSET,EXECUTIVE_PLACEMENT,fitExecutiveAssembly,loadExecutiveAssembly} from '../assets/js/office-executive-v14-2.mjs';
+import {furniturePlanV141} from '../assets/js/office-furniture.mjs';
 
 const file=path=>readFileSync(new URL(path,import.meta.url),'utf8');
 
@@ -30,9 +31,9 @@ test('Integrated Badr Han + chair GLB matches the pinned original binary source'
   }));
 });
 
-test('Executive positioning uses a ground-level, uniformly-scaled assembly',()=>{
+test('Executive positioning advances and lifts the one-piece assembly while keeping uniform scale',()=>{
   const c=EXECUTIVE_PLACEMENT;
-  assert.deepEqual(c.position,[0,0,-4.10]);
+  assert.deepEqual(c.position,[0,0.09,-4.02]);
   assert.ok(Math.abs(c.yawRadians-312*Math.PI/180)<1e-10);
   assert.ok(c.maxEnvelope.every(v=>v>0));
   class Vector3{constructor(x=0,y=0,z=0){Object.assign(this,{x,y,z});}}
@@ -55,7 +56,7 @@ test('Executive positioning uses a ground-level, uniformly-scaled assembly',()=>
   const model={position:{x:0,y:0,z:0},updateMatrixWorld(){}};
   const result=fitExecutiveAssembly({Box3,Vector3,Group},model);
   assert.equal(result.name,'rhxr-executive-chair-assembly');
-  assert.deepEqual(result.position.values,[0,0,-4.10]);
+  assert.deepEqual(result.position.values,[0,0.09,-4.02]);
   assert.equal(result.rotation.y,c.yawRadians);
   assert.equal(result.children[0],model);
   assert.ok(result.scale.factor>0&&result.scale.factor<=1.3);
@@ -81,8 +82,8 @@ test('Badr Han load failure keeps original chair and actor fallback possible',as
 test('Previous desk/visitor remain untouched and original V14/ S02 paths use their original models',()=>{
   const furn=file('../assets/js/office-furniture.mjs');
   const room=file('../assets/js/room.mjs');
-  assert.match(furn,/id:'desk'.*size:\[3\.195,1\.035,1\.575\]/);
-  assert.match(furn,/id:'visitor'.*position:\[0,0,-0\.98\]/);
+  assert.match(furn,/id:'desk'.*size:\[3\.30,1\.07,1\.62\]/);
+  assert.match(furn,/id:'visitor'.*position:\[0,0,-0\.86\]/);
   assert.ok(room.includes("const advanced=window.location.pathname.includes('/rhxr-v14-1/')"));
   assert.ok(room.includes("plan:v141Layout||undefined"));
   const html=file('../experiences/rhxr-v14-1/index.html');
@@ -103,10 +104,13 @@ test('The rotated original 3D bounds preserve near-life-size appearance beside t
     EXECUTIVE_PLACEMENT.maxEnvelope[1]/h,
     EXECUTIVE_PLACEMENT.maxEnvelope[2]/rotatedDepth);
   const height=h*scale,depth=rotatedDepth*scale;
-  const deskRearEdge=-2.35-1.575/2;
+  const desk=furniturePlanV141.find(x=>x.id==='desk');
+  const deskRearEdge=desk.position[2]-desk.size[2]/2;
   const frontEdge=EXECUTIVE_PLACEMENT.position[2]+depth/2;
   const clearance=deskRearEdge-frontEdge;
   assert.ok(height>1.70&&height<2.05,'Full chair-and-figure model should be near human scale');
-  assert.ok(clearance>.05&&clearance<.3,'Assembled chair should fit close to desk without overlapping');
+  assert.ok(clearance>.05&&clearance<.1,'Assembled chair should fit close to desk without overlapping');
+  assert.ok(Math.abs(clearance-.065)<.000001,'Desk shift protects 6.5cm horizontal clearance');
+  assert.equal(EXECUTIVE_PLACEMENT.position[1],.09,'Entire assembly rises 9cm to reveal footwear');
   console.log('[RH-XR executive fit estimate]',JSON.stringify({scale,height,depth,clearance}));
 });
