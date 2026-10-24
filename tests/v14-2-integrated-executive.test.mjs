@@ -23,6 +23,8 @@ test('Integrated Badr Han + chair GLB matches the pinned original binary source'
     bytes:source.length, meshes:doc.meshes.length,nodes:doc.nodes?.length||0,
     names:doc.nodes?.slice(0,18).map(n=>n.name||'unnamed'),
     materials:doc.materials?.length||0,textures:doc.textures?.length||0,
+    positionBounds:doc.accessors?.filter(v=>v.type==='VEC3'&&v.min&&v.max)
+      .slice(0,5).map(v=>({min:v.min,max:v.max}))||[],
     used:doc.extensionsUsed||[],required:doc.extensionsRequired||[],
     animations:doc.animations?.length||0,skins:doc.skins?.length||0
   }));
