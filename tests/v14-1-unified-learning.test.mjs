@@ -121,11 +121,13 @@ test('DACI remains behind Mona Lisa with larger text, high-opacity backdrop and 
   assert.ok(avatarControl.includes("ctx.fillStyle='rgba(8,31,41,.96)'"));
 });
 
-test('The user-validated 312° avatar and close-fitting furniture remain untouched',()=>{
+test('Badr remains oriented at 312° and shared RH learning panels are unchanged',()=>{
   assert.ok(Math.abs(ARMCHAIR_AVATAR_PLACEMENT.yawRadians*180/Math.PI-312)<1e-10);
-  assert.equal(ARMCHAIR_AVATAR_PLACEMENT.position[2],-3.75);
+  assert.equal(ARMCHAIR_AVATAR_PLACEMENT.position[2],-3.75,
+    'Legacy Mona Lisa chair preserved in case Badr fails');
   assert.deepEqual(furniturePlanV141.map(({id,position})=>[id,position[2]]),[
-    ['desk',-2.35],['manager',-3.75],['visitor',-.98]
+    ['desk',-2.27],['manager',-3.75],['visitor',-.86]
   ]);
-  assert.deepEqual(furniturePlanV141[0].size,[3.195,1.035,1.575]);
+  assert.deepEqual(furniturePlanV141[0].size,[3.30,1.07,1.62]);
+  assert.equal(WALL_DACI_LAYOUT.backgroundAlpha,.985);
 });
