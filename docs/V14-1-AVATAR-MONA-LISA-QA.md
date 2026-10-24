@@ -1,5 +1,32 @@
 # RH·XR V14.1 — Avatar Mona Lisa sur le fauteuil RH
 
+## Mise à jour du 24 octobre 2026 — mobilier rapproché et rotation à 45°
+
+Le **réglage actuel** dans V14.1 est le suivant :
+
+- Bureau `desk.glb` redimensionné uniformément à **90 %**, enveloppe de 3,55 × 1,15 × 1,75 m à **3,195 × 1,035 × 1,575 m**. Son centre reste au même endroit.
+- Fauteuil du responsable `amrchair.glb` avancé de **35 cm** (z : −4,45 → **−4,10**).
+- Chaise du visiteur `chair.glb` avancée de **35 cm** (z : +0,05 → **−0,30**).
+- Mona Lisa reste centrée sur son fauteuil (z = −4,10), avec l'agrandissement précédent de 10 %, sans déformation.
+- Deux commandes, **+45°** et **−45°** : une sélection ne tourne **jamais** le modèle de 180° directement. Les huit orientations successives possibles couvrent 360°.
+- Les boutons sont disponibles dans le guide 2D et sous forme de **deux panneaux 3D** sélectionnables par les manettes Quest.
+- La valeur initiale est conservée à 180°, mais on peut affiner progressivement par pas de 45° et lire l'angle réel affiché.
+- Les routes S02 et V14 anciennes conservent leurs placements initiaux, grâce à un plan d'implantation spécifique V14.1.
+- **46 tests GitHub Actions réussis** sur la version de code avant mise à jour de la présente documentation. Le rendu Quest reste à vérifier.
+
+Le point visuel important est désormais la marge restante entre le bureau réduit et les deux sièges, et l'absence d'intersections entre Mona Lisa et le fauteuil après chaque rotation.
+
+### Instructions actuelles de recette
+
+1. Ouvrir `/experiences/rhxr-v14-1/index.html` dans Quest Browser et entrer en VR.
+2. À droite du fauteuil RH, sélectionner « MONA LISA +45° » ou « MONA LISA −45° » avec une manette.
+3. Vérifier chaque déplacement angulaire de **45°**, et les angles affichés (par ex. 180° → 225° → 270°).
+4. Vérifier la proximité des meubles, leur absence d'intersections et la liberté de mouvement autour du bureau.
+5. Si les boutons ne semblent pas mis à jour, rouvrir la Preview du dernier commit plutôt qu'une ancienne URL mémorisée.
+
+---
+
+
 ## Provenance et intégrité
 
 Le fichier `assets/models/mona-lisa.glb` est repris **sans conversion** depuis le commit GitHub `8587c40216a1bcbc881445b9123fe0168058f6ab` du dépôt `rh-xr/rhxr`.
@@ -13,10 +40,10 @@ Le fichier `assets/models/mona-lisa.glb` est repris **sans conversion** depuis l
 
 ## Implantation
 
-Le fauteuil du responsable RH est `amrchair.glb`, centré à `x=0, z=-4.45`.
+Le fauteuil du responsable RH est `amrchair.glb`, centré à `x=0, z=-4.10` (V14.1, avancé de 35 cm).
 
 Le modèle Mona Lisa :
-- est placé au même centre horizontal `[0, -4.45]` ;
+- est placé au même centre horizontal `[0, -4.10]` ;
 - est réduit uniformément, sans déformation, dans une enveloppe maximale **1,001 × 1,463 × 1,012 m** (soit +10 % par dimension, sans déformation) ;
 - a sa base apparente alignée à la hauteur `y=0.51 m` (hauteur de coussin estimée, à confirmer sur Quest) ;
 - possède une orientation nominale de **180°**, modifiable temporairement à 0° pour comparer via `?avatarYaw=0`.
