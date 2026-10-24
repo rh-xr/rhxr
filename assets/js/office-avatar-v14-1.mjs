@@ -8,10 +8,10 @@ export const AVATAR_SOURCE=Object.freeze({
   filename:"mona-lisa.glb",bytes:3020580
 });
 export const ARMCHAIR_AVATAR_PLACEMENT=Object.freeze({
-  // Matches the V14.1 manager armchair moved 35 cm closer to the desk.
-  position:[0,0,-4.10],seatHeight:0.51,
-  // Uniform 10% enlargement over V14.1 baseline; 180° facing as default.
-  maxEnvelope:[1.001,1.463,1.012],yawRadians:Math.PI
+  // Matches the V14.1 manager armchair tucked close to the desk.
+  position:[0,0,-3.75],seatHeight:0.51,
+  // User-validated 312° orientation and prior 10% avatar enlargement.
+  maxEnvelope:[1.001,1.463,1.012],yawRadians:312*Math.PI/180
 });
 export const avatarHref=()=>new URL("../models/mona-lisa.glb",import.meta.url).href;
 export function fitAvatarToArmchair(THREE,model,spec=ARMCHAIR_AVATAR_PLACEMENT){
