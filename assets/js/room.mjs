@@ -2,11 +2,11 @@
  * The same educational scenario remains available without XR.
  */
 import { readSticks, displacement, snapTurn, pivotCorrection } from './locomotion.mjs';
-import { loadOfficeFurniture,furniturePlanV141 } from './office-furniture.mjs?v=20261024-layout45';
+import { loadOfficeFurniture,furniturePlanV141 } from './office-furniture.mjs?v=20261024-wall312';
 import {createPremiumOffice} from './premium-office-v14.mjs';
 import {upgradeOfficeFinish} from './premium-finish-v14-1.mjs';
-import {loadArmchairAvatar,ARMCHAIR_AVATAR_PLACEMENT} from './office-avatar-v14-1.mjs?v=20261024-layout45';
-import {createAvatarTurnControl,avatarYawDegrees} from './avatar-turn-v14-1.mjs?v=20261024-layout45';
+import {loadArmchairAvatar,ARMCHAIR_AVATAR_PLACEMENT} from './office-avatar-v14-1.mjs?v=20261024-wall312';
+import {createAvatarTurnControl,avatarYawDegrees} from './avatar-turn-v14-1.mjs?v=20261024-wall312';
 import {createMetricsSampler,createMetricsDisplay} from './metrics-v14.mjs';
 
 let initialized = false;
@@ -89,8 +89,8 @@ export async function mountRoom(stage) {
   // Preserve the validated S02/V14 layout; only V14.1 opts into these adjustments.
   const v141Layout=advanced?furniturePlanV141:null;
   const deskCenter=-2.35;
-  const managerZ=advanced?-4.10:-4.50;
-  const visitorZ=advanced?-.30:.05;
+  const managerZ=advanced?-3.75:-4.50;
+  const visitorZ=advanced?-.98:.05;
   const fallback={desk:[],manager:[],visitor:[]};
   fallback.desk.push(cube(advanced?3.33:3.7, advanced?.135:.15, advanced?1.53:1.7, 0, advanced?.927:1.03, deskCenter, mat.wood));
   for (const x of (advanced?[-1.35,1.35]:[-1.5,1.5]))
@@ -133,7 +133,9 @@ export async function mountRoom(stage) {
     const updateAvatarStatus=(angle)=>{if(avatarStatus)avatarStatus.textContent=
       'Mona Lisa GLB chargé · orientation effective : '+angle+'° · taille ×1,10 · pas de 45°';};
     // Defer avatar decompression until the three original pieces of furniture load.
-    const avatarYaw=params.get('avatarYaw')==='0'?0:ARMCHAIR_AVATAR_PLACEMENT.yawRadians;
+    const yawParam=params.get('avatarYaw');
+    const yawDegrees=yawParam!==null&&/^\\d{1,3}$/.test(yawParam)&&Number(yawParam)<360?Number(yawParam):312;
+    const avatarYaw=yawDegrees*Math.PI/180;
     void furnitureReady.then(()=>loadArmchairAvatar(THREE,scene,{
       placement:{...ARMCHAIR_AVATAR_PLACEMENT,yawRadians:avatarYaw},
       onLoaded(model){
