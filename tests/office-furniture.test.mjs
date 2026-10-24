@@ -66,27 +66,33 @@ test('the existing VR office keeps locomotion unchanged and loads local GLBs',()
   assert.ok(html.includes('https://esm.sh/three@0.169.0'));
 });
 
-test('V14.1 keeps the 10% smaller desk and moves the seats to within 10 cm',()=>{
+test('V14.2 enlarges desk and visitor without exceeding sensible furniture proportions',()=>{
   assert.equal(furniturePlanV141.length,3);
   const byId=(plan,id)=>plan.find(p=>p.id===id);
-  const desk0=byId(furniturePlan,'desk'),desk=byId(furniturePlanV141,'desk');
-  for(let i=0;i<3;i++)assert.ok(Math.abs(desk.size[i]/desk0.size[i]-.9)<1e-12);
-  assert.deepEqual(desk.position,desk0.position,'Do not move the desk away from the centre');
-  for(const id of ['manager','visitor']){
-    const current=byId(furniturePlanV141,id),previous=byId(furniturePlan,id);
-    assert.ok(Math.abs(current.position[2]-desk.position[2])<
-      Math.abs(previous.position[2]-desk.position[2]));
-    assert.ok(Math.abs(current.position[2]-previous.position[2])>.3);
-    assert.ok(Math.abs(current.position[2]-previous.position[2])<1.1);
-    assert.deepEqual(current.size,previous.size,'Do not rescale the chairs');
+  const deskOld=byId(furniturePlan,'desk'),desk=byId(furniturePlanV141,'desk');
+  const visitorOld=byId(furniturePlan,'visitor'),visitor=byId(furniturePlanV141,'visitor');
+  const oldV141Desk=[3.195,1.035,1.575],oldV141Visitor=[1.02,1.18,1.02];
+  assert.deepEqual(desk.size,[3.30,1.07,1.62]);
+  assert.deepEqual(visitor.size,[1.06,1.23,1.06]);
+  for(let i=0;i<3;i++){
+    assert.ok(desk.size[i]>oldV141Desk[i]&&desk.size[i]<deskOld.size[i]);
+    assert.ok(visitor.size[i]>oldV141Visitor[i]);
+    assert.ok(visitor.size[i]/oldV141Visitor[i]<1.06);
   }
-  const manager=byId(furniturePlanV141,'manager'),visitor=byId(furniturePlanV141,'visitor');
-  const gapManager=(desk.position[2]-desk.size[2]/2)-(manager.position[2]+manager.size[2]/2);
-  const gapVisitor=(visitor.position[2]-visitor.size[2]/2)-(desk.position[2]+desk.size[2]/2);
-  assert.ok(gapManager>=.07&&gapManager<.11,'Manager chair should nearly touch the desk without intersection');
-  assert.ok(gapVisitor>=.07&&gapVisitor<.11,'Visitor chair should nearly touch the desk without intersection');
-  assert.equal(manager.position[2],-3.75);
-  assert.equal(visitor.position[2],-.98);
+  assert.deepEqual(desk.position,[0,0,-2.27]);
+  assert.deepEqual(visitor.position,[0,0,-.86]);
+  assert.deepEqual(byId(furniturePlanV141,'manager').position,[0,0,-3.75],
+    'Legacy armchair location stays available for recovery only');
+});
+
+test('Desk-to-visitor envelope retains a small positive gap in final V14.2 layout',()=>{
+  const desk=furniturePlanV141.find(x=>x.id==='desk');
+  const visitor=furniturePlanV141.find(x=>x.id==='visitor');
+  const deskFront=desk.position[2]+desk.size[2]/2;
+  const visitorBack=visitor.position[2]-visitor.size[2]/2;
+  const gap=visitorBack-deskFront;
+  assert.ok(gap>=.055&&gap<=.12,'Visitor must not penetrate desk after scale up');
+  assert.ok(Math.abs(gap-.07)<.000001);
 });
 
 test('V14.1-specific plan does not alter legacy S02 or V14 defaults',()=>{
