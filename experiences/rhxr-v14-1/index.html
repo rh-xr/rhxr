@@ -39,6 +39,7 @@ select{width:100%;border-radius:9px;padding:11px;border:1px solid #9cbdc4;backgr
 .actions button.main{background:#0f6c78;color:white}
 .actions button[disabled]{opacity:.5;cursor:not-allowed}
 .avatar-state{margin:9px 0 14px;padding:9px 12px;border:1px solid #d7e4db;background:#f0f7f3;border-radius:8px;color:#315e55;font-size:12px;font-weight:700}
+ .case-file{background:#f3f8f7;border:1px solid #b6d6d1;border-radius:12px;padding:13px 15px;margin:7px 0 16px;font-size:13px;color:#224a4d;line-height:1.55}.case-file h3{font-size:15px;margin:0 0 8px}.case-file button{background:#cde5df;color:#164f55;border:1px solid #9dc4bd;border-radius:8px;padding:8px 11px;font-weight:750}.case-details{padding:9px 0 0;border-top:1px solid #c4dcd7;margin-top:10px}.case-details p{margin:7px 0}.case-skills{color:#386b70;font-size:12px;font-weight:700}.debrief strong{color:#164f55}
 .objective{padding:12px 13px;background:#f0f8f7;border:1px solid #d0e2de;border-radius:8px;color:#315761;font-size:13px;line-height:1.5;margin:9px 0 13px}.debrief{background:#edf5ef;padding:12px 15px;border-radius:10px;color:#294537;font-size:13px;white-space:pre-line;line-height:1.55;margin:12px 0}
 .hint{font-size:12px;color:#53737b;line-height:1.5;border-top:1px solid #dfebec;padding-top:13px;margin-top:14px}
 .badge{display:inline-block;font-size:11px;background:#e4efec;color:#315760;padding:5px 9px;border-radius:6px;font-weight:700}
@@ -49,8 +50,8 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 </style></head>
 <body>
 <header><span class="top">RH·XR / LABORATOIRE V14.1 / FICTION</span>
-<h1>Un bureau VR. Quatre missions RH. Les documents DACI en contexte.</h1>
-<p>Choisissez une situation depuis les panneaux du bureau ou depuis le guide textuel. En VR, pointez un panneau avec la manette et appuyez sur la gâchette. Chaque décision DACI mène à une conséquence et à une source fictive identifiable. Mona Lisa est orientée par défaut à 312°.</p>
+<h1>Un bureau VR. Sept missions RH. Des documents DACI et des débriefings en contexte.</h1>
+<p>Choisissez une situation depuis les panneaux du bureau ou depuis le guide textuel. En VR, pointez un panneau avec la manette et appuyez sur la gâchette. Chaque décision DACI mène à une conséquence et à une source fictive identifiable. Trois missions complémentaires abordent l’IA dans le recrutement, la confidentialité des données RH et la coopération hybride. Tous les documents d’exercice ajoutés sont fictifs. Mona Lisa est orientée par défaut à 312°.</p>
 <nav><a href="../rhxr-v14/index.html">← Laboratoire V14</a><a href="../../simulation.html?office=v14">Bureau V14 initial</a><a href="../daci-v13/index.html">Parcours DACI V13</a><a href="../../index.html">Portail RH·XR</a></nav></header>
 <div class="layout">
 <article><div id="stage" aria-label="Bureau de formation RH·XR en 3D">
@@ -66,6 +67,18 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 <div id="avatar-status" class="avatar-state" role="status">Avatar Mona Lisa · chargement du modèle 3D en cours…</div><div class="actions"><button id="avatar-turn" type="button" disabled>↻ Tourner Mona Lisa +45°</button><button id="avatar-turn-back" type="button" disabled>↺ Tourner Mona Lisa −45°</button><span class="badge">Deux petits panneaux transparents contre le mur, sélectionnables dans le Quest</span></div>
 <label for="mission">Mission à réaliser</label>
 <select id="mission" aria-label="Choisir une mission RH"></select>
+<section class="case-file" aria-labelledby="case-title">
+<h3 id="case-title">Dossier de mission</h3>
+<p id="case-role"></p>
+<p class="case-skills" id="case-skills"></p>
+<button type="button" id="brief-toggle" aria-expanded="false" aria-controls="brief-detail">Consulter le dossier</button>
+<div id="brief-detail" class="case-details" hidden>
+<p><strong>Situation :</strong> <span id="case-setting"></span></p>
+<p><strong>Support :</strong> <span id="case-artifact"></span></p>
+<p><strong>Avant de décider :</strong> <span id="case-prepare"></span></p>
+<p><strong>Point de vigilance :</strong> <span id="case-warning"></span></p>
+</div>
+</section>
 <div class="kicker" id="phase">Situation · introduction</div><div id="objective" class="objective"></div>
 <h3 id="actor">—</h3>
 <p id="dialogue" aria-live="polite">Chargement du contenu…</p>
@@ -84,8 +97,8 @@ footer{max-width:1500px;margin:8px auto 32px;padding:0 22px;text-align:center;fo
 </div><footer>RH·XR V14.1 — démonstrateur pédagogique expérimental. Corpus et personnages fictifs. Les textes de S02 ne sont pas présentés comme des sources DACI vérifiées.</footer>
 <script type="module">
 import {mountRoom} from '../../assets/js/room.mjs?v=20261024-readable96-1';
-import {createLearningSession} from '../../assets/js/learning-v14-1.mjs';
-import {createSpatialLearningHub} from '../../assets/js/spatial-learning-v14-1.mjs?v=20261024-final-panels';
+import {createLearningSession} from '../../assets/js/learning-v14-1.mjs?v=20261024-content-v2';
+import {createSpatialLearningHub} from '../../assets/js/spatial-learning-v14-1.mjs?v=20261024-content-v2';
 const $=id=>document.getElementById(id);let training=null,hub=null;
 const node=(tag,text)=>{const e=document.createElement(tag);e.textContent=String(text??'');return e;};
 function render(v){
@@ -93,8 +106,21 @@ function render(v){
  $('phase').textContent=v.title+(v.phase?' · '+v.phase:'')+' · '+v.steps+' décision(s)';
  $('actor').textContent=v.actor;
  $('objective').textContent='Objectifs pédagogiques : '+v.objective;
+ $('case-role').textContent='Votre rôle : '+v.caseFile.role;
+ $('case-skills').textContent='Compétences : '+v.competencies.join(' · ');
+ $('case-setting').textContent=v.setting;
+ $('case-artifact').textContent=v.caseFile.artefact;
+ $('case-prepare').textContent=v.caseFile.prepare;
+ $('case-warning').textContent=v.caseFile.vigilance;
+ $('brief-detail').hidden=!v.showBrief;
+ $('brief-toggle').setAttribute('aria-expanded',String(v.showBrief));
+ $('brief-toggle').textContent=v.showBrief?'Refermer le dossier':'Consulter le dossier de mission';
  $('debrief').hidden=!v.ending;
- $('debrief').textContent=v.ending?'Bilan des décisions (sans évaluation RH individuelle) :\\n'+v.summary:'';
+ $('debrief').textContent=v.ending?
+  'Bilan formatif du parcours (aucune évaluation individuelle RH) :\\n'+
+  v.debrief.takeaways.join(' · ')+'\\n\\n'+v.summary+
+  '\\n\\nExercice de transfert : '+v.debrief.recommendedAction+
+  '\\nVigilance : '+v.debrief.warning:'';
  $('dialogue').textContent=v.dialogue||(v.ending?'Parcours terminé. Revoyez vos choix ou passez à une autre mission.':'');
  $('question').textContent=v.ending?'Bilan pédagogique':v.question;
  const zone=$('choices');zone.replaceChildren();
@@ -114,6 +140,7 @@ function perform(action){
  if(!training)return;
  if(hub){hub.action(action);return;}
  if(action.startsWith('mission:'))training.setMission(action.slice(8));
+ else if(action==='brief')training.toggleBrief();
  else if(action.startsWith('choice:'))training.choose(action.slice(7));
  else if(action==='next')training.next();
  else if(action==='document')training.toggleDocument();
@@ -129,6 +156,7 @@ async function start(){
    $('mission').addEventListener('change',e=>perform('mission:'+e.target.value));
    $('continue').onclick=()=>perform('next');$('document').onclick=()=>perform('document');
    $('restart').onclick=()=>perform('restart');
+   $('brief-toggle').onclick=()=>perform('brief');
    $('guide-toggle').onclick=()=>{
      if(!hub)return;
      hub.action('toggle');
@@ -141,7 +169,7 @@ async function start(){
    hub=createSpatialLearningHub(room.THREE,room,training,{onChange:render});
    room.onFrame(()=>hub.update());
    $('guide-toggle').onclick=()=>hub.action('toggle');
-   $('status').textContent='Quatre missions disponibles. Sur Quest, sélectionnez avec les gâchettes ; les mêmes décisions restent accessibles dans ce guide.';
+   $('status').textContent='Sept missions disponibles, réparties sur deux pages dans le Quest. Ouvrez un dossier de mission pour préparer la situation ; choix et débriefs restent accessibles dans ce guide.';
  }catch(error){console.warn('[RH·XR V14.1] 3D unavailable',error);
    $('stage-status').textContent='3D indisponible · scénarios textuels actifs';
    $('status').textContent='VR non disponible : '+error.message+' · Le parcours texte reste opérationnel.';
