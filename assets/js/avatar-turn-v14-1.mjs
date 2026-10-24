@@ -31,22 +31,25 @@ export function createAvatarTurnControl(THREE,{scene,renderer,playerRig},avatar,
     if(!ctx)return null;
     const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
     const material=new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide,transparent:true,depthTest:true,depthWrite:false});
-    const geometry=new THREE.PlaneGeometry(1.48,.42);
+    const geometry=new THREE.PlaneGeometry(1.64,.46);
     const plaque=new THREE.Mesh(geometry,material);
     plaque.name=steps>0?'rhxr-mona-lisa-turn-plus45':'rhxr-mona-lisa-turn-minus45';
-    // Calibration controls share the wall, away from the avatar's face.
-    plaque.position.set(4.02,y,-7.17);
+    // Near-opaque calibration controls match DACI panels, forward from back wall.
+    plaque.position.set(4.02,y,-6.52);
     scene.add(plaque);
     const repaint=()=>{
       ctx.clearRect(0,0,1024,300);
-      ctx.lineJoin='round';ctx.strokeStyle='rgba(8,31,39,.94)';ctx.lineWidth=9;
+      ctx.fillStyle='rgba(8,31,41,.96)';ctx.fillRect(0,0,1024,300);
+      ctx.strokeStyle='rgba(211,232,227,.7)';ctx.lineWidth=3;
+      ctx.strokeRect(3,3,1018,294);
+      ctx.lineJoin='round';ctx.strokeStyle='rgba(8,31,39,.8)';ctx.lineWidth=5;
       const draw=(text,x,y,color)=>{
         ctx.strokeText(text,x,y);ctx.fillStyle=color;ctx.fillText(text,x,y);
       };
-      ctx.font='bold 58px system-ui';draw(label,36,100,'#fbe2ab');
-      ctx.font='42px system-ui';
+      ctx.font='bold 65px system-ui';draw(label,36,100,'#fbe2ab');
+      ctx.font='49px system-ui';
       draw('Orientation : '+avatarYawDegrees(avatar)+'°',36,192,'#e9f7f3');
-      ctx.font='29px system-ui';draw('Pointer + gâchette',36,265,'#fbe2ab');
+      ctx.font='34px system-ui';draw('Pointer + gâchette',36,265,'#fbe2ab');
       texture.needsUpdate=true;
     };
     plaques.push({steps,plaque,repaint,geometry,material,texture});
