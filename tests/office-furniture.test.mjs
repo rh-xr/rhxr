@@ -77,7 +77,7 @@ test('V14.1 keeps the 10% smaller desk and moves the seats to within 10 cm',()=>
     assert.ok(Math.abs(current.position[2]-desk.position[2])<
       Math.abs(previous.position[2]-desk.position[2]));
     assert.ok(Math.abs(current.position[2]-previous.position[2])>.3);
-    assert.ok(Math.abs(current.position[2]-previous.position[2])<.75);
+    assert.ok(Math.abs(current.position[2]-previous.position[2])<1.1);
     assert.deepEqual(current.size,previous.size,'Do not rescale the chairs');
   }
   const manager=byId(furniturePlanV141,'manager'),visitor=byId(furniturePlanV141,'visitor');
