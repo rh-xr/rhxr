@@ -1,5 +1,6 @@
 /** Minimal DOM smoke harness for all public pages. It verifies initialization, not visual layout. */
 import assert from 'node:assert/strict';
+import {guides,sources} from '../assets/js/content.mjs';
 const pages=['home','ressources','bibliotheque','fiche','ia','formation','politique'];
 const fake=(id)=>({id,innerHTML:'',textContent:'',value:id==='filterTopic'||id==='promptTopic'||id==='filterArea'||id==='filterKind'?'all':'',disabled:false,addEventListener(){},querySelectorAll(){return []},classList:{add(){},remove(){},toggle(){}},setAttribute(){}});
 for(const page of pages){
@@ -11,7 +12,7 @@ for(const page of pages){
  if(page==='home')assert.match(html,/Pratiquer avec l'IA/);
  if(page==='fiche')assert.match(html,/Structurer un recrutement équitable/);
  if(page==='ia')assert.match(html,/Générer le brouillon/);
- if(page==='ressources')assert.equal(elements.get('#count').textContent,'13 fiches affichées');
- if(page==='bibliotheque')assert.equal(elements.get('#count').textContent,'11 ressources affichées');
+ if(page==='ressources')assert.equal(elements.get('#count').textContent,`${guides.length} fiches affichées`);
+ if(page==='bibliotheque')assert.equal(elements.get('#count').textContent,`${sources.length} ressources affichées`);
  console.log(`OK ${page}: ${html.length} characters`);
 }
