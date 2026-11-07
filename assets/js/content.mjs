@@ -1,3 +1,4 @@
+import {additionalSources,additionalGuides,additionalPrompts} from './enrichment.mjs';
 /** RH·XR public editorial content. No personal records, no legal advice. */
 export const topics = [
   {id:'recrutement',label:'Recrutement',icon:'◎',summary:'Définir le besoin, objectiver les critères et soigner l’expérience candidat.'},
@@ -10,7 +11,7 @@ export const topics = [
   {id:'ia',label:'IA & éthique',icon:'✦',summary:'Tirer parti des outils numériques sans automatiser les jugements.'}
 ];
 
-export const guides = [
+const baseGuides = [
  {id:'recruter-sans-biais',topic:'recrutement',level:'Fondamentaux',minutes:7,title:'Structurer un recrutement équitable',intro:'Une procédure lisible aide à comparer des compétences utiles au poste plutôt qu’à accumuler des impressions subjectives.',sections:[
   {h:'Partir du travail réel',p:'Décrivez les résultats attendus, les conditions de travail, les compétences indispensables et celles qui peuvent être acquises après l’embauche. Faites valider le besoin par le manager et la fonction RH.'},
   {h:'Utiliser les mêmes repères',p:'Préparez des questions reliées aux missions et une grille commune. Une mise en situation simple permet de discuter du travail concret. Notez les faits observés et gardez les décisions sous contrôle humain.'},
@@ -65,7 +66,7 @@ export const guides = [
   {h:'Évaluer le risque',p:'Identifiez la juridiction, le type de données et l’incidence sur les personnes. Les applications de sélection et de gestion des travailleurs demandent une analyse juridique et organisationnelle approfondie.'}],actions:['Privilégier les données fictives','Relire tout contenu généré','Faire valider les usages sensibles'],sourceIds:['ilo-ia-rh','eu-ai-act','cndp-traitements']}
 ];
 
-export const sources = [
+const baseSources = [
  {id:'cnil-recrutement',title:'Guide du recrutement — 19 fiches',org:'CNIL',area:'France',kind:'Guide',topic:'recrutement',url:'https://www.cnil.fr/fr/le-guide-du-recrutement',desc:'Données des candidats, finalités, droits, conservation et bonnes pratiques.',date:'2023 · mises à jour sur le site'},
  {id:'cnil-personnel',title:'Les règles pour la gestion du personnel',org:'CNIL',area:'France',kind:'Guide',topic:'personnel',url:'https://www.cnil.fr/fr/les-regles-pour-la-gestion-du-personnel',desc:'Protection des données des salariés et traitements associés.',date:'Site institutionnel'},
  {id:'cndp-lois',title:'Textes et lois sur les données personnelles',org:'CNDP',area:'Maroc',kind:'Réglementation',topic:'personnel',url:'https://www.cndp.ma/textes-et-lois/',desc:'Références officielles, dont la loi marocaine n° 09-08.',date:'Site institutionnel'},
@@ -79,7 +80,7 @@ export const sources = [
  {id:'anact-qvct',title:'Qualité de vie et des conditions de travail',org:'ANACT',area:'France',kind:'Ressource',topic:'qvct',url:'https://www.anact.fr/',desc:'Méthodes et ressources institutionnelles sur les conditions de travail.',date:'Site institutionnel'}
 ];
 
-export const prompts = [
+const basePrompts = [
  {id:'p1',topic:'recrutement',title:'Fiche de poste claire',desc:'Décrire missions, compétences et résultats attendus.',text:'Agis comme un conseiller RH. À partir d’un poste fictif [INTITULÉ] dans [SECTEUR], propose une fiche de poste structurée : finalité, missions, responsabilités, compétences indispensables et souhaitables, collaborations et critères de réussite. Évite les critères discriminatoires. Signale ce qui doit être vérifié par un responsable RH.'},
  {id:'p2',topic:'recrutement',title:'Grille d’entretien structurée',desc:'Préparer des questions liées au travail.',text:'Conçois une grille d’entretien pour un poste fictif [POSTE]. Fournis 6 questions comportementales reliées à des compétences professionnelles, des critères d’observation factuels et une échelle descriptivement justifiée. Exclue toute évaluation automatique ou inférence psychologique.'},
  {id:'p3',topic:'recrutement',title:'Annonce inclusive',desc:'Réécrire une offre d’emploi de manière accessible.',text:'Réécris cette offre d’emploi fictive [TEXTE SANS DONNÉES PERSONNELLES] en français clair, avec les responsabilités essentielles, conditions transparentes et critères directement pertinents. Identifie les formulations qui pourraient exclure inutilement des candidatures.'},
@@ -97,7 +98,10 @@ export const prompts = [
  {id:'p15',topic:'ia',title:'Évaluer un cas d’usage IA',desc:'Mener une analyse de risques initiale.',text:'Évalue conceptuellement un cas d’usage IA RH fictif [USAGE] dans [PAYS]. Présente finalité, données envisagées, risques de biais, confidentialité, contrôle humain, alternatives sans IA, obligations à vérifier et recommandation de validation juridique. N’affirme pas de conformité.'},
  {id:'p16',topic:'ia',title:'Vérifier un texte généré',desc:'Audit de fiabilité d’une réponse IA.',text:'Agis comme relecteur critique d’un texte RH non confidentiel [TEXTE]. Sépare les affirmations factuelles des opinions, liste les vérifications nécessaires, cherche les imprécisions et propose une version prudente. Ne crée pas de fausses références.'}
 ];
+export const guides=[...baseGuides,...additionalGuides];
+export const sources=[...baseSources,...additionalSources];
+export const prompts=[...basePrompts,...additionalPrompts];
 export const getTopic=id=>topics.find(t=>t.id===id);
 export const getGuide=id=>guides.find(g=>g.id===id);
 export const getSourcesForGuide=g=>g.sourceIds.map(id=>sources.find(s=>s.id===id)).filter(Boolean);
-export const filterBy=(items,filters={})=>items.filter(x=>(!filters.topic||filters.topic==='all'||x.topic===filters.topic)&&(!filters.area||filters.area==='all'||x.area===filters.area)&&(!filters.kind||filters.kind==='all'||x.kind===filters.kind)&&(!filters.q||(`${x.title||''} ${x.desc||''} ${x.intro||''} ${x.org||''} ${x.label||''}`).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(filters.q.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase())));
+export const filterBy=(items,filters={})=>items.filter(x=>(!filters.topic||filters.topic==='all'||x.topic===filters.topic)&&(!filters.area||filters.area==='all'||x.area===filters.area)&&(!filters.kind||filters.kind==='all'||x.kind===filters.kind)&&(!filters.q||(`${x.title||''} ${x.desc||''} ${x.intro||''} ${x.org||''} ${x.label||''} ${x.text||''} ${x.scope||''}`).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(filters.q.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase())));
