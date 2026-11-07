@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {guides,sources,prompts,filterBy,getSourcesForGuide} from '../assets/js/content.mjs';
+import {buildRHPlan,planTypes} from '../assets/js/rh-plans.mjs';
+import {readFileSync} from 'node:fs';
+const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
+test('enriched resources are linked, unique and scoped by jurisdiction',()=>{const ids=new Set();for(const s of sources){assert.ok(!ids.has(s.id));ids.add(s.id);assert.match(s.url,/^https:\/\//);}assert.ok(sources.length>=20);assert.ok(sources.some(s=>s.area==='Maroc'&&s.id==='code-travail-maroc'));assert.ok(sources.some(s=>s.area==='France'&&s.id==='fr-formation'));assert.ok(filterBy(sources,{q:'Code du travail',area:'Maroc'}).length>0);});
+test('added guides are referenced and prompts searchable by their text',()=>{assert.ok(guides.length>=19);assert.ok(prompts.length>=22);for(const g of guides)assert.equal(getSourcesForGuide(g).length,g.sourceIds.length);assert.ok(filterBy(prompts,{q:'juridiction'}).length>0);});
+test('all three RH templates work locally and reject incomplete input',()=>{assert.deepEqual(planTypes.map(t=>t.id),['entretien','integration','formation']);for(const kind of planTypes.map(t=>t.id)){const out=buildRHPlan({kind,role:'Responsable de formation',objective:'Préparer un parcours adapté au poste',skills:'Écoute; Organisation'});assert.match(out,/Responsable de formation/);assert.match(out,/Écoute/);assert.match(out,/sans valeur juridique/);}assert.throws(()=>buildRHPlan({kind:'entretien',role:'RH',objective:'Court'}),/Précisez/);});
+test('IA studio tools and V14.1 entry remain visible',()=>{const portal=read('../assets/js/portal.mjs');assert.match(portal,/id="planForm"/);assert.match(portal,/id="sourceList"/);assert.match(portal,/initRhExtras\(\)/);assert.ok(portal.includes('experiences/rhxr-v14-1/index.html'));const room=read('../assets/js/room.mjs');assert.ok(room.includes('loadExecutiveAssembly(THREE,scene'));});

@@ -1,18 +1,31 @@
-# RH·XR — Human Resources Extended Reality
+# RH·XR — Ressources humaines, IA responsable et apprentissage immersif
 
-Plateforme indépendante de formation immersive RA/RV/IA appliquée aux ressources humaines.
+Portail pédagogique indépendant qui réunit **documentation RH**, **outils locaux d'assistance**, **promptothèque** et **simulations 3D/WebXR**. Il n'est pas destiné à gérer des dossiers individuels ni à prendre des décisions RH.
 
-## Lot 0 — démonstrateur pédagogique
+## Espaces proposés
 
-- Portail Web responsive et huit modules décrits (les modules futurs sont explicitement signalés).
-- Simulation **S02 — Gérer un désaccord professionnel** : 3 phases, 9 décisions, débriefing et score *strictement formatif*.
-- Studio de consultation et export JSON du scénario.
-- Salle 3D Three.js expérimentale avec entrée WebXR si le matériel le permet ; l'exercice textuel reste disponible.
-- Aucune authentification, collecte nominative, conservation d'audio ou publication de résultat personnel.
+| Espace | Fonction |
+|---|---|
+| Accueil (`index.html`) | Orientation, accès aux ressources et au bureau immersif |
+| Comprendre les RH (`ressources.html`) | 19 fiches pratiques dans huit domaines |
+| Documentation (`bibliotheque.html`) | 20 sources sélectionnées, filtrables par juridiction et type |
+| AI Studio (`ia.html`) | 22 prompts éditables, générateur de fiche de poste et trois trames RH locales |
+| Formation & XR (`formation.html`) | Bureau V14.1, sept missions, simulation S02 et Studio pédagogique |
+| Bureau immersif (`experiences/rhxr-v14-1/index.html`) | Expérience 3D/WebXR principale avec mobilier GLB, avatar Badr Han et guide textuel |
+| S02 (`simulation.html`) | Simulation guidée en mode texte, option 3D facultative |
+| Studio (`studio.html`) | Consultation pédagogique et export JSON |
 
-## Lancer en local
+Le catalogue documentaire est éditorial : **aucune actualisation automatique des textes juridiques n'est annoncée**. Les sources du Maroc, de la France, de l'Union européenne et de l'OIT doivent être replacées dans leur champ d'application. Les dates de consultation ne garantissent pas qu'un texte reste à jour.
 
-Prérequis : Node.js >= 20.
+## IA — capacités réelles
+
+Les prompts préparent des demandes à copier vers un outil choisi par l'utilisateur. Les quatre générateurs locaux utilisent des modèles déterministes : ils ne sont **pas** connectés à un modèle d'IA générative et n'effectuent aucun appel API. La recherche de références officielle de l'AI Studio est également locale. Ne pas saisir de CV réel, d'informations confidentielles ni de données sensibles.
+
+Les scénarios et avatars sont fictifs. Ni leurs choix ni leurs scores pédagogiques ne doivent servir au recrutement, à la promotion, à une sanction ou à la surveillance du personnel.
+
+## Développement et vérification
+
+Node.js >=20 recommandé.
 
 ```bash
 npm test
@@ -20,18 +33,12 @@ npm start
 # http://localhost:4173
 ```
 
-La simulation 2D fonctionne sans dépendance externe. La scène 3D facultative nécessite Internet pour charger Three.js depuis un CDN.
+Le site est statique (HTML, CSS, modules JavaScript). Le serveur local de développement ne conserve pas de résultats personnels. La 3D charge Three.js et ses outils de décodage depuis des CDN ; WebGL et Internet sont nécessaires. Le mode VR suppose un navigateur, un casque et un contexte sécurisé compatibles.
 
-## État
+## Prévisualisation et validation
 
-Ceci est **un prototype Lot 0**, pas un logiciel RH de production : les comptes, Payload CMS, PostgreSQL, l'IA conversationnelle, les analytics et les modules RA sont des extensions futures. Les scènes, situations et personnages sont fictifs. Le score ne doit jamais servir à l'embauche, à la promotion, à la sanction ou à la surveillance d'employés.
+Les améliorations du portail sont proposées dans la PR [#8](https://github.com/rh-xr/rhxr/pull/8), branche `feature/rhxr-knowledge-ai-studio-v1`. La branche `main` n'est pas modifiée avant une fusion explicitement validée.
 
-Développement par branches/PR ; ne pas ajouter de données RH réelles. Voir `docs/`.
+Avant toute publication en production : exécuter les tests, inspecter la Preview Vercel sur PC et smartphone, vérifier l'accès sans casque aux missions et contrôler le bureau V14.1 sur Quest 3S (avatar, fauteuil, collisions, performances).
 
-## Déploiement de démonstration (Vercel)
-
-Le projet Vercel est connecté au dépôt `rh-xr/rhxr`. La branche de production `main` ne contient pour l'instant que le document d'initialisation ; une erreur 404 sur sa racine est donc attendue.
-
-**Pour examiner la version exécutable sans fusionner :** utiliser le déploiement **Preview** de la branche `feature/lot0-prototype`, qui comporte `index.html`, `simulation.html`, `studio.html` et les ressources dans `assets/`.
-
-Le site est statique : Application Preset = Other, Root Directory = `./`, sans variables d'environnement et sans commande de construction spécifique. Vérifier la Preview sur ordinateur, smartphone puis Quest 3S avant de fusionner la Pull Request.
+Voir `docs/RHXR_EDITORIAL_V1_1.md`, `docs/RHXR_V14_OFFICE_INTEGRATION.md`, `docs/SECURITY.md` et `docs/ROADMAP.md`.
