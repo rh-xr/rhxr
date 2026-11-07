@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {guides,sources,prompts,topics,filterBy,getSourcesForGuide} from '../assets/js/content.mjs';
+import {buildJobSheet,cleanText,splitItems} from '../assets/js/generator.mjs';
+test('catalogue contains valid topic references',()=>{const ids=new Set(topics.map(x=>x.id));for(const x of [...guides,...prompts,...sources])assert.ok(ids.has(x.topic),x.id)});
+test('guide documentation references resolve',()=>{const ids=new Set(sources.map(s=>s.id));for(const guide of guides){assert.ok(guide.sections.length>=2);for(const id of guide.sourceIds)assert.ok(ids.has(id));assert.equal(getSourcesForGuide(guide).length,guide.sourceIds.length)}});
+test('official sources have secure links',()=>{for(const source of sources)assert.ok(source.url.startsWith('https://'),source.id)});
+test('filters support accented searches and jurisdiction',()=>{assert.ok(filterBy(guides,{q:'récrutement'}).length>0);assert.ok(filterBy(guides,{q:'compétences'}).length>0);assert.ok(filterBy(sources,{area:'Maroc'}).length>=2)});
+test('template generator builds a local draft',()=>{const doc=buildJobSheet({title:'Chargé de formation',mission:'Coordonner un plan de formation',activities:'Suivre le budget\nPlanifier les sessions',skills:'Communication;Organisation'});assert.match(doc,/Chargé de formation/);assert.match(doc,/Suivre le budget/);assert.match(doc,/Communication/);assert.match(doc,/BROUILLON À VALIDER/)});
+test('missing required fields are rejected',()=>assert.throws(()=>buildJobSheet({title:'RH'}),/minimum/));
+test('input control characters are stripped',()=>{assert.equal(cleanText('A\n\tB'),'A B');assert.deepEqual(splitItems('A;B\nC'),['A','B','C'])});
